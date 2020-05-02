@@ -6,6 +6,9 @@
   "bin": {
     "linkrot": "index.js"
   },
+  "scripts": {
+    "release": "standard-version"
+  },
   "dependencies": {
     "got": "^10.7.0",
     "magic-string": "^0.25.7",
@@ -13,5 +16,8 @@
     "remark": "^12.0.0",
     "remark-frontmatter": "^2.0.0",
     "unist-util-select": "^3.0.1"
+  },
+  "devDependencies": {
+    "standard-version": "^7.1.0"
   }
 }
