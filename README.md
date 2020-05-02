@@ -1,10 +1,8 @@
 # linkrot
 
 ```
-$ yarn global add @tmcw/linkrot
-
 # in jekyll root directory
-$ linkrot
+$ npx @tmcw/linkrot
 ```
 
 This is a specialized tool for Jekyll blogs and other blogs that use Markdown for their
