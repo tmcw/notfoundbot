@@ -30,7 +30,7 @@ function shouldScan(url) {
 }
 
 function gatherFiles() {
-  const BASE = "./_posts";
+  const BASE = ".";
   const files = fs.readdirSync(BASE).filter((f) => f.endsWith(".md"));
   const list = [];
   for (let f of files) {
