@@ -46,6 +46,13 @@ async function createBranch(context, branch) {
       throw Error(error);
     }
   }
+  for (let [path, content] of replacements) {
+    await toolkit.repos.createOrUpdateFileContents({
+      ...context.repo,
+      path,
+      content: Buffer.from(content).toString("base64"),
+    });
+  }
 }
 
 function githubToken() {
@@ -149,8 +156,7 @@ async function testUrl(url) {
   );
 
   async function replace(a, b) {
-    const branch = `linkrot-${Date.now()}`;
-    await git.checkoutLocalBranch(branch);
+    let results = [];
     for (let f of urlReferences.get(a)) {
       const text = fs.readFileSync(f, "utf8");
       const s = new MagicString(text);
@@ -167,10 +173,8 @@ async function testUrl(url) {
           );
         }
       }
-      fs.writeFileSync(f, s.toString());
+      results.push([f, s.toString()]);
     }
-    await git.push("origin", branch);
-    await git.checkoutLocalBranch("master");
   }
 
   for (let url of [...urls].reverse()) {
@@ -200,9 +204,8 @@ async function testUrl(url) {
           shouldReplace = true;
         }
         if (shouldReplace) {
-          console.log("replacing");
-          replace(result[0], result[1][2]);
-          createBranch(context, "fix-linkrot-test");
+          const replacements = replace(result[0], result[1][2]);
+          createBranch(context, `fix-linkrot-${Date.now()}`, replacements);
           cache.set(result[1][2], [Date.now(), "ok"]);
           fs.writeFileSync(
             ".linkrot.json",
