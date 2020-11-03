@@ -150,7 +150,7 @@ async function testUrl(url) {
             await prompts({
               type: "confirm",
               name: "value",
-              message: `redirect ${result[0]} to ${result[1][2]}?`,
+              message: `redirect ${result[0]} to ${result[1][2]}`,
             })
           ).value;
         } else {
