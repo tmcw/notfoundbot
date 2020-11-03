@@ -143,10 +143,10 @@ async function testUrl(url) {
       case "redirect":
         const orig = Url.parse(result[0]);
         orig.protocol = "https:";
-        let value = false;
+        let shouldReplace = false;
         const httpsized = Url.format(orig);
         if (httpsized !== result[1][2]) {
-          value = (
+          shouldReplace = (
             await prompts({
               type: "confirm",
               name: "value",
@@ -154,9 +154,9 @@ async function testUrl(url) {
             })
           ).value;
         } else {
-          value = true;
+          shouldReplace = true;
         }
-        if (value) {
+        if (shouldReplace) {
           replace(result[0], result[1][2]);
           cache.set(result[1][2], [Date.now(), "ok"]);
           fs.writeFileSync(
