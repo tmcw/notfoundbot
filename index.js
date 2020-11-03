@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 const fs = require("fs");
+const simpleGit = require("simple-git");
 const Url = require("url");
 const path = require("path");
 const got = require("got");
@@ -7,7 +8,9 @@ const Remark = require("remark");
 const { selectAll } = require("unist-util-select");
 const frontmatter = require("remark-frontmatter");
 const MagicString = require("magic-string");
-const { GitHub, context } = require("@actions/github");
+const { getOctokit, context } = require("@actions/github");
+
+const git = simpleGit();
 
 // From https://github.com/sindresorhus/is-absolute-url
 function isAbsoluteUrl(url) {
@@ -18,7 +21,8 @@ function isAbsoluteUrl(url) {
 }
 
 async function createBranch(context, branch) {
-  const toolkit = new GitHub(githubToken());
+  console.log("creating branch");
+  const toolkit = getOctokit(githubToken());
   // Sometimes branch might come in with refs/heads already
   branch = branch.replace("refs/heads/", "");
 
@@ -102,9 +106,9 @@ async function testUrl(url) {
 }
 
 (async function () {
-  const cache = fs.existsSync(".linkrot.json")
+  const cache = /*fs.existsSync(".linkrot.json")
     ? new Map(JSON.parse(fs.readFileSync(".linkrot.json", "utf8")))
-    : new Map();
+		: */ new Map();
 
   const files = gatherFiles();
 
@@ -145,6 +149,8 @@ async function testUrl(url) {
   );
 
   function replace(a, b) {
+    const branch = `linkrot-${Date.now()}`;
+    git.checkoutLocalBranch(branch);
     for (let f of urlReferences.get(a)) {
       const text = fs.readFileSync(f, "utf8");
       const s = new MagicString(text);
@@ -163,6 +169,8 @@ async function testUrl(url) {
       }
       fs.writeFileSync(f, s.toString());
     }
+    git.push("origin", branch);
+    git.checkoutLocalBranch("master");
   }
 
   for (let url of [...urls].reverse()) {
@@ -192,6 +200,7 @@ async function testUrl(url) {
           shouldReplace = true;
         }
         if (shouldReplace) {
+          console.log("replacing");
           replace(result[0], result[1][2]);
           createBranch(context, "fix-linkrot-test");
           cache.set(result[1][2], [Date.now(), "ok"]);
