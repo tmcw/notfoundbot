@@ -148,9 +148,9 @@ async function testUrl(url) {
     } cached, ${cache_purges} cache entries expired)`
   );
 
-  function replace(a, b) {
+  async function replace(a, b) {
     const branch = `linkrot-${Date.now()}`;
-    git.checkoutLocalBranch(branch);
+    await git.checkoutLocalBranch(branch);
     for (let f of urlReferences.get(a)) {
       const text = fs.readFileSync(f, "utf8");
       const s = new MagicString(text);
@@ -169,8 +169,8 @@ async function testUrl(url) {
       }
       fs.writeFileSync(f, s.toString());
     }
-    git.push("origin", branch);
-    git.checkoutLocalBranch("master");
+    await git.push("origin", branch);
+    await git.checkoutLocalBranch("master");
   }
 
   for (let url of [...urls].reverse()) {
