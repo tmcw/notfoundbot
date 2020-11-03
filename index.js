@@ -39,21 +39,32 @@ async function createBranch(context, branch, replacements) {
         sha: context.sha,
         ...context.repo,
       });
-      // await toolkit.git.pulls.create({
-      //   ...context.repo,
-      // });
     } else {
       throw Error(error);
     }
   }
   for (let [path, content] of replacements) {
+    const existing = await toolkit.repos.getContent({
+      ...context.repo,
+      ref: `refs/heads/${branch}`,
+      path,
+    });
+
     await toolkit.repos.createOrUpdateFileContents({
       ...context.repo,
       path,
+      branch,
+      sha: existing.data.sha,
       message: "Fixing redirect",
       content: Buffer.from(content).toString("base64"),
     });
   }
+  await toolkit.pulls.create({
+    ...context.repo,
+    title: "Updating redirects",
+    head: branch,
+    base: "master",
+  });
 }
 
 function githubToken() {
