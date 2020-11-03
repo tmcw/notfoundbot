@@ -1,20 +1,22 @@
 {
   "name": "@tmcw/linkrot",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "main": "index.js",
   "license": "MIT",
   "bin": {
     "linkrot": "index.js"
   },
   "scripts": {
-    "release": "standard-version"
+    "release": "standard-version",
+    "start": "./index.js"
   },
   "dependencies": {
+    "@actions/github": "^4.0.0",
     "got": "^10.7.0",
     "magic-string": "^0.25.7",
-    "prompts": "^2.3.2",
     "remark": "^12.0.0",
     "remark-frontmatter": "^2.0.0",
+    "simple-git": "^2.21.0",
     "unist-util-select": "^3.0.1"
   },
   "devDependencies": {
