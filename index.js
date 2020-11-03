@@ -20,7 +20,7 @@ function isAbsoluteUrl(url) {
   return /^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(url);
 }
 
-async function createBranch(context, branch) {
+async function createBranch(context, branch, replacements) {
   console.log("creating branch");
   const toolkit = getOctokit(githubToken());
   // Sometimes branch might come in with refs/heads already
@@ -50,6 +50,7 @@ async function createBranch(context, branch) {
     await toolkit.repos.createOrUpdateFileContents({
       ...context.repo,
       path,
+      message: "Fixing redirect",
       content: Buffer.from(content).toString("base64"),
     });
   }
@@ -155,7 +156,7 @@ async function testUrl(url) {
     } cached, ${cache_purges} cache entries expired)`
   );
 
-  async function replace(a, b) {
+  function replace(a, b) {
     let results = [];
     for (let f of urlReferences.get(a)) {
       const text = fs.readFileSync(f, "utf8");
@@ -175,6 +176,7 @@ async function testUrl(url) {
       }
       results.push([f, s.toString()]);
     }
+    return results;
   }
 
   for (let url of [...urls].reverse()) {
@@ -205,7 +207,7 @@ async function testUrl(url) {
         }
         if (shouldReplace) {
           const replacements = replace(result[0], result[1][2]);
-          createBranch(context, `fix-linkrot-${Date.now()}`, replacements);
+          createBranch(context, `fix-linkrot-test`, replacements);
           cache.set(result[1][2], [Date.now(), "ok"]);
           fs.writeFileSync(
             ".linkrot.json",
