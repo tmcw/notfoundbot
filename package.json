@@ -11,9 +11,9 @@
     "start": "./index.js"
   },
   "dependencies": {
+    "@actions/github": "^4.0.0",
     "got": "^10.7.0",
     "magic-string": "^0.25.7",
-    "prompts": "^2.3.2",
     "remark": "^12.0.0",
     "remark-frontmatter": "^2.0.0",
     "unist-util-select": "^3.0.1"

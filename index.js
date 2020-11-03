@@ -3,11 +3,11 @@ const fs = require("fs");
 const Url = require("url");
 const path = require("path");
 const got = require("got");
-const prompts = require("prompts");
 const Remark = require("remark");
 const { selectAll } = require("unist-util-select");
 const frontmatter = require("remark-frontmatter");
 const MagicString = require("magic-string");
+const { GitHub, context } = require("@actions/github");
 
 // From https://github.com/sindresorhus/is-absolute-url
 function isAbsoluteUrl(url) {
@@ -15,6 +15,40 @@ function isAbsoluteUrl(url) {
     return false;
   }
   return /^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(url);
+}
+
+async function createBranch(context, branch) {
+  const toolkit = new GitHub(githubToken());
+  // Sometimes branch might come in with refs/heads already
+  branch = branch.replace("refs/heads/", "");
+
+  // throws HttpError if branch already exists.
+  try {
+    await toolkit.repos.getBranch({
+      ...context.repo,
+      branch,
+    });
+  } catch (error) {
+    if (error.name === "HttpError" && error.status === 404) {
+      await toolkit.git.createRef({
+        ref: `refs/heads/${branch}`,
+        sha: context.sha,
+        ...context.repo,
+      });
+      // await toolkit.git.pulls.create({
+      //   ...context.repo,
+      // });
+    } else {
+      throw Error(error);
+    }
+  }
+}
+
+function githubToken() {
+  const token = process.env.GITHUB_TOKEN;
+  if (!token)
+    throw ReferenceError("No token defined in the environment variables");
+  return token;
 }
 
 function shouldScan(url) {
@@ -146,18 +180,20 @@ async function testUrl(url) {
         let shouldReplace = false;
         const httpsized = Url.format(orig);
         if (httpsized !== result[1][2]) {
-          shouldReplace = (
-            await prompts({
-              type: "confirm",
-              name: "value",
-              message: `redirect ${result[0]} to ${result[1][2]}`,
-            })
-          ).value;
+          // shouldReplace = (
+          //   await prompts({
+          //     type: "confirm",
+          //     name: "value",
+          //     message: `redirect ${result[0]} to ${result[1][2]}`,
+          //   })
+          // ).value;
+          shouldReplace = true;
         } else {
           shouldReplace = true;
         }
         if (shouldReplace) {
           replace(result[0], result[1][2]);
+          createBranch(context, "fix-linkrot-test");
           cache.set(result[1][2], [Date.now(), "ok"]);
           fs.writeFileSync(
             ".linkrot.json",
