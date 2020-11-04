@@ -84,7 +84,7 @@ async function suggestChanges(branch, replacements) {
     ...context.repo,
     title: "Updating redirects",
     head: branch,
-    base: "master",
+    base: "main",
   });
 }
 
