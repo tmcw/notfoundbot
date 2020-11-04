@@ -174,6 +174,10 @@ async function testUrl(url) {
     }
   }
 
+  if (replacements.size == 0) {
+    return console.log("No changes to suggest");
+  }
+
   await suggestChanges(
     `linkrot-${new Date().toLocaleDateString().replace("/", "-")}`,
     [...replacements]
