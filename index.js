@@ -7,7 +7,7 @@ const Remark = require("remark");
 const { selectAll } = require("unist-util-select");
 const frontmatter = require("remark-frontmatter");
 const MagicString = require("magic-string");
-const { getOctokit } = require("@actions/github");
+const { getOctokit, context } = require("@actions/github");
 
 // From https://github.com/sindresorhus/is-absolute-url
 function isAbsoluteUrl(url) {
