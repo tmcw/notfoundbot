@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 const fs = require("fs");
-const simpleGit = require("simple-git");
 const Url = require("url");
 const path = require("path");
 const got = require("got");
@@ -8,9 +7,7 @@ const Remark = require("remark");
 const { selectAll } = require("unist-util-select");
 const frontmatter = require("remark-frontmatter");
 const MagicString = require("magic-string");
-const { getOctokit, context } = require("@actions/github");
-
-const git = simpleGit();
+const { getOctokit } = require("@actions/github");
 
 // From https://github.com/sindresorhus/is-absolute-url
 function isAbsoluteUrl(url) {
@@ -20,9 +17,33 @@ function isAbsoluteUrl(url) {
   return /^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(url);
 }
 
-async function createBranch(context, branch, replacements) {
-  console.log("creating branch");
-  const toolkit = getOctokit(githubToken());
+function replace(a, b, urlReferences) {
+  let results = [];
+  for (let file of urlReferences.get(a)) {
+    let text = file.text;
+    const s = new MagicString(text);
+    const remark = Remark().use(frontmatter, "yaml");
+    const ast = remark.parse(text);
+    const links = selectAll("link", ast);
+    for (let link of links) {
+      if (link.url === a) {
+        link.url = b;
+        s.overwrite(
+          link.position.start.offset,
+          link.position.end.offset,
+          remark.stringify(link)
+        );
+      }
+    }
+    file.text = s.toString();
+    results.push(file);
+  }
+  return results;
+}
+
+const toolkit = getOctokit(process.env.GITHUB_TOKEN);
+
+async function suggestChanges(branch, replacements) {
   // Sometimes branch might come in with refs/heads already
   branch = branch.replace("refs/heads/", "");
 
@@ -43,20 +64,20 @@ async function createBranch(context, branch, replacements) {
       throw Error(error);
     }
   }
-  for (let [path, content] of replacements) {
+  for (let file of replacements) {
     const existing = await toolkit.repos.getContent({
       ...context.repo,
       ref: `refs/heads/${branch}`,
-      path,
+      path: file.filename,
     });
 
     await toolkit.repos.createOrUpdateFileContents({
       ...context.repo,
-      path,
+      path: file.filename,
       branch,
       sha: existing.data.sha,
       message: "Fixing redirect",
-      content: Buffer.from(content).toString("base64"),
+      content: Buffer.from(file.text).toString("base64"),
     });
   }
   await toolkit.pulls.create({
@@ -67,23 +88,9 @@ async function createBranch(context, branch, replacements) {
   });
 }
 
-function githubToken() {
-  const token = process.env.GITHUB_TOKEN;
-  if (!token)
-    throw ReferenceError("No token defined in the environment variables");
-  return token;
-}
-
 function shouldScan(url) {
   const parts = Url.parse(url);
-  // Bloomberg redirects to a paywall
-  if (parts.host === "www.bloomberg.com") {
-    return false;
-  }
-  if (parts.scheme === "dat://") {
-    return false;
-  }
-  return true;
+  return parts.scheme === "http:";
 }
 
 function gatherFiles() {
@@ -113,22 +120,18 @@ async function testUrl(url) {
   try {
     const resp = await got.head(url, { timeout: 2000 });
     if (resp.url !== url) {
-      return [url, [Date.now(), "redirect", resp.url]];
+      return { status: "redirect", to: resp.url };
     } else if (resp.status >= 400) {
-      return [url, [Date.now(), "error", resp.status]];
+      return { status: "error", responseCode: resp.status };
     } else {
-      return [url, [Date.now(), "ok"]];
+      return { status: "ok" };
     }
   } catch (e) {
-    return [url, [Date.now(), "error"]];
+    return { status: "error" };
   }
 }
 
 (async function () {
-  const cache = /*fs.existsSync(".linkrot.json")
-    ? new Map(JSON.parse(fs.readFileSync(".linkrot.json", "utf8")))
-		: */ new Map();
-
   const files = gatherFiles();
 
   const urls = new Set();
@@ -138,105 +141,41 @@ async function testUrl(url) {
       urls.add(link.url);
       urlReferences.set(
         link.url,
-        (urlReferences.get(link.url) || []).concat(file.filename)
+        (urlReferences.get(link.url) || []).concat(file)
       );
     }
   }
 
-  const total_urls = urls.size;
+  console.log(`Checking ${urls.size} URLs`);
 
-  let cache_purges = 0;
-
-  for (let [url, val] of cache) {
-    const ttl = 1000 * 60 * 60 * 24 * 7;
-    if (Date.now() - val[0] > ttl) {
-      cache.delete(url);
-      cache_purges++;
-    }
-  }
-
-  for (let url of urls) {
-    if (cache.has(url)) {
-      urls.delete(url);
-    }
-  }
-
-  console.log(
-    `Checking ${urls.size} URLs (${
-      total_urls - urls.size
-    } cached, ${cache_purges} cache entries expired)`
-  );
-
-  function replace(a, b) {
-    let results = [];
-    for (let f of urlReferences.get(a)) {
-      const text = fs.readFileSync(f, "utf8");
-      const s = new MagicString(text);
-      const remark = Remark().use(frontmatter, "yaml");
-      const ast = remark.parse(text);
-      const links = selectAll("link", ast);
-      for (let link of links) {
-        if (link.url === a) {
-          link.url = b;
-          s.overwrite(
-            link.position.start.offset,
-            link.position.end.offset,
-            remark.stringify(link)
-          );
-        }
-      }
-      results.push([f, s.toString()]);
-    }
-    return results;
-  }
+  let replacements = new Set();
 
   for (let url of [...urls].reverse()) {
-    const result = await testUrl(url);
-    switch (result[1][1]) {
+    const { status, to } = await testUrl(url);
+    switch (status) {
       case "ok":
         process.stdout.write(".");
-        cache.set(result[0], result[1]);
-        fs.writeFileSync(".linkrot.json", JSON.stringify([...cache.entries()]));
-        // ignore
         break;
       case "redirect":
-        const orig = Url.parse(result[0]);
-        orig.protocol = "https:";
-        let shouldReplace = false;
-        const httpsized = Url.format(orig);
-        if (httpsized !== result[1][2]) {
-          // shouldReplace = (
-          //   await prompts({
-          //     type: "confirm",
-          //     name: "value",
-          //     message: `redirect ${result[0]} to ${result[1][2]}`,
-          //   })
-          // ).value;
-          shouldReplace = true;
-        } else {
-          shouldReplace = true;
-        }
-        if (shouldReplace) {
-          const replacements = replace(result[0], result[1][2]);
-          createBranch(context, `fix-linkrot-test`, replacements);
-          cache.set(result[1][2], [Date.now(), "ok"]);
-          fs.writeFileSync(
-            ".linkrot.json",
-            JSON.stringify([...cache.entries()])
-          );
+        const httpsized = Url.format({
+          ...Url.parse(url),
+          protocol: "https:",
+        });
+        if (httpsized === to) {
+          for (let file of replace(url, to, urlReferences)) {
+            replacements.add(file);
+          }
         }
         break;
       case "error":
         process.stdout.write("\n");
-        if (result[1][2]) {
-          // console.log(`error: ${url}, status ${result[1][2]}`);
-        } else {
-          // console.log(result[1]);
-          console.log(`error: ${url}`);
-        }
+        console.log(`error: ${url}`);
         break;
     }
   }
 
-  fs.writeFileSync(".linkrot.json", JSON.stringify([...cache.entries()]));
+  await suggestChanges(
+    `linkrot-${new Date().toLocaleDateString().replace("/", "-")}`,
+    [...replacements]
+  );
 })();
