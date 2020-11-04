@@ -41,9 +41,8 @@ function replace(a, b, urlReferences) {
   return results;
 }
 
-const toolkit = getOctokit(process.env.GITHUB_TOKEN);
-
 async function suggestChanges(branch, replacements) {
+  const toolkit = getOctokit(process.env.GITHUB_TOKEN);
   // Sometimes branch might come in with refs/heads already
   branch = branch.replace("refs/heads/", "");
 
@@ -90,7 +89,7 @@ async function suggestChanges(branch, replacements) {
 
 function shouldScan(url) {
   const parts = Url.parse(url);
-  return parts.scheme === "http:";
+  return parts.protocol === "http:";
 }
 
 function gatherFiles() {
@@ -103,9 +102,9 @@ function gatherFiles() {
     const remark = Remark().use(frontmatter, "yaml");
     const ast = remark.parse(text);
     const links = selectAll("link", ast);
-    const externalLinks = links.filter(
-      (link) => isAbsoluteUrl(link.url) && shouldScan(link.url)
-    );
+    const externalLinks = links.filter((link) => {
+      return isAbsoluteUrl(link.url) && shouldScan(link.url);
+    });
     list.push({
       filename,
       ast,
