@@ -1,13 +1,16 @@
 #!/usr/bin/env node
 const fs = require("fs");
+const simpleGit = require("simple-git");
 const Url = require("url");
 const path = require("path");
 const got = require("got");
-const prompts = require("prompts");
 const Remark = require("remark");
 const { selectAll } = require("unist-util-select");
 const frontmatter = require("remark-frontmatter");
 const MagicString = require("magic-string");
+const { getOctokit, context } = require("@actions/github");
+
+const git = simpleGit();
 
 // From https://github.com/sindresorhus/is-absolute-url
 function isAbsoluteUrl(url) {
@@ -15,6 +18,60 @@ function isAbsoluteUrl(url) {
     return false;
   }
   return /^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(url);
+}
+
+async function createBranch(context, branch, replacements) {
+  console.log("creating branch");
+  const toolkit = getOctokit(githubToken());
+  // Sometimes branch might come in with refs/heads already
+  branch = branch.replace("refs/heads/", "");
+
+  // throws HttpError if branch already exists.
+  try {
+    await toolkit.repos.getBranch({
+      ...context.repo,
+      branch,
+    });
+  } catch (error) {
+    if (error.name === "HttpError" && error.status === 404) {
+      await toolkit.git.createRef({
+        ref: `refs/heads/${branch}`,
+        sha: context.sha,
+        ...context.repo,
+      });
+    } else {
+      throw Error(error);
+    }
+  }
+  for (let [path, content] of replacements) {
+    const existing = await toolkit.repos.getContent({
+      ...context.repo,
+      ref: `refs/heads/${branch}`,
+      path,
+    });
+
+    await toolkit.repos.createOrUpdateFileContents({
+      ...context.repo,
+      path,
+      branch,
+      sha: existing.data.sha,
+      message: "Fixing redirect",
+      content: Buffer.from(content).toString("base64"),
+    });
+  }
+  await toolkit.pulls.create({
+    ...context.repo,
+    title: "Updating redirects",
+    head: branch,
+    base: "master",
+  });
+}
+
+function githubToken() {
+  const token = process.env.GITHUB_TOKEN;
+  if (!token)
+    throw ReferenceError("No token defined in the environment variables");
+  return token;
 }
 
 function shouldScan(url) {
@@ -68,9 +125,9 @@ async function testUrl(url) {
 }
 
 (async function () {
-  const cache = fs.existsSync(".linkrot.json")
+  const cache = /*fs.existsSync(".linkrot.json")
     ? new Map(JSON.parse(fs.readFileSync(".linkrot.json", "utf8")))
-    : new Map();
+		: */ new Map();
 
   const files = gatherFiles();
 
@@ -111,6 +168,7 @@ async function testUrl(url) {
   );
 
   function replace(a, b) {
+    let results = [];
     for (let f of urlReferences.get(a)) {
       const text = fs.readFileSync(f, "utf8");
       const s = new MagicString(text);
@@ -127,8 +185,9 @@ async function testUrl(url) {
           );
         }
       }
-      fs.writeFileSync(f, s.toString());
+      results.push([f, s.toString()]);
     }
+    return results;
   }
 
   for (let url of [...urls].reverse()) {
@@ -143,21 +202,23 @@ async function testUrl(url) {
       case "redirect":
         const orig = Url.parse(result[0]);
         orig.protocol = "https:";
-        let value = false;
+        let shouldReplace = false;
         const httpsized = Url.format(orig);
         if (httpsized !== result[1][2]) {
-          value = (
-            await prompts({
-              type: "confirm",
-              name: "value",
-              message: `redirect ${result[0]} to ${result[1][2]}`,
-            })
-          ).value;
+          // shouldReplace = (
+          //   await prompts({
+          //     type: "confirm",
+          //     name: "value",
+          //     message: `redirect ${result[0]} to ${result[1][2]}`,
+          //   })
+          // ).value;
+          shouldReplace = true;
         } else {
-          value = true;
+          shouldReplace = true;
         }
-        if (value) {
-          replace(result[0], result[1][2]);
+        if (shouldReplace) {
+          const replacements = replace(result[0], result[1][2]);
+          createBranch(context, `fix-linkrot-test`, replacements);
           cache.set(result[1][2], [Date.now(), "ok"]);
           fs.writeFileSync(
             ".linkrot.json",
