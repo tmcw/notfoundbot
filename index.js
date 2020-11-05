@@ -46,7 +46,7 @@ async function suggestChanges(branch, replacements) {
   // Sometimes branch might come in with refs/heads already
   branch = branch.replace("refs/heads/", "");
 
-  const { default_branch } = await octokit.request(
+  const { default_branch } = await toolkit.request(
     "GET /repos/{owner}/{repo}",
     {
       owner: context.owner,
