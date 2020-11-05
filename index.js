@@ -46,9 +46,11 @@ async function suggestChanges(branch, replacements) {
   // Sometimes branch might come in with refs/heads already
   branch = branch.replace("refs/heads/", "");
 
-  const { default_branch } = await toolkit.repos.get({
-    owner: context.owner,
-    repo: context.repo,
+  const {
+    data: { default_branch },
+  } = await toolkit.repos.get({
+    owner: context.repo.owner,
+    repo: context.repo.repo,
   });
 
   // throws HttpError if branch already exists.
