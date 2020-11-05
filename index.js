@@ -46,6 +46,14 @@ async function suggestChanges(branch, replacements) {
   // Sometimes branch might come in with refs/heads already
   branch = branch.replace("refs/heads/", "");
 
+  const { default_branch } = await octokit.request(
+    "GET /repos/{owner}/{repo}",
+    {
+      owner: context.owner,
+      repo: context.repo,
+    }
+  );
+
   // throws HttpError if branch already exists.
   try {
     await toolkit.repos.getBranch({
@@ -83,7 +91,7 @@ async function suggestChanges(branch, replacements) {
     ...context.repo,
     title: "Updating redirects",
     head: branch,
-    base: "main",
+    base: default_branch,
   });
 }
 
