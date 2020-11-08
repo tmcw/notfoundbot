@@ -151,7 +151,6 @@ function gatherFiles() {
         const { status, to } = await sniff(url);
         switch (status) {
           case "ok":
-            // process.stdout.write("O");
             break;
           case "redirect":
             const httpsized = Url.format({
@@ -159,18 +158,14 @@ function gatherFiles() {
               protocol: "https:",
             });
             if (httpsized === to) {
-              // process.stdout.write("S");
               for (let file of replace(url, to, urlReferences)) {
                 replacements.add(file);
               }
             } else {
-              console.log(httpsized, to);
-              // process.stdout.write("R");
+              // Other redirect type TODO
             }
             break;
           case "error":
-            // process.stdout.write("E");
-            // console.log(`error: ${url}`);
             break;
         }
       };
