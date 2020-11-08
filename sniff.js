@@ -12,11 +12,17 @@ module.exports = function getRedirect(url) {
       },
       (res) => {
         if (res.statusCode >= 400) {
-          reject();
+          resolve({
+            status: "error",
+          });
+        } else if (res.headers.location && res.headers.location !== url) {
+          resolve({
+            status: "redirect",
+            url: res.headers.location,
+          });
         } else {
           resolve({
-            url: res.headers.location || url,
-            status: res.statusCode,
+            status: "ok",
           });
         }
 
@@ -25,5 +31,7 @@ module.exports = function getRedirect(url) {
     );
 
     req.on("error", reject);
+  }).catch(() => {
+    return { status: "error" };
   });
 };

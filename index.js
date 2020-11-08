@@ -2,7 +2,7 @@
 const fs = require("fs");
 const Url = require("url");
 const path = require("path");
-const got = require("got");
+const isAbsoluteUrl = require("is-absolute-url");
 const Remark = require("remark");
 const pAll = require("p-all");
 const { selectAll } = require("unist-util-select");
@@ -10,14 +10,6 @@ const frontmatter = require("remark-frontmatter");
 const MagicString = require("magic-string");
 const { getOctokit, context } = require("@actions/github");
 const sniff = require("./sniff");
-
-// From https://github.com/sindresorhus/is-absolute-url
-function isAbsoluteUrl(url) {
-  if (/^[a-zA-Z]:\\/.test(url)) {
-    return false;
-  }
-  return /^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(url);
-}
 
 function replace(a, b, urlReferences) {
   let results = [];
@@ -134,21 +126,6 @@ function gatherFiles() {
   return list;
 }
 
-async function testUrl(url) {
-  try {
-    const resp = await sniff(url);
-    if (resp.url !== url) {
-      return { status: "redirect", to: resp.url };
-    } else if (resp.status >= 400) {
-      return { status: "error", responseCode: resp.status };
-    } else {
-      return { status: "ok" };
-    }
-  } catch (e) {
-    return { status: "error" };
-  }
-}
-
 (async function () {
   const files = gatherFiles();
 
@@ -171,7 +148,7 @@ async function testUrl(url) {
   await pAll(
     [...urls].reverse().map((url) => {
       return async () => {
-        const { status, to } = await testUrl(url);
+        const { status, to } = await sniff(url);
         switch (status) {
           case "ok":
             // process.stdout.write("O");
