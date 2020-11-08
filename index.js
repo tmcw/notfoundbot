@@ -144,6 +144,7 @@ function gatherFiles() {
   const files = fs.readdirSync(BASE).filter((f) => f.endsWith(".md"));
   const list = [];
   for (let f of files) {
+    console.log(`Scanning, ${f}`);
     const filename = Path.join(BASE, f);
     const text = fs.readFileSync(filename, "utf8");
     const remark = Remark().use(frontmatter, "yaml");
