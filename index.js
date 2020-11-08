@@ -2,20 +2,14 @@
 const fs = require("fs");
 const Url = require("url");
 const path = require("path");
-const got = require("got");
+const isAbsoluteUrl = require("is-absolute-url");
 const Remark = require("remark");
+const pAll = require("p-all");
 const { selectAll } = require("unist-util-select");
 const frontmatter = require("remark-frontmatter");
 const MagicString = require("magic-string");
 const { getOctokit, context } = require("@actions/github");
-
-// From https://github.com/sindresorhus/is-absolute-url
-function isAbsoluteUrl(url) {
-  if (/^[a-zA-Z]:\\/.test(url)) {
-    return false;
-  }
-  return /^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(url);
-}
+const sniff = require("./sniff");
 
 function replace(a, b, urlReferences) {
   let results = [];
@@ -53,6 +47,16 @@ async function suggestChanges(branch, replacements) {
     repo: context.repo.repo,
   });
 
+  const {
+    data: {
+      object: { sha },
+    },
+  } = await toolkit.git.getRef({
+    owner: context.repo.owner,
+    repo: context.repo.repo,
+    ref: `heads/${default_branch}`,
+  });
+
   // throws HttpError if branch already exists.
   try {
     await toolkit.repos.getBranch({
@@ -63,7 +67,7 @@ async function suggestChanges(branch, replacements) {
     if (error.name === "HttpError" && error.status === 404) {
       await toolkit.git.createRef({
         ref: `refs/heads/${branch}`,
-        sha: context.sha,
+        sha,
         ...context.repo,
       });
     } else {
@@ -96,7 +100,7 @@ async function suggestChanges(branch, replacements) {
 
 function shouldScan(url) {
   const parts = Url.parse(url);
-  return parts.protocol === "http:";
+  return parts.protocol === "http:" || parts.protocol === "https:";
 }
 
 function gatherFiles() {
@@ -122,21 +126,6 @@ function gatherFiles() {
   return list;
 }
 
-async function testUrl(url) {
-  try {
-    const resp = await got.head(url, { timeout: 2000 });
-    if (resp.url !== url) {
-      return { status: "redirect", to: resp.url };
-    } else if (resp.status >= 400) {
-      return { status: "error", responseCode: resp.status };
-    } else {
-      return { status: "ok" };
-    }
-  } catch (e) {
-    return { status: "error" };
-  }
-}
-
 (async function () {
   const files = gatherFiles();
 
@@ -156,32 +145,38 @@ async function testUrl(url) {
 
   let replacements = new Set();
 
-  for (let url of [...urls].reverse()) {
-    const { status, to } = await testUrl(url);
-    switch (status) {
-      case "ok":
-        process.stdout.write(".");
-        break;
-      case "redirect":
-        const httpsized = Url.format({
-          ...Url.parse(url),
-          protocol: "https:",
-        });
-        if (httpsized === to) {
-          for (let file of replace(url, to, urlReferences)) {
-            replacements.add(file);
-          }
+  await pAll(
+    [...urls].reverse().map((url) => {
+      return async () => {
+        const { status, to } = await sniff(url);
+        switch (status) {
+          case "ok":
+            break;
+          case "redirect":
+            const httpsized = Url.format({
+              ...Url.parse(url),
+              protocol: "https:",
+            });
+            if (httpsized === to) {
+              for (let file of replace(url, to, urlReferences)) {
+                replacements.add(file);
+              }
+            } else {
+              // Other redirect type TODO
+            }
+            break;
+          case "error":
+            break;
         }
-        break;
-      case "error":
-        process.stdout.write("\n");
-        console.log(`error: ${url}`);
-        break;
-    }
-  }
+      };
+    }),
+    { concurrency: 10 }
+  );
 
   if (replacements.size == 0) {
     return console.log("No changes to suggest");
+  } else {
+    console.log(`Creating PR with ${replacements.size} changes`);
   }
 
   await suggestChanges(
