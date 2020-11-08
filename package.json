@@ -8,7 +8,7 @@
   },
   "scripts": {
     "release": "standard-version",
-    "test": "ava",
+    "test": "tap test.js",
     "start": "./index.js"
   },
   "dependencies": {
@@ -23,7 +23,7 @@
     "unist-util-select": "^3.0.1"
   },
   "devDependencies": {
-    "ava": "^3.13.0",
-    "standard-version": "^7.1.0"
+    "standard-version": "^7.1.0",
+    "tap": "^14.10.8"
   }
 }
