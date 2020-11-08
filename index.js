@@ -90,11 +90,19 @@ async function suggestChanges(replacements) {
   if (dry) {
     console.log(`DRY: creating pull: ${title}`);
   } else {
-    await toolkit.pulls.create({
+    const {
+      data: { number },
+    } = await toolkit.pulls.create({
       ...context.repo,
       title,
       head: branch,
       base: default_branch,
+    });
+
+    await toolkit.issues.addLabels({
+      ...context.repo,
+      issue_number: number,
+      labels: "linkrot",
     });
   }
 }
@@ -156,6 +164,11 @@ function gatherFiles() {
 }
 
 (async function () {
+  // const { data: pulls } = await toolkit.pulls.list({
+  //   owner: context.repo.owner,
+  //   repo: context.repo.repo,
+  // });
+
   const files = gatherFiles();
 
   const urls = new Set();
