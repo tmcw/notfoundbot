@@ -1,0 +1,101 @@
+{
+  "name": "remark-frontmatter",
+  "version": "2.0.0",
+  "description": "remark plugin to support frontmatter (yaml, toml, and more)",
+  "license": "MIT",
+  "keywords": [
+    "unified",
+    "remark",
+    "remark-plugin",
+    "plugin",
+    "mdast",
+    "markdown",
+    "frontmatter",
+    "yaml",
+    "toml"
+  ],
+  "repository": "remarkjs/remark-frontmatter",
+  "bugs": "https://github.com/remarkjs/remark-frontmatter/issues",
+  "funding": {
+    "type": "opencollective",
+    "url": "https://opencollective.com/unified"
+  },
+  "author": "Titus Wormer <tituswormer@gmail.com> (https://wooorm.com)",
+  "contributors": [
+    "Titus Wormer <tituswormer@gmail.com> (https://wooorm.com)",
+    "Lars Trieloff <lars@trieloff.net>",
+    "Max Kueng <me@maxkueng.com>"
+  ],
+  "files": [
+    "index.js",
+    "lib",
+    "types/index.d.ts"
+  ],
+  "types": "types/index.d.ts",
+  "dependencies": {
+    "fault": "^1.0.1"
+  },
+  "devDependencies": {
+    "browserify": "^16.0.0",
+    "dtslint": "^3.4.1",
+    "is-hidden": "^1.0.0",
+    "not": "^0.1.0",
+    "nyc": "^15.0.0",
+    "prettier": "^2.0.0",
+    "remark": "^12.0.0",
+    "remark-cli": "^8.0.0",
+    "remark-preset-wooorm": "^7.0.0",
+    "tape": "^4.0.0",
+    "tinyify": "^2.0.0",
+    "to-vfile": "^6.0.0",
+    "unified": "^9.0.0",
+    "xo": "^0.28.0"
+  },
+  "scripts": {
+    "format": "remark *.md -qfo && prettier --write . && xo --fix",
+    "build-bundle": "browserify . -s remarkFrontmatter > remark-frontmatter.js",
+    "build-mangle": "browserify . -s remarkFrontmatter -p tinyify > remark-frontmatter.min.js",
+    "build": "npm run build-bundle && npm run build-mangle",
+    "test-api": "node test",
+    "test-coverage": "nyc --reporter lcov tape test/index.js",
+    "test-types": "dtslint types",
+    "test": "npm run format && npm run build && npm run test-coverage && npm run test-types"
+  },
+  "nyc": {
+    "check-coverage": true,
+    "lines": 100,
+    "functions": 100,
+    "branches": 100
+  },
+  "prettier": {
+    "tabWidth": 2,
+    "useTabs": false,
+    "singleQuote": true,
+    "bracketSpacing": false,
+    "semi": false,
+    "trailingComma": "none"
+  },
+  "xo": {
+    "prettier": true,
+    "esnext": false,
+    "rules": {
+      "guard-for-in": "off"
+    },
+    "ignores": [
+      "remark-frontmatter.js",
+      "**/*.ts"
+    ]
+  },
+  "remarkConfig": {
+    "plugins": [
+      [
+        "./",
+        [
+          "yaml",
+          "toml"
+        ]
+      ],
+      "preset-wooorm"
+    ]
+  }
+}
