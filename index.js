@@ -11,6 +11,9 @@ const MagicString = require("magic-string");
 const { getOctokit, context } = require("@actions/github");
 const sniff = require("./sniff");
 
+const dry = process.env.DRY_RUN;
+const toolkit = getOctokit(process.env.GITHUB_TOKEN);
+
 function replace(a, b, urlReferences) {
   let results = [];
   for (let file of urlReferences.get(a)) {
@@ -30,15 +33,16 @@ function replace(a, b, urlReferences) {
       }
     }
     file.text = s.toString();
+    file.replacements.push(`${a} → ${b}`);
     results.push(file);
   }
   return results;
 }
 
-async function suggestChanges(branch, replacements) {
-  const toolkit = getOctokit(process.env.GITHUB_TOKEN);
-  // Sometimes branch might come in with refs/heads already
-  branch = branch.replace("refs/heads/", "");
+async function suggestChanges(replacements) {
+  const branch = `linkrot-${new Date()
+    .toLocaleDateString()
+    .replace(/\//g, "-")}`;
 
   const {
     data: { default_branch },
@@ -65,37 +69,61 @@ async function suggestChanges(branch, replacements) {
     });
   } catch (error) {
     if (error.name === "HttpError" && error.status === 404) {
-      await toolkit.git.createRef({
-        ref: `refs/heads/${branch}`,
-        sha,
-        ...context.repo,
-      });
+      const branchRef = `refs/heads/${branch}`;
+      if (dry) {
+        console.log(`DRY: creating ref: ${branchRef}`);
+      } else {
+        await toolkit.git.createRef({
+          ...context.repo,
+          ref: branchRef,
+          sha,
+        });
+      }
     } else {
       throw Error(error);
     }
   }
-  for (let file of replacements) {
-    const existing = await toolkit.repos.getContent({
-      ...context.repo,
-      ref: `refs/heads/${branch}`,
-      path: file.filename,
-    });
 
-    await toolkit.repos.createOrUpdateFileContents({
+  await createRedirectCommits(toolkit, branch, replacements);
+  const title = `🔗 Linkrot: updating ${replacements.length} links`;
+
+  if (dry) {
+    console.log(`DRY: creating pull: ${title}`);
+  } else {
+    await toolkit.pulls.create({
       ...context.repo,
-      path: file.filename,
-      branch,
-      sha: existing.data.sha,
-      message: "Fixing redirect",
-      content: Buffer.from(file.text).toString("base64"),
+      title,
+      head: branch,
+      base: default_branch,
     });
   }
-  await toolkit.pulls.create({
-    ...context.repo,
-    title: "Updating redirects",
-    head: branch,
-    base: default_branch,
-  });
+}
+
+async function createRedirectCommits(toolkit, branch, replacements) {
+  for (let file of replacements) {
+    const message = file.replacements.join(", ");
+    const ref = `refs/heads/${branch}`;
+    const path = file.filename;
+
+    if (dry) {
+      console.log(`DRY: updating ${file.filename} with message: ${message}`);
+    } else {
+      const existing = await toolkit.repos.getContent({
+        ...context.repo,
+        ref,
+        path,
+      });
+
+      await toolkit.repos.createOrUpdateFileContents({
+        ...context.repo,
+        path,
+        branch,
+        sha: existing.data.sha,
+        message,
+        content: Buffer.from(file.text).toString("base64"),
+      });
+    }
+  }
 }
 
 function shouldScan(url) {
@@ -121,6 +149,7 @@ function gatherFiles() {
       ast,
       text,
       externalLinks,
+      replacements: [],
     });
   }
   return list;
@@ -179,8 +208,5 @@ function gatherFiles() {
     console.log(`Creating PR with ${replacements.size} changes`);
   }
 
-  await suggestChanges(
-    `linkrot-${new Date().toLocaleDateString().replace("/", "-")}`,
-    [...replacements]
-  );
+  await suggestChanges([...replacements]);
 })();
