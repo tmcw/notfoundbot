@@ -140,7 +140,7 @@ function shouldScan(url) {
 }
 
 function gatherFiles() {
-  const BASE = Path.join(__dirname, "./_posts");
+  const BASE = Path.join(process.env.GITHUB_WORKSPACE || __dirname, "./_posts");
   const files = fs.readdirSync(BASE).filter((f) => f.endsWith(".md"));
   const list = [];
   for (let f of files) {
