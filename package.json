@@ -19,7 +19,6 @@
     "p-all": "^3.0.0",
     "remark": "^12.0.0",
     "remark-frontmatter": "^2.0.0",
-    "simple-git": "^2.21.0",
     "unist-util-select": "^3.0.1"
   },
   "devDependencies": {
