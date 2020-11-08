@@ -14,12 +14,14 @@
     "@actions/github": "^4.0.0",
     "got": "^10.7.0",
     "magic-string": "^0.25.7",
+    "p-all": "^3.0.0",
     "remark": "^12.0.0",
     "remark-frontmatter": "^2.0.0",
     "simple-git": "^2.21.0",
     "unist-util-select": "^3.0.1"
   },
   "devDependencies": {
+    "ava": "^3.13.0",
     "standard-version": "^7.1.0"
   }
 }
