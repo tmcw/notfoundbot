@@ -1,0 +1,11 @@
+name: "Linkrot"
+description: "Find and fix outgoing links"
+author: "Tom MacWright"
+
+branding:
+  icon: external-link
+  color: blue
+
+runs:
+  using: 'node12'
+  main: 'index.js'
