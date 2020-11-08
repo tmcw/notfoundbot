@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 const fs = require("fs");
 const Url = require("url");
-const path = require("path");
+const Path = require("path");
 const isAbsoluteUrl = require("is-absolute-url");
 const Remark = require("remark");
 const pAll = require("p-all");
@@ -140,11 +140,11 @@ function shouldScan(url) {
 }
 
 function gatherFiles() {
-  const BASE = "./_posts";
+  const BASE = Path.join(__dirname, "./_posts");
   const files = fs.readdirSync(BASE).filter((f) => f.endsWith(".md"));
   const list = [];
   for (let f of files) {
-    const filename = path.join(BASE, f);
+    const filename = Path.join(BASE, f);
     const text = fs.readFileSync(filename, "utf8");
     const remark = Remark().use(frontmatter, "yaml");
     const ast = remark.parse(text);
