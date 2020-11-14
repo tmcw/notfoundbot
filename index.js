@@ -111,7 +111,7 @@ async function createRedirectCommits(toolkit, branch, replacements) {
   for (let file of replacements) {
     const message = file.replacements.join(", ");
     const ref = `refs/heads/${branch}`;
-    const path = file.filename;
+    const path = file.gitPath;
 
     if (dry) {
       console.log(`DRY: updating ${file.filename} with message: ${message}`);
@@ -160,6 +160,7 @@ function gatherFiles() {
     });
     list.push({
       filename,
+      gitPath: Path.join("_posts", f),
       ast,
       text,
       externalLinks,
@@ -189,7 +190,7 @@ function gatherFiles() {
     }
   }
 
-  const subset = [...urls].reverse().slice(0, 100);
+  const subset = [...urls].reverse().slice(0, 20);
   console.log(`Checking ${subset.length} URLs`);
 
   let replacements = new Set();
