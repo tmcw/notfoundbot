@@ -2,36 +2,62 @@ const Url = require("url");
 const Https = require("https");
 const Http = require("http");
 
-module.exports = function getRedirect(url) {
-  return new Promise((resolve, reject) => {
-    const lib = Url.parse(url).protocol === "http:" ? Http : Https;
-    const req = lib.get(
-      url,
-      {
-        timeout: 2000,
-      },
-      (res) => {
-        if (res.statusCode >= 400) {
-          resolve({
-            status: "error",
-          });
-        } else if (res.headers.location && res.headers.location !== url) {
-          resolve({
-            status: "redirect",
-            url: res.headers.location,
-          });
-        } else {
-          resolve({
-            status: "ok",
-          });
-        }
+const timeout = {
+  timeout: 2000,
+};
 
-        req.destroy();
-      }
-    );
+function cancelGet(url, lib) {
+  return new Promise((resolve, reject) => {
+    const req = lib.get(url, timeout, (res) => {
+      resolve(res);
+      req.destroy();
+    });
 
     req.on("error", reject);
-  }).catch(() => {
-    return { status: "error" };
   });
+}
+
+module.exports = async function getRedirect(url) {
+  const httpsEquivalent = Url.format({
+    ...Url.parse(url),
+    protocol: "https:",
+  });
+  try {
+    const [httpRes, httpsRes] = await Promise.all([
+      cancelGet(url, Http),
+      cancelGet(httpsEquivalent, Https),
+    ]);
+
+    if (httpRes.headers.location === httpsEquivalent) {
+      return {
+        status: "upgrade",
+        url: httpsEquivalent,
+      };
+    }
+
+    console.log(
+      httpsRes.statusCode < 300,
+      httpRes.statusCode < 300,
+      httpRes.headers.etag === httpsRes.headers.etag
+    );
+
+    if (
+      httpsRes.statusCode < 300 &&
+      httpRes.statusCode < 300 &&
+      httpRes.headers.etag === httpsRes.headers.etag
+    ) {
+      return {
+        status: "upgrade",
+        url: httpsEquivalent,
+      };
+    }
+
+    return {
+      status: "ok",
+    };
+  } catch (err) {
+    return {
+      status: "error",
+    };
+  }
 };

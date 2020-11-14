@@ -195,19 +195,9 @@ function gatherFiles() {
         console.log(`Checking ${url}`);
         const { status, to } = await sniff(url);
         switch (status) {
-          case "ok":
-            break;
-          case "redirect":
-            const httpsized = Url.format({
-              ...Url.parse(url),
-              protocol: "https:",
-            });
-            if (httpsized === to) {
-              for (let file of replace(url, to, urlReferences)) {
-                replacements.add(file);
-              }
-            } else {
-              // Other redirect type TODO
+          case "upgrade":
+            for (let file of replace(url, to, urlReferences)) {
+              replacements.add(file);
             }
             break;
           case "error":
