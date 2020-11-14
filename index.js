@@ -184,13 +184,15 @@ function gatherFiles() {
     }
   }
 
-  console.log(`Checking ${urls.size} URLs`);
+  const subset = [...urls].reverse().slice(100);
+  console.log(`Checking ${subset.length} URLs`);
 
   let replacements = new Set();
 
   await pAll(
-    [...urls].reverse().slice(100).map((url) => {
+    subset.map((url) => {
       return async () => {
+        console.log(`Checking ${url}`);
         const { status, to } = await sniff(url);
         switch (status) {
           case "ok":
