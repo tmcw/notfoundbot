@@ -31,7 +31,7 @@ module.exports = async function getRedirect(url) {
     if (httpRes.headers.location === httpsEquivalent) {
       return {
         status: "upgrade",
-        url: httpsEquivalent,
+        to: httpsEquivalent,
       };
     }
 
@@ -43,7 +43,7 @@ module.exports = async function getRedirect(url) {
     ) {
       return {
         status: "upgrade",
-        url: httpsEquivalent,
+        to: httpsEquivalent,
       };
     }
 

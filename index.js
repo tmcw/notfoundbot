@@ -102,7 +102,7 @@ async function suggestChanges(replacements) {
     await toolkit.issues.addLabels({
       ...context.repo,
       issue_number: number,
-      labels: "linkrot",
+      labels: ["linkrot"],
     });
   }
 }
