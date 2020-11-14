@@ -189,7 +189,7 @@ function gatherFiles() {
   let replacements = new Set();
 
   await pAll(
-    [...urls].reverse().map((url) => {
+    [...urls].reverse().slice(100).map((url) => {
       return async () => {
         const { status, to } = await sniff(url);
         switch (status) {
