@@ -35,15 +35,10 @@ module.exports = async function getRedirect(url) {
       };
     }
 
-    console.log(
-      httpsRes.statusCode < 300,
-      httpRes.statusCode < 300,
-      httpRes.headers.etag === httpsRes.headers.etag
-    );
-
     if (
       httpsRes.statusCode < 300 &&
       httpRes.statusCode < 300 &&
+      httpRes.headers.etag &&
       httpRes.headers.etag === httpsRes.headers.etag
     ) {
       return {
