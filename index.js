@@ -190,7 +190,7 @@ function gatherFiles() {
     }
   }
 
-  const subset = [...urls].reverse().slice(0, 20);
+  const subset = [...urls].reverse().slice(0, 100);
   console.log(`Checking ${subset.length} URLs`);
 
   let replacements = new Set();
