@@ -116,6 +116,11 @@ async function createRedirectCommits(toolkit, branch, replacements) {
     if (dry) {
       console.log(`DRY: updating ${file.filename} with message: ${message}`);
     } else {
+      console.log("Finding existing file", {
+        ...context.repo,
+        ref,
+        path,
+      });
       const existing = await toolkit.repos.getContent({
         ...context.repo,
         ref,
@@ -144,7 +149,7 @@ function gatherFiles() {
   const files = fs.readdirSync(BASE).filter((f) => f.endsWith(".md"));
   const list = [];
   for (let f of files) {
-    console.log(`Scanning, ${f}`);
+    // console.log(`Scanning, ${f}`);
     const filename = Path.join(BASE, f);
     const text = fs.readFileSync(filename, "utf8");
     const remark = Remark().use(frontmatter, "yaml");
