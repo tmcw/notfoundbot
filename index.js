@@ -136,7 +136,7 @@ async function createRedirectCommits(toolkit, branch, replacements) {
 
 function shouldScan(url) {
   const parts = Url.parse(url);
-  return parts.protocol === "http:" || parts.protocol === "https:";
+  return parts.protocol === "http:";
 }
 
 function gatherFiles() {
