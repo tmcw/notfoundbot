@@ -26,14 +26,14 @@ type FileChanges = {
   replacements: string[],
 };
 
-function replace(a: string, b: string, urlReferences: any) {
+function replace(a: string, b: string, urlReferences: Map<string, FileChanges[]>) {
   let results = [];
-  for (let file of urlReferences.get(a)) {
+  for (let file of urlReferences.get(a)!) {
     let text = file.text;
     const s = new MagicString(text);
     const remark = Remark().use(frontmatter, ["yaml"]);
     const ast = remark.parse(text);
-    const links = selectAll("link", ast);
+    const links  = selectAll("link", ast) as Link[];
     for (let link of links) {
       if (link.url === a) {
         link.url = b;
