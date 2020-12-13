@@ -7,7 +7,7 @@
     "release": "standard-version",
     "build": "ncc build index.ts --license licenses.txt",
     "test": "tap test.ts",
-    "start": "./main/index.js"
+    "start": "./dist/index.js"
   },
   "dependencies": {
     "@actions/github": "^4.0.0",
