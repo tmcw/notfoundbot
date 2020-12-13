@@ -3,13 +3,11 @@
   "version": "2.0.0-alpha.1",
   "main": "dist/index.js",
   "license": "MIT",
-  "bin": {
-    "linkrot": "index.js"
-  },
   "scripts": {
     "release": "standard-version",
+    "build": "ncc build index.ts --license licenses.txt",
     "test": "tap test.ts",
-    "start": "./index.js"
+    "start": "./main/index.js"
   },
   "dependencies": {
     "@actions/github": "^4.0.0",
