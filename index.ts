@@ -6,6 +6,8 @@ import Path from "path";
 import isAbsoluteUrl from "is-absolute-url";
 import Remark from "remark";
 import pAll from "p-all";
+import type {Link} from "mdast"
+import type {Node} from "unist"
 import { selectAll } from "unist-util-select";
 import frontmatter from "remark-frontmatter";
 import MagicString from "magic-string";
@@ -18,9 +20,9 @@ const toolkit = getOctokit(process.env.GITHUB_TOKEN!);
 type FileChanges = {
   filename: string,
   gitPath: string,
-  ast: any,
+  ast: Node,
   text: string,
-  externalLinks: any[],
+  externalLinks: Link[],
   replacements: string[],
 };
 
@@ -164,7 +166,7 @@ function gatherFiles() {
     const text = fs.readFileSync(filename, "utf8");
     const remark = Remark().use(frontmatter, ["yaml"]);
     const ast = remark.parse(text);
-    const links = selectAll("link", ast);
+    const links = selectAll("link", ast) as Link[];
     const externalLinks = links.filter((link) => {
       const url = link.url as string
       return isAbsoluteUrl(url) && shouldScan(url);

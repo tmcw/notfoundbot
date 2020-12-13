@@ -13,6 +13,8 @@
   },
   "dependencies": {
     "@actions/github": "^4.0.0",
+    "@types/mdast": "^3.0.3",
+    "@types/unist": "^2.0.3",
     "is-absolute-url": "^3.0.3",
     "magic-string": "^0.25.7",
     "p-all": "^3.0.0",
