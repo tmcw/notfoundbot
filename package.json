@@ -1,23 +1,31 @@
 {
   "name": "@tmcw/linkrot",
   "version": "2.0.0-alpha.1",
-  "main": "index.js",
+  "main": "dist/index.js",
   "license": "MIT",
   "bin": {
     "linkrot": "index.js"
   },
   "scripts": {
     "release": "standard-version",
-    "test": "tap test.js",
+    "test": "tap test.ts",
     "start": "./index.js"
   },
   "dependencies": {
     "@actions/github": "^4.0.0",
+    "@types/mdast": "^3.0.3",
+    "@types/unist": "^2.0.3",
     "is-absolute-url": "^3.0.3",
     "magic-string": "^0.25.7",
     "p-all": "^3.0.0",
     "remark": "^12.0.0",
     "remark-frontmatter": "^2.0.0",
+    "typescript": "^4.1.3",
+    "unified": "^9.2.0",
     "unist-util-select": "^3.0.1"
+  },
+  "devDependencies": {
+    "@types/tap": "^14.10.1",
+    "tap": "^14.11.0"
   }
 }
