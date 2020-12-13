@@ -21,7 +21,7 @@ type FileChanges = {
   ast: any,
   text: string,
   externalLinks: any[],
-  replacements: Array<any>,
+  replacements: string[],
 };
 
 function replace(a: string, b: string, urlReferences: any) {
