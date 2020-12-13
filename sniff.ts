@@ -1,12 +1,15 @@
-const Url = require("url");
-const Https = require("https");
-const Http = require("http");
+import Url from "url";
+import Https from "https";
+import Http from "http";
 
 const timeout = {
   timeout: 2000,
 };
 
-function cancelGet(url, lib) {
+function cancelGet(
+  url: string,
+  lib: typeof Http | typeof Https
+): Promise<Http.IncomingMessage> {
   return new Promise((resolve, reject) => {
     const req = lib.get(url, timeout, (res) => {
       resolve(res);
@@ -17,7 +20,17 @@ function cancelGet(url, lib) {
   });
 }
 
-module.exports = async function getRedirect(url) {
+type Result =
+  | {
+      status: "upgrade";
+      to: string;
+    }
+  | {
+      status: "error";
+    }
+  | { status: "ok" };
+
+export default async function getRedirect(url: string): Promise<Result> {
   const httpsEquivalent = Url.format({
     ...Url.parse(url),
     protocol: "https:",
@@ -36,8 +49,8 @@ module.exports = async function getRedirect(url) {
     }
 
     if (
-      httpsRes.statusCode < 300 &&
-      httpRes.statusCode < 300 &&
+      httpsRes.statusCode! < 300 &&
+      httpRes.statusCode! < 300 &&
       httpRes.headers.etag &&
       httpRes.headers.etag === httpsRes.headers.etag
     ) {
@@ -55,4 +68,4 @@ module.exports = async function getRedirect(url) {
       status: "error",
     };
   }
-};
+}

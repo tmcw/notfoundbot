@@ -1,33 +1,43 @@
 #!/usr/bin/env node
-const fs = require("fs");
-const Url = require("url");
-const Path = require("path");
-const isAbsoluteUrl = require("is-absolute-url");
-const Remark = require("remark");
-const pAll = require("p-all");
-const { selectAll } = require("unist-util-select");
-const frontmatter = require("remark-frontmatter");
-const MagicString = require("magic-string");
-const { getOctokit, context } = require("@actions/github");
-const sniff = require("./sniff");
+
+import fs from "fs";
+import Url from "url";
+import Path from "path";
+import isAbsoluteUrl from "is-absolute-url";
+import Remark from "remark";
+import pAll from "p-all";
+import { selectAll } from "unist-util-select";
+import frontmatter from "remark-frontmatter";
+import MagicString from "magic-string";
+import { getOctokit, context } from "@actions/github";
+import sniff from "./sniff";
 
 const dry = process.env.DRY_RUN;
-const toolkit = getOctokit(process.env.GITHUB_TOKEN);
+const toolkit = getOctokit(process.env.GITHUB_TOKEN!);
 
-function replace(a, b, urlReferences) {
+type FileChanges = {
+  filename: string,
+  gitPath: string,
+  ast: any,
+  text: string,
+  externalLinks: any[],
+  replacements: Array<any>,
+};
+
+function replace(a: string, b: string, urlReferences: any) {
   let results = [];
   for (let file of urlReferences.get(a)) {
     let text = file.text;
     const s = new MagicString(text);
-    const remark = Remark().use(frontmatter, "yaml");
+    const remark = Remark().use(frontmatter, ["yaml"]);
     const ast = remark.parse(text);
     const links = selectAll("link", ast);
     for (let link of links) {
       if (link.url === a) {
         link.url = b;
         s.overwrite(
-          link.position.start.offset,
-          link.position.end.offset,
+          link.position!.start.offset!,
+          link.position!.end.offset!,
           remark.stringify(link)
         );
       }
@@ -39,7 +49,7 @@ function replace(a, b, urlReferences) {
   return results;
 }
 
-async function suggestChanges(replacements) {
+async function suggestChanges(replacements: FileChanges[]) {
   const branch = `linkrot-${new Date()
     .toLocaleDateString()
     .replace(/\//g, "-")}`;
@@ -84,7 +94,7 @@ async function suggestChanges(replacements) {
     }
   }
 
-  await createRedirectCommits(toolkit, branch, replacements);
+  await createRedirectCommits(branch, replacements);
   const title = `🔗 Linkrot: updating ${replacements.length} links`;
 
   if (dry) {
@@ -107,7 +117,7 @@ async function suggestChanges(replacements) {
   }
 }
 
-async function createRedirectCommits(toolkit, branch, replacements) {
+async function createRedirectCommits(branch: string, replacements: FileChanges[]) {
   for (let file of replacements) {
     const message = file.replacements.join(", ");
     const ref = `refs/heads/${branch}`;
@@ -139,7 +149,7 @@ async function createRedirectCommits(toolkit, branch, replacements) {
   }
 }
 
-function shouldScan(url) {
+function shouldScan(url: string) {
   const parts = Url.parse(url);
   return parts.protocol === "http:";
 }
@@ -147,16 +157,17 @@ function shouldScan(url) {
 function gatherFiles() {
   const BASE = Path.join(process.env.GITHUB_WORKSPACE || __dirname, "_posts");
   const files = fs.readdirSync(BASE).filter((f) => f.endsWith(".md"));
-  const list = [];
+  const list: FileChanges[] = [];
   for (let f of files) {
     // console.log(`Scanning, ${f}`);
     const filename = Path.join(BASE, f);
     const text = fs.readFileSync(filename, "utf8");
-    const remark = Remark().use(frontmatter, "yaml");
+    const remark = Remark().use(frontmatter, ["yaml"]);
     const ast = remark.parse(text);
     const links = selectAll("link", ast);
     const externalLinks = links.filter((link) => {
-      return isAbsoluteUrl(link.url) && shouldScan(link.url);
+      const url = link.url as string
+      return isAbsoluteUrl(url) && shouldScan(url);
     });
     list.push({
       filename,
@@ -178,8 +189,8 @@ function gatherFiles() {
 
   const files = gatherFiles();
 
-  const urls = new Set();
-  const urlReferences = new Map();
+  const urls = new Set<string>();
+  const urlReferences = new Map<string, FileChanges[]>();
   for (let file of files) {
     for (let link of file.externalLinks) {
       urls.add(link.url);
@@ -190,19 +201,19 @@ function gatherFiles() {
     }
   }
 
-  const subset = [...urls].reverse().slice(0, 100);
+  const subset = Array.from(urls).reverse().slice(0, 100);
   console.log(`Checking ${subset.length} URLs`);
 
-  let replacements = new Set();
+  let replacements = new Set<FileChanges>();
 
   await pAll(
     subset.map((url) => {
       return async () => {
         console.log(`Checking ${url}`);
-        const { status, to } = await sniff(url);
-        switch (status) {
+        const result= await sniff(url);
+        switch (result.status) {
           case "upgrade":
-            for (let file of replace(url, to, urlReferences)) {
+            for (let file of replace(url, result.to, urlReferences)) {
               replacements.add(file);
             }
             break;
@@ -220,5 +231,5 @@ function gatherFiles() {
     console.log(`Creating PR with ${replacements.size} changes`);
   }
 
-  await suggestChanges([...replacements]);
+  await suggestChanges(Array.from(replacements));
 })();
