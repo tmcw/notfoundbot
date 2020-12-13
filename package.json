@@ -1,7 +1,7 @@
 {
   "name": "@tmcw/linkrot",
   "version": "2.0.0-alpha.1",
-  "main": "index.js",
+  "main": "dist/index.js",
   "license": "MIT",
   "bin": {
     "linkrot": "index.js"
