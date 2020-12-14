@@ -6,8 +6,8 @@ import Path from "path";
 import isAbsoluteUrl from "is-absolute-url";
 import Remark from "remark";
 import pAll from "p-all";
-import type {Link} from "mdast"
-import type {Node} from "unist"
+import type { Link } from "mdast";
+import type { Node } from "unist";
 import { selectAll } from "unist-util-select";
 import frontmatter from "remark-frontmatter";
 import MagicString from "magic-string";
@@ -18,22 +18,26 @@ const dry = process.env.DRY_RUN;
 const toolkit = getOctokit(process.env.GITHUB_TOKEN!);
 
 type FileChanges = {
-  filename: string,
-  gitPath: string,
-  ast: Node,
-  text: string,
-  externalLinks: Link[],
-  replacements: string[],
+  filename: string;
+  gitPath: string;
+  ast: Node;
+  text: string;
+  externalLinks: Link[];
+  replacements: string[];
 };
 
-function replace(a: string, b: string, urlReferences: Map<string, FileChanges[]>) {
+function replace(
+  a: string,
+  b: string,
+  urlReferences: Map<string, FileChanges[]>
+) {
   let results = [];
   for (let file of urlReferences.get(a)!) {
     let text = file.text;
     const s = new MagicString(text);
     const remark = Remark().use(frontmatter, ["yaml"]);
     const ast = remark.parse(text);
-    const links  = selectAll("link", ast) as Link[];
+    const links = selectAll("link", ast) as Link[];
     for (let link of links) {
       if (link.url === a) {
         link.url = b;
@@ -49,6 +53,19 @@ function replace(a: string, b: string, urlReferences: Map<string, FileChanges[]>
     results.push(file);
   }
   return results;
+}
+
+async function checkForExisting() {
+  const { data: existingLinkrotIssues } = await toolkit.issues.listForRepo({
+    ...context.repo,
+    labels: "linkrot",
+  });
+  const existingPr = existingLinkrotIssues.find((issue) => issue.pull_request);
+  if (existingPr) {
+    console.log("Skipping linkrot because a pull request already exists");
+    console.log(existingPr.pull_request.url);
+    return true;
+  }
 }
 
 async function suggestChanges(replacements: FileChanges[]) {
@@ -73,7 +90,6 @@ async function suggestChanges(replacements: FileChanges[]) {
     ref: `heads/${default_branch}`,
   });
 
-  // throws HttpError if branch already exists.
   try {
     await toolkit.repos.getBranch({
       ...context.repo,
@@ -119,7 +135,10 @@ async function suggestChanges(replacements: FileChanges[]) {
   }
 }
 
-async function createRedirectCommits(branch: string, replacements: FileChanges[]) {
+async function createRedirectCommits(
+  branch: string,
+  replacements: FileChanges[]
+) {
   for (let file of replacements) {
     const message = file.replacements.join(", ");
     const ref = `refs/heads/${branch}`;
@@ -168,7 +187,7 @@ function gatherFiles() {
     const ast = remark.parse(text);
     const links = selectAll("link", ast) as Link[];
     const externalLinks = links.filter((link) => {
-      const url = link.url as string
+      const url = link.url as string;
       return isAbsoluteUrl(url) && shouldScan(url);
     });
     list.push({
@@ -188,6 +207,10 @@ function gatherFiles() {
   //   owner: context.repo.owner,
   //   repo: context.repo.repo,
   // });
+  //
+  if (checkForExisting()) {
+    return;
+  }
 
   const files = gatherFiles();
 
@@ -212,7 +235,7 @@ function gatherFiles() {
     subset.map((url) => {
       return async () => {
         console.log(`Checking ${url}`);
-        const result= await sniff(url);
+        const result = await sniff(url);
         switch (result.status) {
           case "upgrade":
             for (let file of replace(url, result.to, urlReferences)) {
