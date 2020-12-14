@@ -8,4 +8,4 @@ categories:
 
 ---
 
-[test](http://macwright.com)
+[test](https://macwright.com/)
