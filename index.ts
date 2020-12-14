@@ -55,6 +55,19 @@ function replace(
   return results;
 }
 
+async function checkForExisting() {
+  const { data: existingLinkrotIssues } = await toolkit.issues.listForRepo({
+    ...context.repo,
+    labels: "linkrot",
+  });
+  const existingPr = existingLinkrotIssues.find((issue) => issue.pull_request);
+  if (existingPr) {
+    console.log("Skipping linkrot because a pull request already exists");
+    console.log(existingPr.pull_request.url);
+    return true;
+  }
+}
+
 async function suggestChanges(replacements: FileChanges[]) {
   const branch = `linkrot-${new Date()
     .toLocaleDateString()
@@ -66,17 +79,6 @@ async function suggestChanges(replacements: FileChanges[]) {
     owner: context.repo.owner,
     repo: context.repo.repo,
   });
-
-  const { data: existingLinkrotIssues } = await toolkit.issues.listForRepo({
-    ...context.repo,
-    labels: "linkrot",
-  });
-  const existingPr = existingLinkrotIssues.find((issue) => issue.pull_request);
-  if (existingPr) {
-    console.log("Skipping linkrot because a pull request already exists");
-    console.log(existingPr.pull_request.url);
-    return;
-  }
 
   const {
     data: {
@@ -205,6 +207,10 @@ function gatherFiles() {
   //   owner: context.repo.owner,
   //   repo: context.repo.repo,
   // });
+  //
+  if (checkForExisting()) {
+    return;
+  }
 
   const files = gatherFiles();
 
