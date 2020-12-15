@@ -10,6 +10,7 @@
     "start": "./dist/index.js"
   },
   "dependencies": {
+    "@actions/cache": "^1.0.5",
     "@actions/github": "^4.0.0",
     "@types/mdast": "^3.0.3",
     "@types/unist": "^2.0.3",

@@ -12,10 +12,13 @@ import { selectAll } from "unist-util-select";
 import frontmatter from "remark-frontmatter";
 import MagicString from "magic-string";
 import { getOctokit, context } from "@actions/github";
+import { saveCache, restoreCache } from "@actions/cache";
 import sniff from "./sniff";
 
 const dry = process.env.DRY_RUN;
 const toolkit = getOctokit(process.env.GITHUB_TOKEN!);
+const CACHE_FILE = ".linkrot-cache";
+const DEVELOPMENT = process.platform === "darwin";
 
 type FileChanges = {
   filename: string;
@@ -55,6 +58,10 @@ function replace(
   return results;
 }
 
+/**
+ * If an existing PR has the linkrot tag,
+ * print and return true to exit.
+ */
 async function checkForExisting() {
   const { data: existingLinkrotIssues } = await toolkit.issues.listForRepo({
     ...context.repo,
@@ -63,12 +70,12 @@ async function checkForExisting() {
   const existingPr = existingLinkrotIssues.find((issue) => issue.pull_request);
   if (existingPr) {
     console.log("Skipping linkrot because a pull request already exists");
-    console.log(existingPr.pull_request.url);
-    return true;
+    console.log(existingPr.pull_request.html_url);
+    process.exit();
   }
 }
 
-async function suggestChanges(replacements: FileChanges[]) {
+async function suggestChanges(replacements: FileChanges[], body: string) {
   const branch = `linkrot-${new Date()
     .toLocaleDateString()
     .replace(/\//g, "-")}`;
@@ -123,6 +130,7 @@ async function suggestChanges(replacements: FileChanges[]) {
     } = await toolkit.pulls.create({
       ...context.repo,
       title,
+      body,
       head: branch,
       base: default_branch,
     });
@@ -147,11 +155,6 @@ async function createRedirectCommits(
     if (dry) {
       console.log(`DRY: updating ${file.filename} with message: ${message}`);
     } else {
-      console.log("Finding existing file", {
-        ...context.repo,
-        ref,
-        path,
-      });
       const existing = await toolkit.repos.getContent({
         ...context.repo,
         ref,
@@ -202,22 +205,43 @@ function gatherFiles() {
   return list;
 }
 
+type Cache = {
+  [key: string]: number;
+};
+
+function getCache(): Cache {
+  try {
+    const c = JSON.parse(fs.readFileSync(CACHE_FILE, "utf8"));
+    for (let entry of c) {
+      if (c[entry] < Date.now() - 100 * 60 * 60 * 24 * 14) {
+        delete c[entry];
+      }
+    }
+    return c;
+  } catch (e) {
+    return {};
+  }
+}
+
 (async function () {
-  // const { data: pulls } = await toolkit.pulls.list({
-  //   owner: context.repo.owner,
-  //   repo: context.repo.repo,
-  // });
-  //
-  if (checkForExisting()) {
-    return;
+  await checkForExisting();
+
+  if (!DEVELOPMENT) {
+    await restoreCache([CACHE_FILE], "linkrot");
   }
 
+  const cache = getCache();
   const files = gatherFiles();
-
   const urls = new Set<string>();
   const urlReferences = new Map<string, FileChanges[]>();
+  let cacheSkipped = 0;
+
   for (let file of files) {
     for (let link of file.externalLinks) {
+      if (link.url in cache) {
+        cacheSkipped++;
+        continue;
+      }
       urls.add(link.url);
       urlReferences.set(
         link.url,
@@ -230,14 +254,17 @@ function gatherFiles() {
   console.log(`Checking ${subset.length} URLs`);
 
   let replacements = new Set<FileChanges>();
+  let upgrades = 0;
 
   await pAll(
     subset.map((url) => {
       return async () => {
         console.log(`Checking ${url}`);
         const result = await sniff(url);
+        cache[url] = Date.now();
         switch (result.status) {
           case "upgrade":
+            upgrades++;
             for (let file of replace(url, result.to, urlReferences)) {
               replacements.add(file);
             }
@@ -250,11 +277,24 @@ function gatherFiles() {
     { concurrency: 10 }
   );
 
+  fs.writeFileSync(CACHE_FILE, JSON.stringify(cache));
+
+  if (!DEVELOPMENT) {
+    await saveCache([CACHE_FILE], "linkrot");
+  }
+
   if (replacements.size == 0) {
     return console.log("No changes to suggest");
   } else {
     console.log(`Creating PR with ${replacements.size} changes`);
   }
 
-  await suggestChanges(Array.from(replacements));
+  await suggestChanges(
+    Array.from(replacements),
+    `- ${urls.size.toLocaleString()} URLs detected
+- ${subset.length.toLocaleString()} checked in this run
+- ${Object.keys(cache).length.toLocaleString()} URLs in cache
+- ${cacheSkipped.toLocaleString()} skipped because of the cache
+- ${upgrades.toLocaleString()} upgraded`
+  );
 })();
