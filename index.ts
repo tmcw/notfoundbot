@@ -280,7 +280,11 @@ function getCache(): Cache {
   fs.writeFileSync(CACHE_FILE, JSON.stringify(cache));
 
   if (!DEVELOPMENT) {
-    await saveCache([CACHE_FILE], "linkrot");
+    try {
+      await saveCache([CACHE_FILE], "linkrot");
+    } catch (e) {
+      console.error("ERROR: Failed to save cache!");
+    }
   }
 
   if (replacements.size == 0) {

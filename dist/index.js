@@ -72302,7 +72302,7 @@ function getCache() {
 }
 (function () {
     return __awaiter(this, void 0, void 0, function () {
-        var cache, files, urls, urlReferences, cacheSkipped, _i, files_2, file, _a, _b, link, subset, replacements, upgrades;
+        var cache, files, urls, urlReferences, cacheSkipped, _i, files_2, file, _a, _b, link, subset, replacements, upgrades, e_1;
         var _this = this;
         return __generator(this, function (_c) {
             switch (_c.label) {
@@ -72366,12 +72366,19 @@ function getCache() {
                 case 4:
                     _c.sent();
                     fs_1.default.writeFileSync(CACHE_FILE, JSON.stringify(cache));
-                    if (!!DEVELOPMENT) return [3 /*break*/, 6];
-                    return [4 /*yield*/, cache_1.saveCache([CACHE_FILE], "linkrot")];
+                    if (!!DEVELOPMENT) return [3 /*break*/, 8];
+                    _c.label = 5;
                 case 5:
-                    _c.sent();
-                    _c.label = 6;
+                    _c.trys.push([5, 7, , 8]);
+                    return [4 /*yield*/, cache_1.saveCache([CACHE_FILE], "linkrot")];
                 case 6:
+                    _c.sent();
+                    return [3 /*break*/, 8];
+                case 7:
+                    e_1 = _c.sent();
+                    console.error("ERROR: Failed to save cache!");
+                    return [3 /*break*/, 8];
+                case 8:
                     if (replacements.size == 0) {
                         return [2 /*return*/, console.log("No changes to suggest")];
                     }
@@ -72379,7 +72386,7 @@ function getCache() {
                         console.log("Creating PR with " + replacements.size + " changes");
                     }
                     return [4 /*yield*/, suggestChanges(Array.from(replacements), "- " + urls.size.toLocaleString() + " URLs detected\n- " + subset.length.toLocaleString() + " checked in this run\n- " + Object.keys(cache).length.toLocaleString() + " URLs in cache\n- " + cacheSkipped.toLocaleString() + " skipped because of the cache\n- " + upgrades.toLocaleString() + " upgraded")];
-                case 7:
+                case 9:
                     _c.sent();
                     return [2 /*return*/];
             }
