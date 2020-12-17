@@ -5069,7 +5069,7 @@ exports.PersonalAccessTokenCredentialHandler = PersonalAccessTokenCredentialHand
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const http = __webpack_require__(5876);
+const http = __webpack_require__(8605);
 const https = __webpack_require__(7211);
 const pm = __webpack_require__(8994);
 let tunnel;
@@ -6544,7 +6544,7 @@ function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'defau
 var tslib = __webpack_require__(4080);
 var uuid = __webpack_require__(9342);
 var tough = __webpack_require__(144);
-var http = __webpack_require__(5876);
+var http = __webpack_require__(8605);
 var https = __webpack_require__(7211);
 var node_fetch = _interopDefault(__webpack_require__(1307));
 var abortController = __webpack_require__(8137);
@@ -43993,7 +43993,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 /***/ }),
 
-/***/ 4425:
+/***/ 9417:
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -44058,7 +44058,7 @@ __exportStar(__webpack_require__(6420), exports);
 __exportStar(__webpack_require__(310), exports);
 __exportStar(__webpack_require__(4128), exports);
 __exportStar(__webpack_require__(5367), exports);
-__exportStar(__webpack_require__(4425), exports);
+__exportStar(__webpack_require__(9417), exports);
 __exportStar(__webpack_require__(6942), exports);
 __exportStar(__webpack_require__(9211), exports);
 __exportStar(__webpack_require__(9812), exports);
@@ -47886,7 +47886,7 @@ function create(EConstructor) {
 var CombinedStream = __webpack_require__(7939);
 var util = __webpack_require__(1669);
 var path = __webpack_require__(5622);
-var http = __webpack_require__(5876);
+var http = __webpack_require__(8605);
 var https = __webpack_require__(7211);
 var parseUrl = __webpack_require__(8835).parse;
 var fs = __webpack_require__(5747);
@@ -48623,7 +48623,7 @@ if (typeof Object.create === 'function') {
 
 /***/ }),
 
-/***/ 7763:
+/***/ 5410:
 /***/ ((module) => {
 
 "use strict";
@@ -50238,7 +50238,7 @@ module.exports = MagicString;
 
 /***/ }),
 
-/***/ 6268:
+/***/ 1353:
 /***/ ((module) => {
 
 "use strict";
@@ -51784,7 +51784,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
 var Stream = _interopDefault(__webpack_require__(2413));
-var http = _interopDefault(__webpack_require__(5876));
+var http = _interopDefault(__webpack_require__(8605));
 var Url = _interopDefault(__webpack_require__(8835));
 var https = _interopDefault(__webpack_require__(7211));
 var zlib = _interopDefault(__webpack_require__(8761));
@@ -54726,7 +54726,7 @@ function parse(options) {
 
 /***/ }),
 
-/***/ 4420:
+/***/ 2607:
 /***/ ((module) => {
 
 "use strict";
@@ -54881,13 +54881,13 @@ module.exports = {
   gfm: true,
   commonmark: false,
   pedantic: false,
-  blocks: __webpack_require__(4420)
+  blocks: __webpack_require__(2607)
 }
 
 
 /***/ }),
 
-/***/ 9417:
+/***/ 2576:
 /***/ ((module) => {
 
 "use strict";
@@ -55107,7 +55107,7 @@ function locate(value, fromIndex) {
 
 /***/ }),
 
-/***/ 8819:
+/***/ 7763:
 /***/ ((module) => {
 
 "use strict";
@@ -55356,7 +55356,7 @@ function keys(value) {
 
 
 var xtend = __webpack_require__(2508)
-var escapes = __webpack_require__(6268)
+var escapes = __webpack_require__(1353)
 var defaults = __webpack_require__(2672)
 
 module.exports = setOptions
@@ -55733,7 +55733,7 @@ function blockquote(eat, value, silent) {
 "use strict";
 
 
-var locate = __webpack_require__(9417)
+var locate = __webpack_require__(2576)
 
 module.exports = hardBreak
 hardBreak.locator = locate
@@ -58925,7 +58925,7 @@ var decode = __webpack_require__(2095)
 var decimal = __webpack_require__(9691)
 var alphabetical = __webpack_require__(6166)
 var whitespace = __webpack_require__(974)
-var locate = __webpack_require__(8819)
+var locate = __webpack_require__(7763)
 
 module.exports = url
 url.locator = locate
@@ -59862,7 +59862,7 @@ function stringLength(value) {
 var decimal = __webpack_require__(9691)
 var alphanumeric = __webpack_require__(7765)
 var whitespace = __webpack_require__(974)
-var escapes = __webpack_require__(6268)
+var escapes = __webpack_require__(1353)
 var prefix = __webpack_require__(7099)
 
 module.exports = factory
@@ -63721,7 +63721,7 @@ function charactersToExpression(subset) {
 
 /***/ }),
 
-/***/ 8605:
+/***/ 9610:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
@@ -63771,7 +63771,7 @@ function escape(value) {
 "use strict";
 
 
-var encode = __webpack_require__(8605)
+var encode = __webpack_require__(9610)
 var escape = __webpack_require__(8604)
 
 module.exports = encode
@@ -64368,7 +64368,7 @@ module.exports = __webpack_require__(578);
 
 var net = __webpack_require__(1631);
 var tls = __webpack_require__(4016);
-var http = __webpack_require__(5876);
+var http = __webpack_require__(8605);
 var https = __webpack_require__(7211);
 var events = __webpack_require__(8614);
 var assert = __webpack_require__(2357);
@@ -66975,7 +66975,7 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
-/***/ 6125:
+/***/ 4420:
 /***/ (function(__unused_webpack_module, exports) {
 
 // Generated by CoffeeScript 1.12.7
@@ -66994,7 +66994,7 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
-/***/ 3799:
+/***/ 6268:
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 // Generated by CoffeeScript 1.12.7
@@ -67222,7 +67222,7 @@ function wrappy (fn, cb) {
 
   events = __webpack_require__(8614);
 
-  bom = __webpack_require__(6125);
+  bom = __webpack_require__(4420);
 
   processors = __webpack_require__(4309);
 
@@ -67648,7 +67648,7 @@ function wrappy (fn, cb) {
 
   defaults = __webpack_require__(7341);
 
-  builder = __webpack_require__(3799);
+  builder = __webpack_require__(6268);
 
   parser = __webpack_require__(184);
 
@@ -72097,17 +72097,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 var fs_1 = __importDefault(__webpack_require__(5747));
-var url_1 = __importDefault(__webpack_require__(8835));
-var path_1 = __importDefault(__webpack_require__(5622));
-var is_absolute_url_1 = __importDefault(__webpack_require__(7763));
-var remark_1 = __importDefault(__webpack_require__(7112));
 var p_all_1 = __importDefault(__webpack_require__(4275));
-var unist_util_select_1 = __webpack_require__(7879);
-var remark_frontmatter_1 = __importDefault(__webpack_require__(437));
-var magic_string_1 = __importDefault(__webpack_require__(3330));
 var github_1 = __webpack_require__(1089);
 var cache_1 = __webpack_require__(1135);
 var sniff_1 = __importDefault(__webpack_require__(2886));
+var util_1 = __webpack_require__(7208);
 var dry = process.env.DRY_RUN;
 var toolkit = github_1.getOctokit(process.env.GITHUB_TOKEN);
 var CACHE_FILE = ".linkrot-cache";
@@ -72116,20 +72110,7 @@ function replace(a, b, urlReferences) {
     var results = [];
     for (var _i = 0, _a = urlReferences.get(a); _i < _a.length; _i++) {
         var file = _a[_i];
-        var text = file.text;
-        var s = new magic_string_1.default(text);
-        var remark = remark_1.default().use(remark_frontmatter_1.default, ["yaml"]);
-        var ast = remark.parse(text);
-        var links = unist_util_select_1.selectAll("link", ast);
-        for (var _b = 0, links_1 = links; _b < links_1.length; _b++) {
-            var link = links_1[_b];
-            if (link.url === a) {
-                link.url = b;
-                s.overwrite(link.position.start.offset, link.position.end.offset, remark.stringify(link));
-            }
-        }
-        file.text = s.toString();
-        file.replacements.push(a + " \u2192 " + b);
+        util_1.replaceFile(file, a, b);
         results.push(file);
     }
     return results;
@@ -72229,70 +72210,44 @@ function createRedirectCommits(branch, replacements) {
                     _i = 0, replacements_1 = replacements;
                     _a.label = 1;
                 case 1:
-                    if (!(_i < replacements_1.length)) return [3 /*break*/, 6];
+                    if (!(_i < replacements_1.length)) return [3 /*break*/, 5];
                     file = replacements_1[_i];
                     message = file.replacements.join(", ");
                     ref = "refs/heads/" + branch;
                     path = file.gitPath;
-                    if (!dry) return [3 /*break*/, 2];
-                    console.log("DRY: updating " + file.filename + " with message: " + message);
-                    return [3 /*break*/, 5];
-                case 2: return [4 /*yield*/, toolkit.repos.getContent(__assign(__assign({}, github_1.context.repo), { ref: ref,
-                        path: path }))];
-                case 3:
+                    if (dry) {
+                        return [2 /*return*/, console.log("DRY: updating " + file.filename + " with message: " + message)];
+                    }
+                    return [4 /*yield*/, toolkit.repos.getContent(__assign(__assign({}, github_1.context.repo), { ref: ref,
+                            path: path }))];
+                case 2:
                     existing = _a.sent();
                     return [4 /*yield*/, toolkit.repos.createOrUpdateFileContents(__assign(__assign({}, github_1.context.repo), { path: path,
                             branch: branch, sha: existing.data.sha, message: message, content: Buffer.from(file.text).toString("base64") }))];
-                case 4:
+                case 3:
                     _a.sent();
-                    _a.label = 5;
-                case 5:
+                    _a.label = 4;
+                case 4:
                     _i++;
                     return [3 /*break*/, 1];
-                case 6: return [2 /*return*/];
+                case 5: return [2 /*return*/];
             }
         });
     });
 }
-function shouldScan(url) {
-    var parts = url_1.default.parse(url);
-    return parts.protocol === "http:";
-}
-function gatherFiles() {
-    var BASE = path_1.default.join(process.env.GITHUB_WORKSPACE || __dirname, "_posts");
-    var files = fs_1.default.readdirSync(BASE).filter(function (f) { return f.endsWith(".md"); });
-    var list = [];
-    for (var _i = 0, files_1 = files; _i < files_1.length; _i++) {
-        var f = files_1[_i];
-        // console.log(`Scanning, ${f}`);
-        var filename = path_1.default.join(BASE, f);
-        var text = fs_1.default.readFileSync(filename, "utf8");
-        var remark = remark_1.default().use(remark_frontmatter_1.default, ["yaml"]);
-        var ast = remark.parse(text);
-        var links = unist_util_select_1.selectAll("link", ast);
-        var externalLinks = links.filter(function (link) {
-            var url = link.url;
-            return is_absolute_url_1.default(url) && shouldScan(url);
-        });
-        list.push({
-            filename: filename,
-            gitPath: path_1.default.join("_posts", f),
-            ast: ast,
-            text: text,
-            externalLinks: externalLinks,
-            replacements: [],
-        });
-    }
-    return list;
-}
 function getCache() {
     try {
         var c = JSON.parse(fs_1.default.readFileSync(CACHE_FILE, "utf8"));
+        var flushedEntries = 0;
         for (var _i = 0, c_1 = c; _i < c_1.length; _i++) {
             var entry = c_1[_i];
             if (c[entry] < Date.now() - 100 * 60 * 60 * 24 * 14) {
                 delete c[entry];
+                flushedEntries++;
             }
+        }
+        if (flushedEntries) {
+            console.log("Flushed " + flushedEntries.toLocaleString());
         }
         return c;
     }
@@ -72302,7 +72257,7 @@ function getCache() {
 }
 (function () {
     return __awaiter(this, void 0, void 0, function () {
-        var cache, files, urls, urlReferences, cacheSkipped, _i, files_2, file, _a, _b, link, subset, replacements, upgrades, e_1;
+        var cache, files, urls, urlReferences, cacheSkipped, _i, files_1, file, _a, _b, link, subset, replacements, upgrades, e_1;
         var _this = this;
         return __generator(this, function (_c) {
             switch (_c.label) {
@@ -72316,12 +72271,12 @@ function getCache() {
                     _c.label = 3;
                 case 3:
                     cache = getCache();
-                    files = gatherFiles();
+                    files = util_1.gatherFiles();
                     urls = new Set();
                     urlReferences = new Map();
                     cacheSkipped = 0;
-                    for (_i = 0, files_2 = files; _i < files_2.length; _i++) {
-                        file = files_2[_i];
+                    for (_i = 0, files_1 = files; _i < files_1.length; _i++) {
+                        file = files_1[_i];
                         for (_a = 0, _b = file.externalLinks; _a < _b.length; _a++) {
                             link = _b[_a];
                             if (link.url in cache) {
@@ -72455,7 +72410,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 var url_1 = __importDefault(__webpack_require__(8835));
 var https_1 = __importDefault(__webpack_require__(7211));
-var http_1 = __importDefault(__webpack_require__(5876));
+var http_1 = __importDefault(__webpack_require__(8605));
 var timeout = {
     timeout: 2000,
 };
@@ -72490,10 +72445,7 @@ function getRedirect(url) {
                                 to: httpsEquivalent,
                             }];
                     }
-                    if (httpsRes.statusCode < 300 &&
-                        httpRes.statusCode < 300 &&
-                        httpRes.headers.etag &&
-                        httpRes.headers.etag === httpsRes.headers.etag) {
+                    if (httpsRes.statusCode < 300 && httpRes.statusCode < 300) {
                         return [2 /*return*/, {
                                 status: "upgrade",
                                 to: httpsEquivalent,
@@ -72513,6 +72465,81 @@ function getRedirect(url) {
     });
 }
 exports.default = getRedirect;
+
+
+/***/ }),
+
+/***/ 7208:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.shouldScan = exports.replaceFile = exports.findLinks = exports.gatherFiles = void 0;
+var url_1 = __importDefault(__webpack_require__(8835));
+var fs_1 = __importDefault(__webpack_require__(5747));
+var path_1 = __importDefault(__webpack_require__(5622));
+var magic_string_1 = __importDefault(__webpack_require__(3330));
+var remark_1 = __importDefault(__webpack_require__(7112));
+var unist_util_select_1 = __webpack_require__(7879);
+var remark_frontmatter_1 = __importDefault(__webpack_require__(437));
+var is_absolute_url_1 = __importDefault(__webpack_require__(5410));
+function getRemark() {
+    return remark_1.default().use(remark_frontmatter_1.default, ["yaml"]);
+}
+function gatherFiles() {
+    var BASE = path_1.default.join(process.env.GITHUB_WORKSPACE || __dirname, "_posts");
+    return fs_1.default.readdirSync(BASE)
+        .filter(function (f) { return f.endsWith(".md"); })
+        .map(findLinks);
+}
+exports.gatherFiles = gatherFiles;
+function findLinks(basename) {
+    var BASE = path_1.default.join(process.env.GITHUB_WORKSPACE || __dirname, "_posts");
+    var filename = path_1.default.join(BASE, basename);
+    var text = fs_1.default.readFileSync(filename, "utf8");
+    var remark = getRemark();
+    var ast = remark.parse(text);
+    var links = unist_util_select_1.selectAll("link", ast);
+    var externalLinks = links.filter(function (link) {
+        var url = link.url;
+        return is_absolute_url_1.default(url) && shouldScan(url);
+    });
+    return {
+        filename: filename,
+        gitPath: path_1.default.join("_posts", basename),
+        ast: ast,
+        text: text,
+        externalLinks: externalLinks,
+        replacements: [],
+    };
+}
+exports.findLinks = findLinks;
+function replaceFile(file, a, b) {
+    var text = file.text;
+    var s = new magic_string_1.default(text);
+    var remark = getRemark();
+    var ast = remark.parse(text);
+    var links = unist_util_select_1.selectAll("link", ast);
+    for (var _i = 0, links_1 = links; _i < links_1.length; _i++) {
+        var link = links_1[_i];
+        if (link.url === a) {
+            link.url = b;
+            s.overwrite(link.position.start.offset, link.position.end.offset, remark.stringify(link));
+        }
+    }
+    file.text = s.toString();
+    file.replacements.push(a + " \u2192 " + b);
+}
+exports.replaceFile = replaceFile;
+function shouldScan(url) {
+    var parts = url_1.default.parse(url);
+    return parts.protocol === "http:";
+}
+exports.shouldScan = shouldScan;
 
 
 /***/ }),
@@ -72629,7 +72656,7 @@ module.exports = require("fs");;
 
 /***/ }),
 
-/***/ 5876:
+/***/ 8605:
 /***/ ((module) => {
 
 "use strict";

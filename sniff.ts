@@ -48,12 +48,7 @@ export default async function getRedirect(url: string): Promise<Result> {
       };
     }
 
-    if (
-      httpsRes.statusCode! < 300 &&
-      httpRes.statusCode! < 300 &&
-      httpRes.headers.etag &&
-      httpRes.headers.etag === httpsRes.headers.etag
-    ) {
+    if (httpsRes.statusCode! < 300 && httpRes.statusCode! < 300) {
       return {
         status: "upgrade",
         to: httpsEquivalent,

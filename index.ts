@@ -1,33 +1,17 @@
 #!/usr/bin/env node
 
 import fs from "fs";
-import Url from "url";
-import Path from "path";
-import isAbsoluteUrl from "is-absolute-url";
-import Remark from "remark";
 import pAll from "p-all";
-import type { Link } from "mdast";
-import type { Node } from "unist";
-import { selectAll } from "unist-util-select";
-import frontmatter from "remark-frontmatter";
-import MagicString from "magic-string";
 import { getOctokit, context } from "@actions/github";
 import { saveCache, restoreCache } from "@actions/cache";
 import sniff from "./sniff";
+import { FileChanges, Cache } from "./types";
+import { replaceFile, gatherFiles } from "./util";
 
 const dry = process.env.DRY_RUN;
 const toolkit = getOctokit(process.env.GITHUB_TOKEN!);
 const CACHE_FILE = ".linkrot-cache";
 const DEVELOPMENT = process.platform === "darwin";
-
-type FileChanges = {
-  filename: string;
-  gitPath: string;
-  ast: Node;
-  text: string;
-  externalLinks: Link[];
-  replacements: string[];
-};
 
 function replace(
   a: string,
@@ -36,23 +20,7 @@ function replace(
 ) {
   let results = [];
   for (let file of urlReferences.get(a)!) {
-    let text = file.text;
-    const s = new MagicString(text);
-    const remark = Remark().use(frontmatter, ["yaml"]);
-    const ast = remark.parse(text);
-    const links = selectAll("link", ast) as Link[];
-    for (let link of links) {
-      if (link.url === a) {
-        link.url = b;
-        s.overwrite(
-          link.position!.start.offset!,
-          link.position!.end.offset!,
-          remark.stringify(link)
-        );
-      }
-    }
-    file.text = s.toString();
-    file.replacements.push(`${a} → ${b}`);
+    replaceFile(file, a, b);
     results.push(file);
   }
   return results;
@@ -153,69 +121,40 @@ async function createRedirectCommits(
     const path = file.gitPath;
 
     if (dry) {
-      console.log(`DRY: updating ${file.filename} with message: ${message}`);
-    } else {
-      const existing = await toolkit.repos.getContent({
-        ...context.repo,
-        ref,
-        path,
-      });
-
-      await toolkit.repos.createOrUpdateFileContents({
-        ...context.repo,
-        path,
-        branch,
-        sha: existing.data.sha,
-        message,
-        content: Buffer.from(file.text).toString("base64"),
-      });
+      return console.log(
+        `DRY: updating ${file.filename} with message: ${message}`
+      );
     }
-  }
-}
 
-function shouldScan(url: string) {
-  const parts = Url.parse(url);
-  return parts.protocol === "http:";
-}
-
-function gatherFiles() {
-  const BASE = Path.join(process.env.GITHUB_WORKSPACE || __dirname, "_posts");
-  const files = fs.readdirSync(BASE).filter((f) => f.endsWith(".md"));
-  const list: FileChanges[] = [];
-  for (let f of files) {
-    // console.log(`Scanning, ${f}`);
-    const filename = Path.join(BASE, f);
-    const text = fs.readFileSync(filename, "utf8");
-    const remark = Remark().use(frontmatter, ["yaml"]);
-    const ast = remark.parse(text);
-    const links = selectAll("link", ast) as Link[];
-    const externalLinks = links.filter((link) => {
-      const url = link.url as string;
-      return isAbsoluteUrl(url) && shouldScan(url);
+    const existing = await toolkit.repos.getContent({
+      ...context.repo,
+      ref,
+      path,
     });
-    list.push({
-      filename,
-      gitPath: Path.join("_posts", f),
-      ast,
-      text,
-      externalLinks,
-      replacements: [],
+
+    await toolkit.repos.createOrUpdateFileContents({
+      ...context.repo,
+      path,
+      branch,
+      sha: existing.data.sha,
+      message,
+      content: Buffer.from(file.text).toString("base64"),
     });
   }
-  return list;
 }
-
-type Cache = {
-  [key: string]: number;
-};
 
 function getCache(): Cache {
   try {
     const c = JSON.parse(fs.readFileSync(CACHE_FILE, "utf8"));
+    let flushedEntries = 0;
     for (let entry of c) {
       if (c[entry] < Date.now() - 100 * 60 * 60 * 24 * 14) {
         delete c[entry];
+        flushedEntries++;
       }
+    }
+    if (flushedEntries) {
+      console.log(`Flushed ${flushedEntries.toLocaleString()}`);
     }
     return c;
   } catch (e) {
