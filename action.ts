@@ -29,6 +29,7 @@ function message(msg: string) {
       urlsScanned: 0,
       protocolSkipped: 0,
       relativeSkipped: 0,
+      archived: 0,
     },
   };
   const cacheFilePath = ".linkrot-cache";

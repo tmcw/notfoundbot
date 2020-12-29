@@ -8,6 +8,10 @@ const timeout = {
   timeout: 2000,
 };
 
+// In an ideal world, we would use HEAD requests, but
+// many sites don't handle them well or at all, so instead
+// we issue GET requests but avoid reading their responses,
+// and only harvesting the status code.
 function cancelGet(
   url: string,
   lib: typeof Http | typeof Https
@@ -34,25 +38,19 @@ export async function checkGroups(ctx: LContext, groups: LURLGroup[]) {
   );
 }
 
-export async function sniff(url: string): Promise<LStatus> {
-  const httpsEquivalent = Url.format({
+function predictedHttps(url: string) {
+  return Url.format({
     ...Url.parse(url),
     protocol: "https:",
   });
+}
+
+async function sniffHttp(url: string): Promise<LStatus> {
+  const httpsEquivalent = predictedHttps(url);
   try {
-    const [httpRes, httpsRes] = await Promise.all([
-      cancelGet(url, Http),
-      cancelGet(httpsEquivalent, Https),
-    ]);
+    const httpsRes = await cancelGet(httpsEquivalent, Https);
 
-    if (httpRes.headers.location === httpsEquivalent) {
-      return {
-        status: "upgrade",
-        to: httpsEquivalent,
-      };
-    }
-
-    if (httpsRes.statusCode! < 300 && httpRes.statusCode! < 300) {
+    if (httpsRes.statusCode! < 300) {
       return {
         status: "upgrade",
         to: httpsEquivalent,
@@ -67,4 +65,36 @@ export async function sniff(url: string): Promise<LStatus> {
       status: "error",
     };
   }
+}
+
+export async function sniffHttps(url: string): Promise<LStatus> {
+  try {
+    const httpsRes = await cancelGet(url, Https);
+
+    if (httpsRes.statusCode! >= 400) {
+      throw new Error("Status code >= 400");
+    }
+
+    return {
+      status: "ok",
+    };
+  } catch (err) {
+    return {
+      status: "error",
+    };
+  }
+}
+
+export async function sniff(url: string): Promise<LStatus> {
+  const parsed = Url.parse(url);
+
+  const { protocol } = parsed;
+
+  if (protocol === "http:") {
+    return await sniffHttp(url);
+  } else if (protocol === "https:") {
+    return await sniffHttps(url);
+  }
+
+  throw new Error("Unsupported protcol");
 }

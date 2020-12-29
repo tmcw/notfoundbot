@@ -13,7 +13,8 @@ import { testContext } from "./helpers";
 
 test("shouldScan", async (t) => {
   t.equal(shouldScan("data://foo"), false);
-  t.equal(shouldScan("https://macwright.com"), false);
+  t.equal(shouldScan("mailto:foo@bar.com"), false);
+  t.equal(shouldScan("https://macwright.com"), true);
   t.equal(shouldScan("http://macwright.com"), true);
 });
 

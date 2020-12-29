@@ -31,6 +31,7 @@ export function testContext(): LContext {
       urlsDetected: 0,
       protocolSkipped: 0,
       relativeSkipped: 0,
+      archived: 0,
     },
   };
 }

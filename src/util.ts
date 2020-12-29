@@ -48,7 +48,7 @@ export function gatherFiles(ctx: LContext) {
 
 export function shouldScan(url: string) {
   const parts = Url.parse(url);
-  return parts.protocol === "http:";
+  return parts.protocol === "http:" || parts.protocol === "https:";
 }
 
 export function skipGroups(ctx: LContext, groups: LURLGroup[]) {
@@ -87,7 +87,7 @@ export function toLFile(filename: string, gitPath: string): LFile {
   };
 }
 
-export function replaceFile(file: LFile, a: string, b: string) {
+export function replaceLinks(file: LFile, a: string, b: string) {
   const { ast, magicString } = file;
   const links = selectAll("link", ast) as Link[];
   for (let link of links) {
@@ -108,9 +108,15 @@ export function updateFiles(ctx: LContext, groups: LURLGroup[]): LFile[] {
   for (let group of groups) {
     if (group.status?.status == "upgrade") {
       for (let file of group.files) {
-        replaceFile(file, group.url, group.status.to);
+        replaceLinks(file, group.url, group.status.to);
         updatedFiles.add(file);
         ctx.stats.upgradedSSL++;
+      }
+    } else if (group.status?.status == "archive") {
+      for (let file of group.files) {
+        replaceLinks(file, group.url, group.status.to);
+        updatedFiles.add(file);
+        ctx.stats.archived++;
       }
     }
   }

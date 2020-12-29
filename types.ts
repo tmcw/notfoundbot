@@ -17,6 +17,10 @@ export type LStatus =
       to: string;
     }
   | {
+      status: "archive";
+      to: string;
+    }
+  | {
       status: "error";
     }
   | { status: "ok" };
@@ -46,7 +50,27 @@ export type LContext = {
     urlsDetected: number;
     protocolSkipped: number;
     relativeSkipped: number;
+    archived: number;
   };
 };
 
 export class LError extends Error {}
+
+export type IAResults = {
+  results: IAResult[];
+};
+
+type IASnapshot = {
+  closest: {
+    url: string;
+    status: string;
+    timestamp: string;
+    available: boolean;
+  };
+};
+
+type IAResult = {
+  url: string;
+  tag: string;
+  archived_snapshots?: IASnapshot;
+};
