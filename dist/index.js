@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 module.exports =
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
@@ -5069,7 +5068,7 @@ exports.PersonalAccessTokenCredentialHandler = PersonalAccessTokenCredentialHand
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const http = __webpack_require__(8605);
+const http = __webpack_require__(5876);
 const https = __webpack_require__(7211);
 const pm = __webpack_require__(8994);
 let tunnel;
@@ -6544,7 +6543,7 @@ function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'defau
 var tslib = __webpack_require__(4080);
 var uuid = __webpack_require__(9342);
 var tough = __webpack_require__(144);
-var http = __webpack_require__(8605);
+var http = __webpack_require__(5876);
 var https = __webpack_require__(7211);
 var node_fetch = _interopDefault(__webpack_require__(1307));
 var abortController = __webpack_require__(8137);
@@ -43993,7 +43992,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 /***/ }),
 
-/***/ 9417:
+/***/ 4425:
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -44058,13 +44057,13 @@ __exportStar(__webpack_require__(6420), exports);
 __exportStar(__webpack_require__(310), exports);
 __exportStar(__webpack_require__(4128), exports);
 __exportStar(__webpack_require__(5367), exports);
-__exportStar(__webpack_require__(9417), exports);
+__exportStar(__webpack_require__(4425), exports);
 __exportStar(__webpack_require__(6942), exports);
 __exportStar(__webpack_require__(9211), exports);
 __exportStar(__webpack_require__(9812), exports);
 __exportStar(__webpack_require__(2604), exports);
 __exportStar(__webpack_require__(3116), exports);
-__exportStar(__webpack_require__(7328), exports);
+__exportStar(__webpack_require__(5110), exports);
 __exportStar(__webpack_require__(2203), exports);
 __exportStar(__webpack_require__(3936), exports);
 __exportStar(__webpack_require__(1874), exports);
@@ -44244,7 +44243,7 @@ var ValueType;
 
 /***/ }),
 
-/***/ 7328:
+/***/ 5110:
 /***/ (function(__unused_webpack_module, exports) {
 
 "use strict";
@@ -44473,7 +44472,7 @@ exports.NOOP_BATCH_OBSERVER_METRIC = new NoopBatchObserverMetric();
  */
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.NOOP_METER_PROVIDER = exports.NoopMeterProvider = void 0;
-var NoopMeter_1 = __webpack_require__(7328);
+var NoopMeter_1 = __webpack_require__(5110);
 /**
  * An implementation of the {@link MeterProvider} which returns an impotent Meter
  * for all calls to `getMeter`
@@ -47886,7 +47885,7 @@ function create(EConstructor) {
 var CombinedStream = __webpack_require__(7939);
 var util = __webpack_require__(1669);
 var path = __webpack_require__(5622);
-var http = __webpack_require__(8605);
+var http = __webpack_require__(5876);
 var https = __webpack_require__(7211);
 var parseUrl = __webpack_require__(8835).parse;
 var fs = __webpack_require__(5747);
@@ -48530,6 +48529,1926 @@ module.exports = function(dst, src) {
 
 /***/ }),
 
+/***/ 1881:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+module.exports = realpath
+realpath.realpath = realpath
+realpath.sync = realpathSync
+realpath.realpathSync = realpathSync
+realpath.monkeypatch = monkeypatch
+realpath.unmonkeypatch = unmonkeypatch
+
+var fs = __webpack_require__(5747)
+var origRealpath = fs.realpath
+var origRealpathSync = fs.realpathSync
+
+var version = process.version
+var ok = /^v[0-5]\./.test(version)
+var old = __webpack_require__(7328)
+
+function newError (er) {
+  return er && er.syscall === 'realpath' && (
+    er.code === 'ELOOP' ||
+    er.code === 'ENOMEM' ||
+    er.code === 'ENAMETOOLONG'
+  )
+}
+
+function realpath (p, cache, cb) {
+  if (ok) {
+    return origRealpath(p, cache, cb)
+  }
+
+  if (typeof cache === 'function') {
+    cb = cache
+    cache = null
+  }
+  origRealpath(p, cache, function (er, result) {
+    if (newError(er)) {
+      old.realpath(p, cache, cb)
+    } else {
+      cb(er, result)
+    }
+  })
+}
+
+function realpathSync (p, cache) {
+  if (ok) {
+    return origRealpathSync(p, cache)
+  }
+
+  try {
+    return origRealpathSync(p, cache)
+  } catch (er) {
+    if (newError(er)) {
+      return old.realpathSync(p, cache)
+    } else {
+      throw er
+    }
+  }
+}
+
+function monkeypatch () {
+  fs.realpath = realpath
+  fs.realpathSync = realpathSync
+}
+
+function unmonkeypatch () {
+  fs.realpath = origRealpath
+  fs.realpathSync = origRealpathSync
+}
+
+
+/***/ }),
+
+/***/ 7328:
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+// Copyright Joyent, Inc. and other Node contributors.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to permit
+// persons to whom the Software is furnished to do so, subject to the
+// following conditions:
+//
+// The above copyright notice and this permission notice shall be included
+// in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+// USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+var pathModule = __webpack_require__(5622);
+var isWindows = process.platform === 'win32';
+var fs = __webpack_require__(5747);
+
+// JavaScript implementation of realpath, ported from node pre-v6
+
+var DEBUG = process.env.NODE_DEBUG && /fs/.test(process.env.NODE_DEBUG);
+
+function rethrow() {
+  // Only enable in debug mode. A backtrace uses ~1000 bytes of heap space and
+  // is fairly slow to generate.
+  var callback;
+  if (DEBUG) {
+    var backtrace = new Error;
+    callback = debugCallback;
+  } else
+    callback = missingCallback;
+
+  return callback;
+
+  function debugCallback(err) {
+    if (err) {
+      backtrace.message = err.message;
+      err = backtrace;
+      missingCallback(err);
+    }
+  }
+
+  function missingCallback(err) {
+    if (err) {
+      if (process.throwDeprecation)
+        throw err;  // Forgot a callback but don't know where? Use NODE_DEBUG=fs
+      else if (!process.noDeprecation) {
+        var msg = 'fs: missing callback ' + (err.stack || err.message);
+        if (process.traceDeprecation)
+          console.trace(msg);
+        else
+          console.error(msg);
+      }
+    }
+  }
+}
+
+function maybeCallback(cb) {
+  return typeof cb === 'function' ? cb : rethrow();
+}
+
+var normalize = pathModule.normalize;
+
+// Regexp that finds the next partion of a (partial) path
+// result is [base_with_slash, base], e.g. ['somedir/', 'somedir']
+if (isWindows) {
+  var nextPartRe = /(.*?)(?:[\/\\]+|$)/g;
+} else {
+  var nextPartRe = /(.*?)(?:[\/]+|$)/g;
+}
+
+// Regex to find the device root, including trailing slash. E.g. 'c:\\'.
+if (isWindows) {
+  var splitRootRe = /^(?:[a-zA-Z]:|[\\\/]{2}[^\\\/]+[\\\/][^\\\/]+)?[\\\/]*/;
+} else {
+  var splitRootRe = /^[\/]*/;
+}
+
+exports.realpathSync = function realpathSync(p, cache) {
+  // make p is absolute
+  p = pathModule.resolve(p);
+
+  if (cache && Object.prototype.hasOwnProperty.call(cache, p)) {
+    return cache[p];
+  }
+
+  var original = p,
+      seenLinks = {},
+      knownHard = {};
+
+  // current character position in p
+  var pos;
+  // the partial path so far, including a trailing slash if any
+  var current;
+  // the partial path without a trailing slash (except when pointing at a root)
+  var base;
+  // the partial path scanned in the previous round, with slash
+  var previous;
+
+  start();
+
+  function start() {
+    // Skip over roots
+    var m = splitRootRe.exec(p);
+    pos = m[0].length;
+    current = m[0];
+    base = m[0];
+    previous = '';
+
+    // On windows, check that the root exists. On unix there is no need.
+    if (isWindows && !knownHard[base]) {
+      fs.lstatSync(base);
+      knownHard[base] = true;
+    }
+  }
+
+  // walk down the path, swapping out linked pathparts for their real
+  // values
+  // NB: p.length changes.
+  while (pos < p.length) {
+    // find the next part
+    nextPartRe.lastIndex = pos;
+    var result = nextPartRe.exec(p);
+    previous = current;
+    current += result[0];
+    base = previous + result[1];
+    pos = nextPartRe.lastIndex;
+
+    // continue if not a symlink
+    if (knownHard[base] || (cache && cache[base] === base)) {
+      continue;
+    }
+
+    var resolvedLink;
+    if (cache && Object.prototype.hasOwnProperty.call(cache, base)) {
+      // some known symbolic link.  no need to stat again.
+      resolvedLink = cache[base];
+    } else {
+      var stat = fs.lstatSync(base);
+      if (!stat.isSymbolicLink()) {
+        knownHard[base] = true;
+        if (cache) cache[base] = base;
+        continue;
+      }
+
+      // read the link if it wasn't read before
+      // dev/ino always return 0 on windows, so skip the check.
+      var linkTarget = null;
+      if (!isWindows) {
+        var id = stat.dev.toString(32) + ':' + stat.ino.toString(32);
+        if (seenLinks.hasOwnProperty(id)) {
+          linkTarget = seenLinks[id];
+        }
+      }
+      if (linkTarget === null) {
+        fs.statSync(base);
+        linkTarget = fs.readlinkSync(base);
+      }
+      resolvedLink = pathModule.resolve(previous, linkTarget);
+      // track this, if given a cache.
+      if (cache) cache[base] = resolvedLink;
+      if (!isWindows) seenLinks[id] = linkTarget;
+    }
+
+    // resolve the link, then start over
+    p = pathModule.resolve(resolvedLink, p.slice(pos));
+    start();
+  }
+
+  if (cache) cache[original] = p;
+
+  return p;
+};
+
+
+exports.realpath = function realpath(p, cache, cb) {
+  if (typeof cb !== 'function') {
+    cb = maybeCallback(cache);
+    cache = null;
+  }
+
+  // make p is absolute
+  p = pathModule.resolve(p);
+
+  if (cache && Object.prototype.hasOwnProperty.call(cache, p)) {
+    return process.nextTick(cb.bind(null, null, cache[p]));
+  }
+
+  var original = p,
+      seenLinks = {},
+      knownHard = {};
+
+  // current character position in p
+  var pos;
+  // the partial path so far, including a trailing slash if any
+  var current;
+  // the partial path without a trailing slash (except when pointing at a root)
+  var base;
+  // the partial path scanned in the previous round, with slash
+  var previous;
+
+  start();
+
+  function start() {
+    // Skip over roots
+    var m = splitRootRe.exec(p);
+    pos = m[0].length;
+    current = m[0];
+    base = m[0];
+    previous = '';
+
+    // On windows, check that the root exists. On unix there is no need.
+    if (isWindows && !knownHard[base]) {
+      fs.lstat(base, function(err) {
+        if (err) return cb(err);
+        knownHard[base] = true;
+        LOOP();
+      });
+    } else {
+      process.nextTick(LOOP);
+    }
+  }
+
+  // walk down the path, swapping out linked pathparts for their real
+  // values
+  function LOOP() {
+    // stop if scanned past end of path
+    if (pos >= p.length) {
+      if (cache) cache[original] = p;
+      return cb(null, p);
+    }
+
+    // find the next part
+    nextPartRe.lastIndex = pos;
+    var result = nextPartRe.exec(p);
+    previous = current;
+    current += result[0];
+    base = previous + result[1];
+    pos = nextPartRe.lastIndex;
+
+    // continue if not a symlink
+    if (knownHard[base] || (cache && cache[base] === base)) {
+      return process.nextTick(LOOP);
+    }
+
+    if (cache && Object.prototype.hasOwnProperty.call(cache, base)) {
+      // known symbolic link.  no need to stat again.
+      return gotResolvedLink(cache[base]);
+    }
+
+    return fs.lstat(base, gotStat);
+  }
+
+  function gotStat(err, stat) {
+    if (err) return cb(err);
+
+    // if not a symlink, skip to the next path part
+    if (!stat.isSymbolicLink()) {
+      knownHard[base] = true;
+      if (cache) cache[base] = base;
+      return process.nextTick(LOOP);
+    }
+
+    // stat & read the link if not read before
+    // call gotTarget as soon as the link target is known
+    // dev/ino always return 0 on windows, so skip the check.
+    if (!isWindows) {
+      var id = stat.dev.toString(32) + ':' + stat.ino.toString(32);
+      if (seenLinks.hasOwnProperty(id)) {
+        return gotTarget(null, seenLinks[id], base);
+      }
+    }
+    fs.stat(base, function(err) {
+      if (err) return cb(err);
+
+      fs.readlink(base, function(err, target) {
+        if (!isWindows) seenLinks[id] = target;
+        gotTarget(err, target);
+      });
+    });
+  }
+
+  function gotTarget(err, target, base) {
+    if (err) return cb(err);
+
+    var resolvedLink = pathModule.resolve(previous, target);
+    if (cache) cache[base] = resolvedLink;
+    gotResolvedLink(resolvedLink);
+  }
+
+  function gotResolvedLink(resolvedLink) {
+    // resolve the link, then start over
+    p = pathModule.resolve(resolvedLink, p.slice(pos));
+    start();
+  }
+};
+
+
+/***/ }),
+
+/***/ 8978:
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+exports.alphasort = alphasort
+exports.alphasorti = alphasorti
+exports.setopts = setopts
+exports.ownProp = ownProp
+exports.makeAbs = makeAbs
+exports.finish = finish
+exports.mark = mark
+exports.isIgnored = isIgnored
+exports.childrenIgnored = childrenIgnored
+
+function ownProp (obj, field) {
+  return Object.prototype.hasOwnProperty.call(obj, field)
+}
+
+var path = __webpack_require__(5622)
+var minimatch = __webpack_require__(1486)
+var isAbsolute = __webpack_require__(1237)
+var Minimatch = minimatch.Minimatch
+
+function alphasorti (a, b) {
+  return a.toLowerCase().localeCompare(b.toLowerCase())
+}
+
+function alphasort (a, b) {
+  return a.localeCompare(b)
+}
+
+function setupIgnores (self, options) {
+  self.ignore = options.ignore || []
+
+  if (!Array.isArray(self.ignore))
+    self.ignore = [self.ignore]
+
+  if (self.ignore.length) {
+    self.ignore = self.ignore.map(ignoreMap)
+  }
+}
+
+// ignore patterns are always in dot:true mode.
+function ignoreMap (pattern) {
+  var gmatcher = null
+  if (pattern.slice(-3) === '/**') {
+    var gpattern = pattern.replace(/(\/\*\*)+$/, '')
+    gmatcher = new Minimatch(gpattern, { dot: true })
+  }
+
+  return {
+    matcher: new Minimatch(pattern, { dot: true }),
+    gmatcher: gmatcher
+  }
+}
+
+function setopts (self, pattern, options) {
+  if (!options)
+    options = {}
+
+  // base-matching: just use globstar for that.
+  if (options.matchBase && -1 === pattern.indexOf("/")) {
+    if (options.noglobstar) {
+      throw new Error("base matching requires globstar")
+    }
+    pattern = "**/" + pattern
+  }
+
+  self.silent = !!options.silent
+  self.pattern = pattern
+  self.strict = options.strict !== false
+  self.realpath = !!options.realpath
+  self.realpathCache = options.realpathCache || Object.create(null)
+  self.follow = !!options.follow
+  self.dot = !!options.dot
+  self.mark = !!options.mark
+  self.nodir = !!options.nodir
+  if (self.nodir)
+    self.mark = true
+  self.sync = !!options.sync
+  self.nounique = !!options.nounique
+  self.nonull = !!options.nonull
+  self.nosort = !!options.nosort
+  self.nocase = !!options.nocase
+  self.stat = !!options.stat
+  self.noprocess = !!options.noprocess
+  self.absolute = !!options.absolute
+
+  self.maxLength = options.maxLength || Infinity
+  self.cache = options.cache || Object.create(null)
+  self.statCache = options.statCache || Object.create(null)
+  self.symlinks = options.symlinks || Object.create(null)
+
+  setupIgnores(self, options)
+
+  self.changedCwd = false
+  var cwd = process.cwd()
+  if (!ownProp(options, "cwd"))
+    self.cwd = cwd
+  else {
+    self.cwd = path.resolve(options.cwd)
+    self.changedCwd = self.cwd !== cwd
+  }
+
+  self.root = options.root || path.resolve(self.cwd, "/")
+  self.root = path.resolve(self.root)
+  if (process.platform === "win32")
+    self.root = self.root.replace(/\\/g, "/")
+
+  // TODO: is an absolute `cwd` supposed to be resolved against `root`?
+  // e.g. { cwd: '/test', root: __dirname } === path.join(__dirname, '/test')
+  self.cwdAbs = isAbsolute(self.cwd) ? self.cwd : makeAbs(self, self.cwd)
+  if (process.platform === "win32")
+    self.cwdAbs = self.cwdAbs.replace(/\\/g, "/")
+  self.nomount = !!options.nomount
+
+  // disable comments and negation in Minimatch.
+  // Note that they are not supported in Glob itself anyway.
+  options.nonegate = true
+  options.nocomment = true
+
+  self.minimatch = new Minimatch(pattern, options)
+  self.options = self.minimatch.options
+}
+
+function finish (self) {
+  var nou = self.nounique
+  var all = nou ? [] : Object.create(null)
+
+  for (var i = 0, l = self.matches.length; i < l; i ++) {
+    var matches = self.matches[i]
+    if (!matches || Object.keys(matches).length === 0) {
+      if (self.nonull) {
+        // do like the shell, and spit out the literal glob
+        var literal = self.minimatch.globSet[i]
+        if (nou)
+          all.push(literal)
+        else
+          all[literal] = true
+      }
+    } else {
+      // had matches
+      var m = Object.keys(matches)
+      if (nou)
+        all.push.apply(all, m)
+      else
+        m.forEach(function (m) {
+          all[m] = true
+        })
+    }
+  }
+
+  if (!nou)
+    all = Object.keys(all)
+
+  if (!self.nosort)
+    all = all.sort(self.nocase ? alphasorti : alphasort)
+
+  // at *some* point we statted all of these
+  if (self.mark) {
+    for (var i = 0; i < all.length; i++) {
+      all[i] = self._mark(all[i])
+    }
+    if (self.nodir) {
+      all = all.filter(function (e) {
+        var notDir = !(/\/$/.test(e))
+        var c = self.cache[e] || self.cache[makeAbs(self, e)]
+        if (notDir && c)
+          notDir = c !== 'DIR' && !Array.isArray(c)
+        return notDir
+      })
+    }
+  }
+
+  if (self.ignore.length)
+    all = all.filter(function(m) {
+      return !isIgnored(self, m)
+    })
+
+  self.found = all
+}
+
+function mark (self, p) {
+  var abs = makeAbs(self, p)
+  var c = self.cache[abs]
+  var m = p
+  if (c) {
+    var isDir = c === 'DIR' || Array.isArray(c)
+    var slash = p.slice(-1) === '/'
+
+    if (isDir && !slash)
+      m += '/'
+    else if (!isDir && slash)
+      m = m.slice(0, -1)
+
+    if (m !== p) {
+      var mabs = makeAbs(self, m)
+      self.statCache[mabs] = self.statCache[abs]
+      self.cache[mabs] = self.cache[abs]
+    }
+  }
+
+  return m
+}
+
+// lotta situps...
+function makeAbs (self, f) {
+  var abs = f
+  if (f.charAt(0) === '/') {
+    abs = path.join(self.root, f)
+  } else if (isAbsolute(f) || f === '') {
+    abs = f
+  } else if (self.changedCwd) {
+    abs = path.resolve(self.cwd, f)
+  } else {
+    abs = path.resolve(f)
+  }
+
+  if (process.platform === 'win32')
+    abs = abs.replace(/\\/g, '/')
+
+  return abs
+}
+
+
+// Return true, if pattern ends with globstar '**', for the accompanying parent directory.
+// Ex:- If node_modules/** is the pattern, add 'node_modules' to ignore list along with it's contents
+function isIgnored (self, path) {
+  if (!self.ignore.length)
+    return false
+
+  return self.ignore.some(function(item) {
+    return item.matcher.match(path) || !!(item.gmatcher && item.gmatcher.match(path))
+  })
+}
+
+function childrenIgnored (self, path) {
+  if (!self.ignore.length)
+    return false
+
+  return self.ignore.some(function(item) {
+    return !!(item.gmatcher && item.gmatcher.match(path))
+  })
+}
+
+
+/***/ }),
+
+/***/ 6691:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+// Approach:
+//
+// 1. Get the minimatch set
+// 2. For each pattern in the set, PROCESS(pattern, false)
+// 3. Store matches per-set, then uniq them
+//
+// PROCESS(pattern, inGlobStar)
+// Get the first [n] items from pattern that are all strings
+// Join these together.  This is PREFIX.
+//   If there is no more remaining, then stat(PREFIX) and
+//   add to matches if it succeeds.  END.
+//
+// If inGlobStar and PREFIX is symlink and points to dir
+//   set ENTRIES = []
+// else readdir(PREFIX) as ENTRIES
+//   If fail, END
+//
+// with ENTRIES
+//   If pattern[n] is GLOBSTAR
+//     // handle the case where the globstar match is empty
+//     // by pruning it out, and testing the resulting pattern
+//     PROCESS(pattern[0..n] + pattern[n+1 .. $], false)
+//     // handle other cases.
+//     for ENTRY in ENTRIES (not dotfiles)
+//       // attach globstar + tail onto the entry
+//       // Mark that this entry is a globstar match
+//       PROCESS(pattern[0..n] + ENTRY + pattern[n .. $], true)
+//
+//   else // not globstar
+//     for ENTRY in ENTRIES (not dotfiles, unless pattern[n] is dot)
+//       Test ENTRY against pattern[n]
+//       If fails, continue
+//       If passes, PROCESS(pattern[0..n] + item + pattern[n+1 .. $])
+//
+// Caveat:
+//   Cache all stats and readdirs results to minimize syscall.  Since all
+//   we ever care about is existence and directory-ness, we can just keep
+//   `true` for files, and [children,...] for directories, or `false` for
+//   things that don't exist.
+
+module.exports = glob
+
+var fs = __webpack_require__(5747)
+var rp = __webpack_require__(1881)
+var minimatch = __webpack_require__(1486)
+var Minimatch = minimatch.Minimatch
+var inherits = __webpack_require__(5635)
+var EE = __webpack_require__(8614).EventEmitter
+var path = __webpack_require__(5622)
+var assert = __webpack_require__(2357)
+var isAbsolute = __webpack_require__(1237)
+var globSync = __webpack_require__(3892)
+var common = __webpack_require__(8978)
+var alphasort = common.alphasort
+var alphasorti = common.alphasorti
+var setopts = common.setopts
+var ownProp = common.ownProp
+var inflight = __webpack_require__(848)
+var util = __webpack_require__(1669)
+var childrenIgnored = common.childrenIgnored
+var isIgnored = common.isIgnored
+
+var once = __webpack_require__(447)
+
+function glob (pattern, options, cb) {
+  if (typeof options === 'function') cb = options, options = {}
+  if (!options) options = {}
+
+  if (options.sync) {
+    if (cb)
+      throw new TypeError('callback provided to sync glob')
+    return globSync(pattern, options)
+  }
+
+  return new Glob(pattern, options, cb)
+}
+
+glob.sync = globSync
+var GlobSync = glob.GlobSync = globSync.GlobSync
+
+// old api surface
+glob.glob = glob
+
+function extend (origin, add) {
+  if (add === null || typeof add !== 'object') {
+    return origin
+  }
+
+  var keys = Object.keys(add)
+  var i = keys.length
+  while (i--) {
+    origin[keys[i]] = add[keys[i]]
+  }
+  return origin
+}
+
+glob.hasMagic = function (pattern, options_) {
+  var options = extend({}, options_)
+  options.noprocess = true
+
+  var g = new Glob(pattern, options)
+  var set = g.minimatch.set
+
+  if (!pattern)
+    return false
+
+  if (set.length > 1)
+    return true
+
+  for (var j = 0; j < set[0].length; j++) {
+    if (typeof set[0][j] !== 'string')
+      return true
+  }
+
+  return false
+}
+
+glob.Glob = Glob
+inherits(Glob, EE)
+function Glob (pattern, options, cb) {
+  if (typeof options === 'function') {
+    cb = options
+    options = null
+  }
+
+  if (options && options.sync) {
+    if (cb)
+      throw new TypeError('callback provided to sync glob')
+    return new GlobSync(pattern, options)
+  }
+
+  if (!(this instanceof Glob))
+    return new Glob(pattern, options, cb)
+
+  setopts(this, pattern, options)
+  this._didRealPath = false
+
+  // process each pattern in the minimatch set
+  var n = this.minimatch.set.length
+
+  // The matches are stored as {<filename>: true,...} so that
+  // duplicates are automagically pruned.
+  // Later, we do an Object.keys() on these.
+  // Keep them as a list so we can fill in when nonull is set.
+  this.matches = new Array(n)
+
+  if (typeof cb === 'function') {
+    cb = once(cb)
+    this.on('error', cb)
+    this.on('end', function (matches) {
+      cb(null, matches)
+    })
+  }
+
+  var self = this
+  this._processing = 0
+
+  this._emitQueue = []
+  this._processQueue = []
+  this.paused = false
+
+  if (this.noprocess)
+    return this
+
+  if (n === 0)
+    return done()
+
+  var sync = true
+  for (var i = 0; i < n; i ++) {
+    this._process(this.minimatch.set[i], i, false, done)
+  }
+  sync = false
+
+  function done () {
+    --self._processing
+    if (self._processing <= 0) {
+      if (sync) {
+        process.nextTick(function () {
+          self._finish()
+        })
+      } else {
+        self._finish()
+      }
+    }
+  }
+}
+
+Glob.prototype._finish = function () {
+  assert(this instanceof Glob)
+  if (this.aborted)
+    return
+
+  if (this.realpath && !this._didRealpath)
+    return this._realpath()
+
+  common.finish(this)
+  this.emit('end', this.found)
+}
+
+Glob.prototype._realpath = function () {
+  if (this._didRealpath)
+    return
+
+  this._didRealpath = true
+
+  var n = this.matches.length
+  if (n === 0)
+    return this._finish()
+
+  var self = this
+  for (var i = 0; i < this.matches.length; i++)
+    this._realpathSet(i, next)
+
+  function next () {
+    if (--n === 0)
+      self._finish()
+  }
+}
+
+Glob.prototype._realpathSet = function (index, cb) {
+  var matchset = this.matches[index]
+  if (!matchset)
+    return cb()
+
+  var found = Object.keys(matchset)
+  var self = this
+  var n = found.length
+
+  if (n === 0)
+    return cb()
+
+  var set = this.matches[index] = Object.create(null)
+  found.forEach(function (p, i) {
+    // If there's a problem with the stat, then it means that
+    // one or more of the links in the realpath couldn't be
+    // resolved.  just return the abs value in that case.
+    p = self._makeAbs(p)
+    rp.realpath(p, self.realpathCache, function (er, real) {
+      if (!er)
+        set[real] = true
+      else if (er.syscall === 'stat')
+        set[p] = true
+      else
+        self.emit('error', er) // srsly wtf right here
+
+      if (--n === 0) {
+        self.matches[index] = set
+        cb()
+      }
+    })
+  })
+}
+
+Glob.prototype._mark = function (p) {
+  return common.mark(this, p)
+}
+
+Glob.prototype._makeAbs = function (f) {
+  return common.makeAbs(this, f)
+}
+
+Glob.prototype.abort = function () {
+  this.aborted = true
+  this.emit('abort')
+}
+
+Glob.prototype.pause = function () {
+  if (!this.paused) {
+    this.paused = true
+    this.emit('pause')
+  }
+}
+
+Glob.prototype.resume = function () {
+  if (this.paused) {
+    this.emit('resume')
+    this.paused = false
+    if (this._emitQueue.length) {
+      var eq = this._emitQueue.slice(0)
+      this._emitQueue.length = 0
+      for (var i = 0; i < eq.length; i ++) {
+        var e = eq[i]
+        this._emitMatch(e[0], e[1])
+      }
+    }
+    if (this._processQueue.length) {
+      var pq = this._processQueue.slice(0)
+      this._processQueue.length = 0
+      for (var i = 0; i < pq.length; i ++) {
+        var p = pq[i]
+        this._processing--
+        this._process(p[0], p[1], p[2], p[3])
+      }
+    }
+  }
+}
+
+Glob.prototype._process = function (pattern, index, inGlobStar, cb) {
+  assert(this instanceof Glob)
+  assert(typeof cb === 'function')
+
+  if (this.aborted)
+    return
+
+  this._processing++
+  if (this.paused) {
+    this._processQueue.push([pattern, index, inGlobStar, cb])
+    return
+  }
+
+  //console.error('PROCESS %d', this._processing, pattern)
+
+  // Get the first [n] parts of pattern that are all strings.
+  var n = 0
+  while (typeof pattern[n] === 'string') {
+    n ++
+  }
+  // now n is the index of the first one that is *not* a string.
+
+  // see if there's anything else
+  var prefix
+  switch (n) {
+    // if not, then this is rather simple
+    case pattern.length:
+      this._processSimple(pattern.join('/'), index, cb)
+      return
+
+    case 0:
+      // pattern *starts* with some non-trivial item.
+      // going to readdir(cwd), but not include the prefix in matches.
+      prefix = null
+      break
+
+    default:
+      // pattern has some string bits in the front.
+      // whatever it starts with, whether that's 'absolute' like /foo/bar,
+      // or 'relative' like '../baz'
+      prefix = pattern.slice(0, n).join('/')
+      break
+  }
+
+  var remain = pattern.slice(n)
+
+  // get the list of entries.
+  var read
+  if (prefix === null)
+    read = '.'
+  else if (isAbsolute(prefix) || isAbsolute(pattern.join('/'))) {
+    if (!prefix || !isAbsolute(prefix))
+      prefix = '/' + prefix
+    read = prefix
+  } else
+    read = prefix
+
+  var abs = this._makeAbs(read)
+
+  //if ignored, skip _processing
+  if (childrenIgnored(this, read))
+    return cb()
+
+  var isGlobStar = remain[0] === minimatch.GLOBSTAR
+  if (isGlobStar)
+    this._processGlobStar(prefix, read, abs, remain, index, inGlobStar, cb)
+  else
+    this._processReaddir(prefix, read, abs, remain, index, inGlobStar, cb)
+}
+
+Glob.prototype._processReaddir = function (prefix, read, abs, remain, index, inGlobStar, cb) {
+  var self = this
+  this._readdir(abs, inGlobStar, function (er, entries) {
+    return self._processReaddir2(prefix, read, abs, remain, index, inGlobStar, entries, cb)
+  })
+}
+
+Glob.prototype._processReaddir2 = function (prefix, read, abs, remain, index, inGlobStar, entries, cb) {
+
+  // if the abs isn't a dir, then nothing can match!
+  if (!entries)
+    return cb()
+
+  // It will only match dot entries if it starts with a dot, or if
+  // dot is set.  Stuff like @(.foo|.bar) isn't allowed.
+  var pn = remain[0]
+  var negate = !!this.minimatch.negate
+  var rawGlob = pn._glob
+  var dotOk = this.dot || rawGlob.charAt(0) === '.'
+
+  var matchedEntries = []
+  for (var i = 0; i < entries.length; i++) {
+    var e = entries[i]
+    if (e.charAt(0) !== '.' || dotOk) {
+      var m
+      if (negate && !prefix) {
+        m = !e.match(pn)
+      } else {
+        m = e.match(pn)
+      }
+      if (m)
+        matchedEntries.push(e)
+    }
+  }
+
+  //console.error('prd2', prefix, entries, remain[0]._glob, matchedEntries)
+
+  var len = matchedEntries.length
+  // If there are no matched entries, then nothing matches.
+  if (len === 0)
+    return cb()
+
+  // if this is the last remaining pattern bit, then no need for
+  // an additional stat *unless* the user has specified mark or
+  // stat explicitly.  We know they exist, since readdir returned
+  // them.
+
+  if (remain.length === 1 && !this.mark && !this.stat) {
+    if (!this.matches[index])
+      this.matches[index] = Object.create(null)
+
+    for (var i = 0; i < len; i ++) {
+      var e = matchedEntries[i]
+      if (prefix) {
+        if (prefix !== '/')
+          e = prefix + '/' + e
+        else
+          e = prefix + e
+      }
+
+      if (e.charAt(0) === '/' && !this.nomount) {
+        e = path.join(this.root, e)
+      }
+      this._emitMatch(index, e)
+    }
+    // This was the last one, and no stats were needed
+    return cb()
+  }
+
+  // now test all matched entries as stand-ins for that part
+  // of the pattern.
+  remain.shift()
+  for (var i = 0; i < len; i ++) {
+    var e = matchedEntries[i]
+    var newPattern
+    if (prefix) {
+      if (prefix !== '/')
+        e = prefix + '/' + e
+      else
+        e = prefix + e
+    }
+    this._process([e].concat(remain), index, inGlobStar, cb)
+  }
+  cb()
+}
+
+Glob.prototype._emitMatch = function (index, e) {
+  if (this.aborted)
+    return
+
+  if (isIgnored(this, e))
+    return
+
+  if (this.paused) {
+    this._emitQueue.push([index, e])
+    return
+  }
+
+  var abs = isAbsolute(e) ? e : this._makeAbs(e)
+
+  if (this.mark)
+    e = this._mark(e)
+
+  if (this.absolute)
+    e = abs
+
+  if (this.matches[index][e])
+    return
+
+  if (this.nodir) {
+    var c = this.cache[abs]
+    if (c === 'DIR' || Array.isArray(c))
+      return
+  }
+
+  this.matches[index][e] = true
+
+  var st = this.statCache[abs]
+  if (st)
+    this.emit('stat', e, st)
+
+  this.emit('match', e)
+}
+
+Glob.prototype._readdirInGlobStar = function (abs, cb) {
+  if (this.aborted)
+    return
+
+  // follow all symlinked directories forever
+  // just proceed as if this is a non-globstar situation
+  if (this.follow)
+    return this._readdir(abs, false, cb)
+
+  var lstatkey = 'lstat\0' + abs
+  var self = this
+  var lstatcb = inflight(lstatkey, lstatcb_)
+
+  if (lstatcb)
+    fs.lstat(abs, lstatcb)
+
+  function lstatcb_ (er, lstat) {
+    if (er && er.code === 'ENOENT')
+      return cb()
+
+    var isSym = lstat && lstat.isSymbolicLink()
+    self.symlinks[abs] = isSym
+
+    // If it's not a symlink or a dir, then it's definitely a regular file.
+    // don't bother doing a readdir in that case.
+    if (!isSym && lstat && !lstat.isDirectory()) {
+      self.cache[abs] = 'FILE'
+      cb()
+    } else
+      self._readdir(abs, false, cb)
+  }
+}
+
+Glob.prototype._readdir = function (abs, inGlobStar, cb) {
+  if (this.aborted)
+    return
+
+  cb = inflight('readdir\0'+abs+'\0'+inGlobStar, cb)
+  if (!cb)
+    return
+
+  //console.error('RD %j %j', +inGlobStar, abs)
+  if (inGlobStar && !ownProp(this.symlinks, abs))
+    return this._readdirInGlobStar(abs, cb)
+
+  if (ownProp(this.cache, abs)) {
+    var c = this.cache[abs]
+    if (!c || c === 'FILE')
+      return cb()
+
+    if (Array.isArray(c))
+      return cb(null, c)
+  }
+
+  var self = this
+  fs.readdir(abs, readdirCb(this, abs, cb))
+}
+
+function readdirCb (self, abs, cb) {
+  return function (er, entries) {
+    if (er)
+      self._readdirError(abs, er, cb)
+    else
+      self._readdirEntries(abs, entries, cb)
+  }
+}
+
+Glob.prototype._readdirEntries = function (abs, entries, cb) {
+  if (this.aborted)
+    return
+
+  // if we haven't asked to stat everything, then just
+  // assume that everything in there exists, so we can avoid
+  // having to stat it a second time.
+  if (!this.mark && !this.stat) {
+    for (var i = 0; i < entries.length; i ++) {
+      var e = entries[i]
+      if (abs === '/')
+        e = abs + e
+      else
+        e = abs + '/' + e
+      this.cache[e] = true
+    }
+  }
+
+  this.cache[abs] = entries
+  return cb(null, entries)
+}
+
+Glob.prototype._readdirError = function (f, er, cb) {
+  if (this.aborted)
+    return
+
+  // handle errors, and cache the information
+  switch (er.code) {
+    case 'ENOTSUP': // https://github.com/isaacs/node-glob/issues/205
+    case 'ENOTDIR': // totally normal. means it *does* exist.
+      var abs = this._makeAbs(f)
+      this.cache[abs] = 'FILE'
+      if (abs === this.cwdAbs) {
+        var error = new Error(er.code + ' invalid cwd ' + this.cwd)
+        error.path = this.cwd
+        error.code = er.code
+        this.emit('error', error)
+        this.abort()
+      }
+      break
+
+    case 'ENOENT': // not terribly unusual
+    case 'ELOOP':
+    case 'ENAMETOOLONG':
+    case 'UNKNOWN':
+      this.cache[this._makeAbs(f)] = false
+      break
+
+    default: // some unusual error.  Treat as failure.
+      this.cache[this._makeAbs(f)] = false
+      if (this.strict) {
+        this.emit('error', er)
+        // If the error is handled, then we abort
+        // if not, we threw out of here
+        this.abort()
+      }
+      if (!this.silent)
+        console.error('glob error', er)
+      break
+  }
+
+  return cb()
+}
+
+Glob.prototype._processGlobStar = function (prefix, read, abs, remain, index, inGlobStar, cb) {
+  var self = this
+  this._readdir(abs, inGlobStar, function (er, entries) {
+    self._processGlobStar2(prefix, read, abs, remain, index, inGlobStar, entries, cb)
+  })
+}
+
+
+Glob.prototype._processGlobStar2 = function (prefix, read, abs, remain, index, inGlobStar, entries, cb) {
+  //console.error('pgs2', prefix, remain[0], entries)
+
+  // no entries means not a dir, so it can never have matches
+  // foo.txt/** doesn't match foo.txt
+  if (!entries)
+    return cb()
+
+  // test without the globstar, and with every child both below
+  // and replacing the globstar.
+  var remainWithoutGlobStar = remain.slice(1)
+  var gspref = prefix ? [ prefix ] : []
+  var noGlobStar = gspref.concat(remainWithoutGlobStar)
+
+  // the noGlobStar pattern exits the inGlobStar state
+  this._process(noGlobStar, index, false, cb)
+
+  var isSym = this.symlinks[abs]
+  var len = entries.length
+
+  // If it's a symlink, and we're in a globstar, then stop
+  if (isSym && inGlobStar)
+    return cb()
+
+  for (var i = 0; i < len; i++) {
+    var e = entries[i]
+    if (e.charAt(0) === '.' && !this.dot)
+      continue
+
+    // these two cases enter the inGlobStar state
+    var instead = gspref.concat(entries[i], remainWithoutGlobStar)
+    this._process(instead, index, true, cb)
+
+    var below = gspref.concat(entries[i], remain)
+    this._process(below, index, true, cb)
+  }
+
+  cb()
+}
+
+Glob.prototype._processSimple = function (prefix, index, cb) {
+  // XXX review this.  Shouldn't it be doing the mounting etc
+  // before doing stat?  kinda weird?
+  var self = this
+  this._stat(prefix, function (er, exists) {
+    self._processSimple2(prefix, index, er, exists, cb)
+  })
+}
+Glob.prototype._processSimple2 = function (prefix, index, er, exists, cb) {
+
+  //console.error('ps2', prefix, exists)
+
+  if (!this.matches[index])
+    this.matches[index] = Object.create(null)
+
+  // If it doesn't exist, then just mark the lack of results
+  if (!exists)
+    return cb()
+
+  if (prefix && isAbsolute(prefix) && !this.nomount) {
+    var trail = /[\/\\]$/.test(prefix)
+    if (prefix.charAt(0) === '/') {
+      prefix = path.join(this.root, prefix)
+    } else {
+      prefix = path.resolve(this.root, prefix)
+      if (trail)
+        prefix += '/'
+    }
+  }
+
+  if (process.platform === 'win32')
+    prefix = prefix.replace(/\\/g, '/')
+
+  // Mark this as a match
+  this._emitMatch(index, prefix)
+  cb()
+}
+
+// Returns either 'DIR', 'FILE', or false
+Glob.prototype._stat = function (f, cb) {
+  var abs = this._makeAbs(f)
+  var needDir = f.slice(-1) === '/'
+
+  if (f.length > this.maxLength)
+    return cb()
+
+  if (!this.stat && ownProp(this.cache, abs)) {
+    var c = this.cache[abs]
+
+    if (Array.isArray(c))
+      c = 'DIR'
+
+    // It exists, but maybe not how we need it
+    if (!needDir || c === 'DIR')
+      return cb(null, c)
+
+    if (needDir && c === 'FILE')
+      return cb()
+
+    // otherwise we have to stat, because maybe c=true
+    // if we know it exists, but not what it is.
+  }
+
+  var exists
+  var stat = this.statCache[abs]
+  if (stat !== undefined) {
+    if (stat === false)
+      return cb(null, stat)
+    else {
+      var type = stat.isDirectory() ? 'DIR' : 'FILE'
+      if (needDir && type === 'FILE')
+        return cb()
+      else
+        return cb(null, type, stat)
+    }
+  }
+
+  var self = this
+  var statcb = inflight('stat\0' + abs, lstatcb_)
+  if (statcb)
+    fs.lstat(abs, statcb)
+
+  function lstatcb_ (er, lstat) {
+    if (lstat && lstat.isSymbolicLink()) {
+      // If it's a symlink, then treat it as the target, unless
+      // the target does not exist, then treat it as a file.
+      return fs.stat(abs, function (er, stat) {
+        if (er)
+          self._stat2(f, abs, null, lstat, cb)
+        else
+          self._stat2(f, abs, er, stat, cb)
+      })
+    } else {
+      self._stat2(f, abs, er, lstat, cb)
+    }
+  }
+}
+
+Glob.prototype._stat2 = function (f, abs, er, stat, cb) {
+  if (er && (er.code === 'ENOENT' || er.code === 'ENOTDIR')) {
+    this.statCache[abs] = false
+    return cb()
+  }
+
+  var needDir = f.slice(-1) === '/'
+  this.statCache[abs] = stat
+
+  if (abs.slice(-1) === '/' && stat && !stat.isDirectory())
+    return cb(null, false, stat)
+
+  var c = true
+  if (stat)
+    c = stat.isDirectory() ? 'DIR' : 'FILE'
+  this.cache[abs] = this.cache[abs] || c
+
+  if (needDir && c === 'FILE')
+    return cb()
+
+  return cb(null, c, stat)
+}
+
+
+/***/ }),
+
+/***/ 3892:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+module.exports = globSync
+globSync.GlobSync = GlobSync
+
+var fs = __webpack_require__(5747)
+var rp = __webpack_require__(1881)
+var minimatch = __webpack_require__(1486)
+var Minimatch = minimatch.Minimatch
+var Glob = __webpack_require__(6691).Glob
+var util = __webpack_require__(1669)
+var path = __webpack_require__(5622)
+var assert = __webpack_require__(2357)
+var isAbsolute = __webpack_require__(1237)
+var common = __webpack_require__(8978)
+var alphasort = common.alphasort
+var alphasorti = common.alphasorti
+var setopts = common.setopts
+var ownProp = common.ownProp
+var childrenIgnored = common.childrenIgnored
+var isIgnored = common.isIgnored
+
+function globSync (pattern, options) {
+  if (typeof options === 'function' || arguments.length === 3)
+    throw new TypeError('callback provided to sync glob\n'+
+                        'See: https://github.com/isaacs/node-glob/issues/167')
+
+  return new GlobSync(pattern, options).found
+}
+
+function GlobSync (pattern, options) {
+  if (!pattern)
+    throw new Error('must provide pattern')
+
+  if (typeof options === 'function' || arguments.length === 3)
+    throw new TypeError('callback provided to sync glob\n'+
+                        'See: https://github.com/isaacs/node-glob/issues/167')
+
+  if (!(this instanceof GlobSync))
+    return new GlobSync(pattern, options)
+
+  setopts(this, pattern, options)
+
+  if (this.noprocess)
+    return this
+
+  var n = this.minimatch.set.length
+  this.matches = new Array(n)
+  for (var i = 0; i < n; i ++) {
+    this._process(this.minimatch.set[i], i, false)
+  }
+  this._finish()
+}
+
+GlobSync.prototype._finish = function () {
+  assert(this instanceof GlobSync)
+  if (this.realpath) {
+    var self = this
+    this.matches.forEach(function (matchset, index) {
+      var set = self.matches[index] = Object.create(null)
+      for (var p in matchset) {
+        try {
+          p = self._makeAbs(p)
+          var real = rp.realpathSync(p, self.realpathCache)
+          set[real] = true
+        } catch (er) {
+          if (er.syscall === 'stat')
+            set[self._makeAbs(p)] = true
+          else
+            throw er
+        }
+      }
+    })
+  }
+  common.finish(this)
+}
+
+
+GlobSync.prototype._process = function (pattern, index, inGlobStar) {
+  assert(this instanceof GlobSync)
+
+  // Get the first [n] parts of pattern that are all strings.
+  var n = 0
+  while (typeof pattern[n] === 'string') {
+    n ++
+  }
+  // now n is the index of the first one that is *not* a string.
+
+  // See if there's anything else
+  var prefix
+  switch (n) {
+    // if not, then this is rather simple
+    case pattern.length:
+      this._processSimple(pattern.join('/'), index)
+      return
+
+    case 0:
+      // pattern *starts* with some non-trivial item.
+      // going to readdir(cwd), but not include the prefix in matches.
+      prefix = null
+      break
+
+    default:
+      // pattern has some string bits in the front.
+      // whatever it starts with, whether that's 'absolute' like /foo/bar,
+      // or 'relative' like '../baz'
+      prefix = pattern.slice(0, n).join('/')
+      break
+  }
+
+  var remain = pattern.slice(n)
+
+  // get the list of entries.
+  var read
+  if (prefix === null)
+    read = '.'
+  else if (isAbsolute(prefix) || isAbsolute(pattern.join('/'))) {
+    if (!prefix || !isAbsolute(prefix))
+      prefix = '/' + prefix
+    read = prefix
+  } else
+    read = prefix
+
+  var abs = this._makeAbs(read)
+
+  //if ignored, skip processing
+  if (childrenIgnored(this, read))
+    return
+
+  var isGlobStar = remain[0] === minimatch.GLOBSTAR
+  if (isGlobStar)
+    this._processGlobStar(prefix, read, abs, remain, index, inGlobStar)
+  else
+    this._processReaddir(prefix, read, abs, remain, index, inGlobStar)
+}
+
+
+GlobSync.prototype._processReaddir = function (prefix, read, abs, remain, index, inGlobStar) {
+  var entries = this._readdir(abs, inGlobStar)
+
+  // if the abs isn't a dir, then nothing can match!
+  if (!entries)
+    return
+
+  // It will only match dot entries if it starts with a dot, or if
+  // dot is set.  Stuff like @(.foo|.bar) isn't allowed.
+  var pn = remain[0]
+  var negate = !!this.minimatch.negate
+  var rawGlob = pn._glob
+  var dotOk = this.dot || rawGlob.charAt(0) === '.'
+
+  var matchedEntries = []
+  for (var i = 0; i < entries.length; i++) {
+    var e = entries[i]
+    if (e.charAt(0) !== '.' || dotOk) {
+      var m
+      if (negate && !prefix) {
+        m = !e.match(pn)
+      } else {
+        m = e.match(pn)
+      }
+      if (m)
+        matchedEntries.push(e)
+    }
+  }
+
+  var len = matchedEntries.length
+  // If there are no matched entries, then nothing matches.
+  if (len === 0)
+    return
+
+  // if this is the last remaining pattern bit, then no need for
+  // an additional stat *unless* the user has specified mark or
+  // stat explicitly.  We know they exist, since readdir returned
+  // them.
+
+  if (remain.length === 1 && !this.mark && !this.stat) {
+    if (!this.matches[index])
+      this.matches[index] = Object.create(null)
+
+    for (var i = 0; i < len; i ++) {
+      var e = matchedEntries[i]
+      if (prefix) {
+        if (prefix.slice(-1) !== '/')
+          e = prefix + '/' + e
+        else
+          e = prefix + e
+      }
+
+      if (e.charAt(0) === '/' && !this.nomount) {
+        e = path.join(this.root, e)
+      }
+      this._emitMatch(index, e)
+    }
+    // This was the last one, and no stats were needed
+    return
+  }
+
+  // now test all matched entries as stand-ins for that part
+  // of the pattern.
+  remain.shift()
+  for (var i = 0; i < len; i ++) {
+    var e = matchedEntries[i]
+    var newPattern
+    if (prefix)
+      newPattern = [prefix, e]
+    else
+      newPattern = [e]
+    this._process(newPattern.concat(remain), index, inGlobStar)
+  }
+}
+
+
+GlobSync.prototype._emitMatch = function (index, e) {
+  if (isIgnored(this, e))
+    return
+
+  var abs = this._makeAbs(e)
+
+  if (this.mark)
+    e = this._mark(e)
+
+  if (this.absolute) {
+    e = abs
+  }
+
+  if (this.matches[index][e])
+    return
+
+  if (this.nodir) {
+    var c = this.cache[abs]
+    if (c === 'DIR' || Array.isArray(c))
+      return
+  }
+
+  this.matches[index][e] = true
+
+  if (this.stat)
+    this._stat(e)
+}
+
+
+GlobSync.prototype._readdirInGlobStar = function (abs) {
+  // follow all symlinked directories forever
+  // just proceed as if this is a non-globstar situation
+  if (this.follow)
+    return this._readdir(abs, false)
+
+  var entries
+  var lstat
+  var stat
+  try {
+    lstat = fs.lstatSync(abs)
+  } catch (er) {
+    if (er.code === 'ENOENT') {
+      // lstat failed, doesn't exist
+      return null
+    }
+  }
+
+  var isSym = lstat && lstat.isSymbolicLink()
+  this.symlinks[abs] = isSym
+
+  // If it's not a symlink or a dir, then it's definitely a regular file.
+  // don't bother doing a readdir in that case.
+  if (!isSym && lstat && !lstat.isDirectory())
+    this.cache[abs] = 'FILE'
+  else
+    entries = this._readdir(abs, false)
+
+  return entries
+}
+
+GlobSync.prototype._readdir = function (abs, inGlobStar) {
+  var entries
+
+  if (inGlobStar && !ownProp(this.symlinks, abs))
+    return this._readdirInGlobStar(abs)
+
+  if (ownProp(this.cache, abs)) {
+    var c = this.cache[abs]
+    if (!c || c === 'FILE')
+      return null
+
+    if (Array.isArray(c))
+      return c
+  }
+
+  try {
+    return this._readdirEntries(abs, fs.readdirSync(abs))
+  } catch (er) {
+    this._readdirError(abs, er)
+    return null
+  }
+}
+
+GlobSync.prototype._readdirEntries = function (abs, entries) {
+  // if we haven't asked to stat everything, then just
+  // assume that everything in there exists, so we can avoid
+  // having to stat it a second time.
+  if (!this.mark && !this.stat) {
+    for (var i = 0; i < entries.length; i ++) {
+      var e = entries[i]
+      if (abs === '/')
+        e = abs + e
+      else
+        e = abs + '/' + e
+      this.cache[e] = true
+    }
+  }
+
+  this.cache[abs] = entries
+
+  // mark and cache dir-ness
+  return entries
+}
+
+GlobSync.prototype._readdirError = function (f, er) {
+  // handle errors, and cache the information
+  switch (er.code) {
+    case 'ENOTSUP': // https://github.com/isaacs/node-glob/issues/205
+    case 'ENOTDIR': // totally normal. means it *does* exist.
+      var abs = this._makeAbs(f)
+      this.cache[abs] = 'FILE'
+      if (abs === this.cwdAbs) {
+        var error = new Error(er.code + ' invalid cwd ' + this.cwd)
+        error.path = this.cwd
+        error.code = er.code
+        throw error
+      }
+      break
+
+    case 'ENOENT': // not terribly unusual
+    case 'ELOOP':
+    case 'ENAMETOOLONG':
+    case 'UNKNOWN':
+      this.cache[this._makeAbs(f)] = false
+      break
+
+    default: // some unusual error.  Treat as failure.
+      this.cache[this._makeAbs(f)] = false
+      if (this.strict)
+        throw er
+      if (!this.silent)
+        console.error('glob error', er)
+      break
+  }
+}
+
+GlobSync.prototype._processGlobStar = function (prefix, read, abs, remain, index, inGlobStar) {
+
+  var entries = this._readdir(abs, inGlobStar)
+
+  // no entries means not a dir, so it can never have matches
+  // foo.txt/** doesn't match foo.txt
+  if (!entries)
+    return
+
+  // test without the globstar, and with every child both below
+  // and replacing the globstar.
+  var remainWithoutGlobStar = remain.slice(1)
+  var gspref = prefix ? [ prefix ] : []
+  var noGlobStar = gspref.concat(remainWithoutGlobStar)
+
+  // the noGlobStar pattern exits the inGlobStar state
+  this._process(noGlobStar, index, false)
+
+  var len = entries.length
+  var isSym = this.symlinks[abs]
+
+  // If it's a symlink, and we're in a globstar, then stop
+  if (isSym && inGlobStar)
+    return
+
+  for (var i = 0; i < len; i++) {
+    var e = entries[i]
+    if (e.charAt(0) === '.' && !this.dot)
+      continue
+
+    // these two cases enter the inGlobStar state
+    var instead = gspref.concat(entries[i], remainWithoutGlobStar)
+    this._process(instead, index, true)
+
+    var below = gspref.concat(entries[i], remain)
+    this._process(below, index, true)
+  }
+}
+
+GlobSync.prototype._processSimple = function (prefix, index) {
+  // XXX review this.  Shouldn't it be doing the mounting etc
+  // before doing stat?  kinda weird?
+  var exists = this._stat(prefix)
+
+  if (!this.matches[index])
+    this.matches[index] = Object.create(null)
+
+  // If it doesn't exist, then just mark the lack of results
+  if (!exists)
+    return
+
+  if (prefix && isAbsolute(prefix) && !this.nomount) {
+    var trail = /[\/\\]$/.test(prefix)
+    if (prefix.charAt(0) === '/') {
+      prefix = path.join(this.root, prefix)
+    } else {
+      prefix = path.resolve(this.root, prefix)
+      if (trail)
+        prefix += '/'
+    }
+  }
+
+  if (process.platform === 'win32')
+    prefix = prefix.replace(/\\/g, '/')
+
+  // Mark this as a match
+  this._emitMatch(index, prefix)
+}
+
+// Returns either 'DIR', 'FILE', or false
+GlobSync.prototype._stat = function (f) {
+  var abs = this._makeAbs(f)
+  var needDir = f.slice(-1) === '/'
+
+  if (f.length > this.maxLength)
+    return false
+
+  if (!this.stat && ownProp(this.cache, abs)) {
+    var c = this.cache[abs]
+
+    if (Array.isArray(c))
+      c = 'DIR'
+
+    // It exists, but maybe not how we need it
+    if (!needDir || c === 'DIR')
+      return c
+
+    if (needDir && c === 'FILE')
+      return false
+
+    // otherwise we have to stat, because maybe c=true
+    // if we know it exists, but not what it is.
+  }
+
+  var exists
+  var stat = this.statCache[abs]
+  if (!stat) {
+    var lstat
+    try {
+      lstat = fs.lstatSync(abs)
+    } catch (er) {
+      if (er && (er.code === 'ENOENT' || er.code === 'ENOTDIR')) {
+        this.statCache[abs] = false
+        return false
+      }
+    }
+
+    if (lstat && lstat.isSymbolicLink()) {
+      try {
+        stat = fs.statSync(abs)
+      } catch (er) {
+        stat = lstat
+      }
+    } else {
+      stat = lstat
+    }
+  }
+
+  this.statCache[abs] = stat
+
+  var c = true
+  if (stat)
+    c = stat.isDirectory() ? 'DIR' : 'FILE'
+
+  this.cache[abs] = this.cache[abs] || c
+
+  if (needDir && c === 'FILE')
+    return false
+
+  return c
+}
+
+GlobSync.prototype._mark = function (p) {
+  return common.mark(this, p)
+}
+
+GlobSync.prototype._makeAbs = function (f) {
+  return common.makeAbs(this, f)
+}
+
+
+/***/ }),
+
 /***/ 3225:
 /***/ ((module) => {
 
@@ -48569,6 +50488,67 @@ module.exports = (string, count = 1, options) => {
 
 	return string.replace(regex, options.indent.repeat(count));
 };
+
+
+/***/ }),
+
+/***/ 848:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var wrappy = __webpack_require__(5448)
+var reqs = Object.create(null)
+var once = __webpack_require__(447)
+
+module.exports = wrappy(inflight)
+
+function inflight (key, cb) {
+  if (reqs[key]) {
+    reqs[key].push(cb)
+    return null
+  } else {
+    reqs[key] = [cb]
+    return makeres(key)
+  }
+}
+
+function makeres (key) {
+  return once(function RES () {
+    var cbs = reqs[key]
+    var len = cbs.length
+    var args = slice(arguments)
+
+    // XXX It's somewhat ambiguous whether a new callback added in this
+    // pass should be queued for later execution if something in the
+    // list of callbacks throws, or if it should just be discarded.
+    // However, it's such an edge case that it hardly matters, and either
+    // choice is likely as surprising as the other.
+    // As it happens, we do go ahead and schedule it for later execution.
+    try {
+      for (var i = 0; i < len; i++) {
+        cbs[i].apply(null, args)
+      }
+    } finally {
+      if (cbs.length > len) {
+        // added more in the interim.
+        // de-zalgo, just in case, but don't call again.
+        cbs.splice(0, len)
+        process.nextTick(function () {
+          RES.apply(null, args)
+        })
+      } else {
+        delete reqs[key]
+      }
+    }
+  })
+}
+
+function slice (args) {
+  var length = args.length
+  var array = []
+
+  for (var i = 0; i < length; i++) array[i] = args[i]
+  return array
+}
 
 
 /***/ }),
@@ -50238,7 +52218,7 @@ module.exports = MagicString;
 
 /***/ }),
 
-/***/ 1353:
+/***/ 6268:
 /***/ ((module) => {
 
 "use strict";
@@ -51784,7 +53764,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
 var Stream = _interopDefault(__webpack_require__(2413));
-var http = _interopDefault(__webpack_require__(8605));
+var http = _interopDefault(__webpack_require__(5876));
 var Url = _interopDefault(__webpack_require__(8835));
 var https = _interopDefault(__webpack_require__(7211));
 var zlib = _interopDefault(__webpack_require__(8761));
@@ -54184,6 +56164,34 @@ function disallowed(code) {
 
 /***/ }),
 
+/***/ 1237:
+/***/ ((module) => {
+
+"use strict";
+
+
+function posix(path) {
+	return path.charAt(0) === '/';
+}
+
+function win32(path) {
+	// https://github.com/nodejs/node/blob/b3fcc245fb25539909ef1d5eaa01dbf92e168633/lib/path.js#L56
+	var splitDeviceRe = /^([a-zA-Z]:|[\\\/]{2}[^\\\/]+[\\\/]+[^\\\/]+)?([\\\/])?([\s\S]*?)$/;
+	var result = splitDeviceRe.exec(path);
+	var device = result[1] || '';
+	var isUnc = Boolean(device && device.charAt(1) !== ':');
+
+	// UNC paths are always absolute
+	return Boolean(result[2] || isUnc);
+}
+
+module.exports = process.platform === 'win32' ? win32 : posix;
+module.exports.posix = posix;
+module.exports.win32 = win32;
+
+
+/***/ }),
+
 /***/ 772:
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
@@ -54726,7 +56734,7 @@ function parse(options) {
 
 /***/ }),
 
-/***/ 2607:
+/***/ 4420:
 /***/ ((module) => {
 
 "use strict";
@@ -54881,13 +56889,13 @@ module.exports = {
   gfm: true,
   commonmark: false,
   pedantic: false,
-  blocks: __webpack_require__(2607)
+  blocks: __webpack_require__(4420)
 }
 
 
 /***/ }),
 
-/***/ 2576:
+/***/ 9417:
 /***/ ((module) => {
 
 "use strict";
@@ -55356,7 +57364,7 @@ function keys(value) {
 
 
 var xtend = __webpack_require__(2508)
-var escapes = __webpack_require__(1353)
+var escapes = __webpack_require__(6268)
 var defaults = __webpack_require__(2672)
 
 module.exports = setOptions
@@ -55733,7 +57741,7 @@ function blockquote(eat, value, silent) {
 "use strict";
 
 
-var locate = __webpack_require__(2576)
+var locate = __webpack_require__(9417)
 
 module.exports = hardBreak
 hardBreak.locator = locate
@@ -59862,7 +61870,7 @@ function stringLength(value) {
 var decimal = __webpack_require__(9691)
 var alphanumeric = __webpack_require__(7765)
 var whitespace = __webpack_require__(974)
-var escapes = __webpack_require__(1353)
+var escapes = __webpack_require__(6268)
 var prefix = __webpack_require__(7099)
 
 module.exports = factory
@@ -63721,7 +65729,7 @@ function charactersToExpression(subset) {
 
 /***/ }),
 
-/***/ 9610:
+/***/ 8605:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
@@ -63771,7 +65779,7 @@ function escape(value) {
 "use strict";
 
 
-var encode = __webpack_require__(9610)
+var encode = __webpack_require__(8605)
 var escape = __webpack_require__(8604)
 
 module.exports = encode
@@ -64368,7 +66376,7 @@ module.exports = __webpack_require__(578);
 
 var net = __webpack_require__(1631);
 var tls = __webpack_require__(4016);
-var http = __webpack_require__(8605);
+var http = __webpack_require__(5876);
 var https = __webpack_require__(7211);
 var events = __webpack_require__(8614);
 var assert = __webpack_require__(2357);
@@ -66975,7 +68983,7 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
-/***/ 4420:
+/***/ 6125:
 /***/ (function(__unused_webpack_module, exports) {
 
 // Generated by CoffeeScript 1.12.7
@@ -66994,7 +69002,7 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
-/***/ 6268:
+/***/ 3799:
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 // Generated by CoffeeScript 1.12.7
@@ -67222,7 +69230,7 @@ function wrappy (fn, cb) {
 
   events = __webpack_require__(8614);
 
-  bom = __webpack_require__(4420);
+  bom = __webpack_require__(6125);
 
   processors = __webpack_require__(4309);
 
@@ -67648,7 +69656,7 @@ function wrappy (fn, cb) {
 
   defaults = __webpack_require__(7341);
 
-  builder = __webpack_require__(6268);
+  builder = __webpack_require__(3799);
 
   parser = __webpack_require__(184);
 
@@ -72040,22 +74048,11 @@ function factory(key, options) {
 
 /***/ }),
 
-/***/ 4034:
+/***/ 2391:
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
 
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -72097,253 +74094,71 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 var fs_1 = __importDefault(__webpack_require__(5747));
-var p_all_1 = __importDefault(__webpack_require__(4275));
+var index_1 = __webpack_require__(4034);
+var get_cache_1 = __webpack_require__(3308);
 var github_1 = __webpack_require__(1089);
 var cache_1 = __webpack_require__(1135);
-var sniff_1 = __importDefault(__webpack_require__(2886));
-var util_1 = __webpack_require__(7208);
-var dry = process.env.DRY_RUN;
 var toolkit = github_1.getOctokit(process.env.GITHUB_TOKEN);
-var CACHE_FILE = ".linkrot-cache";
-var DEVELOPMENT = process.platform === "darwin";
-function replace(a, b, urlReferences) {
-    var results = [];
-    for (var _i = 0, _a = urlReferences.get(a); _i < _a.length; _i++) {
-        var file = _a[_i];
-        util_1.replaceFile(file, a, b);
-        results.push(file);
-    }
-    return results;
-}
-/**
- * If an existing PR has the linkrot tag,
- * print and return true to exit.
- */
-function checkForExisting() {
-    return __awaiter(this, void 0, void 0, function () {
-        var existingLinkrotIssues, existingPr;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, toolkit.issues.listForRepo(__assign(__assign({}, github_1.context.repo), { labels: "linkrot" }))];
-                case 1:
-                    existingLinkrotIssues = (_a.sent()).data;
-                    existingPr = existingLinkrotIssues.find(function (issue) { return issue.pull_request; });
-                    if (existingPr) {
-                        console.log("Skipping linkrot because a pull request already exists");
-                        console.log(existingPr.pull_request.html_url);
-                        process.exit();
-                    }
-                    return [2 /*return*/];
-            }
-        });
-    });
-}
-function suggestChanges(replacements, body) {
-    return __awaiter(this, void 0, void 0, function () {
-        var branch, default_branch, sha, error_1, branchRef, title, number;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    branch = "linkrot-" + new Date()
-                        .toLocaleDateString()
-                        .replace(/\//g, "-");
-                    return [4 /*yield*/, toolkit.repos.get({
-                            owner: github_1.context.repo.owner,
-                            repo: github_1.context.repo.repo,
-                        })];
-                case 1:
-                    default_branch = (_a.sent()).data.default_branch;
-                    return [4 /*yield*/, toolkit.git.getRef({
-                            owner: github_1.context.repo.owner,
-                            repo: github_1.context.repo.repo,
-                            ref: "heads/" + default_branch,
-                        })];
-                case 2:
-                    sha = (_a.sent()).data.object.sha;
-                    _a.label = 3;
-                case 3:
-                    _a.trys.push([3, 5, , 11]);
-                    return [4 /*yield*/, toolkit.repos.getBranch(__assign(__assign({}, github_1.context.repo), { branch: branch }))];
-                case 4:
-                    _a.sent();
-                    return [3 /*break*/, 11];
-                case 5:
-                    error_1 = _a.sent();
-                    if (!(error_1.name === "HttpError" && error_1.status === 404)) return [3 /*break*/, 9];
-                    branchRef = "refs/heads/" + branch;
-                    if (!dry) return [3 /*break*/, 6];
-                    console.log("DRY: creating ref: " + branchRef);
-                    return [3 /*break*/, 8];
-                case 6: return [4 /*yield*/, toolkit.git.createRef(__assign(__assign({}, github_1.context.repo), { ref: branchRef, sha: sha }))];
-                case 7:
-                    _a.sent();
-                    _a.label = 8;
-                case 8: return [3 /*break*/, 10];
-                case 9: throw Error(error_1);
-                case 10: return [3 /*break*/, 11];
-                case 11: return [4 /*yield*/, createRedirectCommits(branch, replacements)];
-                case 12:
-                    _a.sent();
-                    title = "\uD83D\uDD17 Linkrot: updating " + replacements.length + " links";
-                    if (!dry) return [3 /*break*/, 13];
-                    console.log("DRY: creating pull: " + title);
-                    return [3 /*break*/, 16];
-                case 13: return [4 /*yield*/, toolkit.pulls.create(__assign(__assign({}, github_1.context.repo), { title: title,
-                        body: body, head: branch, base: default_branch }))];
-                case 14:
-                    number = (_a.sent()).data.number;
-                    return [4 /*yield*/, toolkit.issues.addLabels(__assign(__assign({}, github_1.context.repo), { issue_number: number, labels: ["linkrot"] }))];
-                case 15:
-                    _a.sent();
-                    _a.label = 16;
-                case 16: return [2 /*return*/];
-            }
-        });
-    });
-}
-function createRedirectCommits(branch, replacements) {
-    return __awaiter(this, void 0, void 0, function () {
-        var _i, replacements_1, file, message, ref, path, existing;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    _i = 0, replacements_1 = replacements;
-                    _a.label = 1;
-                case 1:
-                    if (!(_i < replacements_1.length)) return [3 /*break*/, 5];
-                    file = replacements_1[_i];
-                    message = file.replacements.join(", ");
-                    ref = "refs/heads/" + branch;
-                    path = file.gitPath;
-                    if (dry) {
-                        return [2 /*return*/, console.log("DRY: updating " + file.filename + " with message: " + message)];
-                    }
-                    return [4 /*yield*/, toolkit.repos.getContent(__assign(__assign({}, github_1.context.repo), { ref: ref,
-                            path: path }))];
-                case 2:
-                    existing = _a.sent();
-                    return [4 /*yield*/, toolkit.repos.createOrUpdateFileContents(__assign(__assign({}, github_1.context.repo), { path: path,
-                            branch: branch, sha: existing.data.sha, message: message, content: Buffer.from(file.text).toString("base64") }))];
-                case 3:
-                    _a.sent();
-                    _a.label = 4;
-                case 4:
-                    _i++;
-                    return [3 /*break*/, 1];
-                case 5: return [2 /*return*/];
-            }
-        });
-    });
-}
-function getCache() {
-    try {
-        var c = JSON.parse(fs_1.default.readFileSync(CACHE_FILE, "utf8"));
-        var flushedEntries = 0;
-        for (var _i = 0, c_1 = c; _i < c_1.length; _i++) {
-            var entry = c_1[_i];
-            if (c[entry] < Date.now() - 100 * 60 * 60 * 24 * 14) {
-                delete c[entry];
-                flushedEntries++;
-            }
-        }
-        if (flushedEntries) {
-            console.log("Flushed " + flushedEntries.toLocaleString());
-        }
-        return c;
-    }
-    catch (e) {
-        return {};
-    }
+var messages = [];
+function message(msg) {
+    messages.push(msg);
+    console.log(msg);
 }
 (function () {
     return __awaiter(this, void 0, void 0, function () {
-        var cache, files, urls, urlReferences, cacheSkipped, _i, files_1, file, _a, _b, link, subset, replacements, upgrades, e_1;
-        var _this = this;
-        return __generator(this, function (_c) {
-            switch (_c.label) {
-                case 0: return [4 /*yield*/, checkForExisting()];
+        var ctx, cacheFilePath, e_1, e_2;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    ctx = {
+                        cwd: process.env.GITHUB_WORKSPACE || __dirname,
+                        toolkit: toolkit,
+                        context: github_1.context,
+                        cache: {},
+                        message: message,
+                        messages: messages,
+                        limit: 100,
+                        stats: {
+                            cacheSkipped: 0,
+                            upgradedSSL: 0,
+                            urlsDetected: 0,
+                            urlsScanned: 0,
+                            protocolSkipped: 0,
+                            relativeSkipped: 0,
+                            archived: 0,
+                        },
+                    };
+                    cacheFilePath = ".linkrot-cache";
+                    _a.label = 1;
                 case 1:
-                    _c.sent();
-                    if (!!DEVELOPMENT) return [3 /*break*/, 3];
-                    return [4 /*yield*/, cache_1.restoreCache([CACHE_FILE], "linkrot")];
+                    _a.trys.push([1, 3, , 4]);
+                    return [4 /*yield*/, cache_1.restoreCache([cacheFilePath], "linkrot")];
                 case 2:
-                    _c.sent();
-                    _c.label = 3;
+                    _a.sent();
+                    return [3 /*break*/, 4];
                 case 3:
-                    cache = getCache();
-                    files = util_1.gatherFiles();
-                    urls = new Set();
-                    urlReferences = new Map();
-                    cacheSkipped = 0;
-                    for (_i = 0, files_1 = files; _i < files_1.length; _i++) {
-                        file = files_1[_i];
-                        for (_a = 0, _b = file.externalLinks; _a < _b.length; _a++) {
-                            link = _b[_a];
-                            if (link.url in cache) {
-                                cacheSkipped++;
-                                continue;
-                            }
-                            urls.add(link.url);
-                            urlReferences.set(link.url, (urlReferences.get(link.url) || []).concat(file));
-                        }
-                    }
-                    subset = Array.from(urls).reverse().slice(0, 100);
-                    console.log("Checking " + subset.length + " URLs");
-                    replacements = new Set();
-                    upgrades = 0;
-                    return [4 /*yield*/, p_all_1.default(subset.map(function (url) {
-                            return function () { return __awaiter(_this, void 0, void 0, function () {
-                                var result, _i, _a, file;
-                                return __generator(this, function (_b) {
-                                    switch (_b.label) {
-                                        case 0:
-                                            console.log("Checking " + url);
-                                            return [4 /*yield*/, sniff_1.default(url)];
-                                        case 1:
-                                            result = _b.sent();
-                                            cache[url] = Date.now();
-                                            switch (result.status) {
-                                                case "upgrade":
-                                                    upgrades++;
-                                                    for (_i = 0, _a = replace(url, result.to, urlReferences); _i < _a.length; _i++) {
-                                                        file = _a[_i];
-                                                        replacements.add(file);
-                                                    }
-                                                    break;
-                                                case "error":
-                                                    break;
-                                            }
-                                            return [2 /*return*/];
-                                    }
-                                });
-                            }); };
-                        }), { concurrency: 10 })];
-                case 4:
-                    _c.sent();
-                    fs_1.default.writeFileSync(CACHE_FILE, JSON.stringify(cache));
-                    if (!!DEVELOPMENT) return [3 /*break*/, 8];
-                    _c.label = 5;
+                    e_1 = _a.sent();
+                    ctx.message("ERROR: Failed to restore cache!");
+                    return [3 /*break*/, 4];
+                case 4: return [4 /*yield*/, get_cache_1.getCache(ctx, cacheFilePath)];
                 case 5:
-                    _c.trys.push([5, 7, , 8]);
-                    return [4 /*yield*/, cache_1.saveCache([CACHE_FILE], "linkrot")];
+                    _a.sent();
+                    return [4 /*yield*/, index_1.action(ctx)];
                 case 6:
-                    _c.sent();
-                    return [3 /*break*/, 8];
+                    _a.sent();
+                    fs_1.default.writeFileSync(cacheFilePath, JSON.stringify(ctx.cache));
+                    _a.label = 7;
                 case 7:
-                    e_1 = _c.sent();
-                    console.error("ERROR: Failed to save cache!");
-                    return [3 /*break*/, 8];
+                    _a.trys.push([7, 9, , 10]);
+                    return [4 /*yield*/, cache_1.saveCache([cacheFilePath], "linkrot")];
                 case 8:
-                    if (replacements.size == 0) {
-                        return [2 /*return*/, console.log("No changes to suggest")];
-                    }
-                    else {
-                        console.log("Creating PR with " + replacements.size + " changes");
-                    }
-                    return [4 /*yield*/, suggestChanges(Array.from(replacements), "- " + urls.size.toLocaleString() + " URLs detected\n- " + subset.length.toLocaleString() + " checked in this run\n- " + Object.keys(cache).length.toLocaleString() + " URLs in cache\n- " + cacheSkipped.toLocaleString() + " skipped because of the cache\n- " + upgrades.toLocaleString() + " upgraded")];
+                    _a.sent();
+                    return [3 /*break*/, 10];
                 case 9:
-                    _c.sent();
-                    return [2 /*return*/];
+                    e_2 = _a.sent();
+                    ctx.message("ERROR: Failed to save cache!");
+                    return [3 /*break*/, 10];
+                case 10: return [2 /*return*/];
             }
         });
     });
@@ -72352,7 +74167,250 @@ function getCache() {
 
 /***/ }),
 
-/***/ 2886:
+/***/ 4034:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.action = void 0;
+var util_1 = __webpack_require__(5245);
+var check_groups_1 = __webpack_require__(4229);
+var check_archives_1 = __webpack_require__(4703);
+var suggest_changes_1 = __webpack_require__(3390);
+var check_existing_1 = __webpack_require__(6154);
+function action(ctx) {
+    return __awaiter(this, void 0, void 0, function () {
+        var files, rawGroups, urlGroups, updatedFiles;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, check_existing_1.checkForExisting(ctx)];
+                case 1:
+                    _a.sent();
+                    files = util_1.gatherFiles(ctx);
+                    rawGroups = util_1.groupFiles(ctx, files);
+                    urlGroups = util_1.skipGroups(ctx, rawGroups);
+                    return [4 /*yield*/, check_groups_1.checkGroups(ctx, urlGroups)];
+                case 2:
+                    _a.sent();
+                    return [4 /*yield*/, check_archives_1.checkArchives(urlGroups)];
+                case 3:
+                    _a.sent();
+                    updatedFiles = util_1.updateFiles(ctx, urlGroups);
+                    return [4 /*yield*/, suggest_changes_1.suggestChanges(ctx, updatedFiles)];
+                case 4:
+                    _a.sent();
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+exports.action = action;
+
+
+/***/ }),
+
+/***/ 4703:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.checkArchives = void 0;
+var ia_client_1 = __webpack_require__(5340);
+function checkArchives(groups) {
+    var _a, _b;
+    return __awaiter(this, void 0, void 0, function () {
+        var errorGroups, archiveStatus, _loop_1, _i, _c, result;
+        return __generator(this, function (_d) {
+            switch (_d.label) {
+                case 0:
+                    errorGroups = groups.filter(function (group) { var _a; return ((_a = group.status) === null || _a === void 0 ? void 0 : _a.status) === "error"; });
+                    errorGroups = errorGroups.slice(0, 50);
+                    if (!errorGroups.length)
+                        return [2 /*return*/];
+                    return [4 /*yield*/, ia_client_1.queryIA(errorGroups.map(function (group) { return group.url; }))];
+                case 1:
+                    archiveStatus = _d.sent();
+                    _loop_1 = function (result) {
+                        if ((_b = (_a = result.archived_snapshots) === null || _a === void 0 ? void 0 : _a.closest) === null || _b === void 0 ? void 0 : _b.available) {
+                            errorGroups.find(function (group) { return group.url == result.url; }).status = {
+                                status: "archive",
+                                to: result.archived_snapshots.closest.url,
+                            };
+                        }
+                    };
+                    for (_i = 0, _c = archiveStatus.results; _i < _c.length; _i++) {
+                        result = _c[_i];
+                        _loop_1(result);
+                    }
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+exports.checkArchives = checkArchives;
+
+
+/***/ }),
+
+/***/ 6154:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.checkForExisting = void 0;
+var types_1 = __webpack_require__(6582);
+/**
+ * If an existing PR has the linkrot tag,
+ * print and return true to exit.
+ */
+function checkForExisting(ctx) {
+    return __awaiter(this, void 0, void 0, function () {
+        var toolkit, context, existingLinkrotIssues, existingPr;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    toolkit = ctx.toolkit, context = ctx.context;
+                    return [4 /*yield*/, toolkit.issues.listForRepo(__assign(__assign({}, context.repo), { labels: "linkrot" }))];
+                case 1:
+                    existingLinkrotIssues = (_a.sent()).data;
+                    existingPr = existingLinkrotIssues.find(function (issue) { return issue.pull_request; });
+                    if (existingPr) {
+                        ctx.message("Skipping linkrot because a pull request already exists\n" + existingPr.pull_request.html_url);
+                        throw new types_1.LError();
+                    }
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+exports.checkForExisting = checkForExisting;
+
+
+/***/ }),
+
+/***/ 4229:
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -72408,12 +74466,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.sniff = exports.sniffHttps = exports.checkGroups = void 0;
 var url_1 = __importDefault(__webpack_require__(8835));
 var https_1 = __importDefault(__webpack_require__(7211));
-var http_1 = __importDefault(__webpack_require__(8605));
+var p_all_1 = __importDefault(__webpack_require__(4275));
 var timeout = {
     timeout: 2000,
 };
+// In an ideal world, we would use HEAD requests, but
+// many sites don't handle them well or at all, so instead
+// we issue GET requests but avoid reading their responses,
+// and only harvesting the status code.
 function cancelGet(url, lib) {
     return new Promise(function (resolve, reject) {
         var req = lib.get(url, timeout, function (res) {
@@ -72423,29 +74486,50 @@ function cancelGet(url, lib) {
         req.on("error", reject);
     });
 }
-function getRedirect(url) {
+function checkGroups(ctx, groups) {
     return __awaiter(this, void 0, void 0, function () {
-        var httpsEquivalent, _a, httpRes, httpsRes, err_1;
-        return __generator(this, function (_b) {
-            switch (_b.label) {
+        var _this = this;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, p_all_1.default(groups.map(function (group) {
+                        return function () { return __awaiter(_this, void 0, void 0, function () {
+                            var _a;
+                            return __generator(this, function (_b) {
+                                switch (_b.label) {
+                                    case 0:
+                                        _a = group;
+                                        return [4 /*yield*/, sniff(group.url)];
+                                    case 1:
+                                        _a.status = _b.sent();
+                                        ctx.cache[group.url] = Date.now();
+                                        return [2 /*return*/];
+                                }
+                            });
+                        }); };
+                    }), { concurrency: 10 })];
+                case 1: return [2 /*return*/, _a.sent()];
+            }
+        });
+    });
+}
+exports.checkGroups = checkGroups;
+function predictedHttps(url) {
+    return url_1.default.format(__assign(__assign({}, url_1.default.parse(url)), { protocol: "https:" }));
+}
+function sniffHttp(url) {
+    return __awaiter(this, void 0, void 0, function () {
+        var httpsEquivalent, httpsRes, err_1;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
                 case 0:
-                    httpsEquivalent = url_1.default.format(__assign(__assign({}, url_1.default.parse(url)), { protocol: "https:" }));
-                    _b.label = 1;
+                    httpsEquivalent = predictedHttps(url);
+                    _a.label = 1;
                 case 1:
-                    _b.trys.push([1, 3, , 4]);
-                    return [4 /*yield*/, Promise.all([
-                            cancelGet(url, http_1.default),
-                            cancelGet(httpsEquivalent, https_1.default),
-                        ])];
+                    _a.trys.push([1, 3, , 4]);
+                    return [4 /*yield*/, cancelGet(httpsEquivalent, https_1.default)];
                 case 2:
-                    _a = _b.sent(), httpRes = _a[0], httpsRes = _a[1];
-                    if (httpRes.headers.location === httpsEquivalent) {
-                        return [2 /*return*/, {
-                                status: "upgrade",
-                                to: httpsEquivalent,
-                            }];
-                    }
-                    if (httpsRes.statusCode < 300 && httpRes.statusCode < 300) {
+                    httpsRes = _a.sent();
+                    if (httpsRes.statusCode < 300) {
                         return [2 /*return*/, {
                                 status: "upgrade",
                                 to: httpsEquivalent,
@@ -72455,7 +74539,7 @@ function getRedirect(url) {
                             status: "ok",
                         }];
                 case 3:
-                    err_1 = _b.sent();
+                    err_1 = _a.sent();
                     return [2 /*return*/, {
                             status: "error",
                         }];
@@ -72464,12 +74548,219 @@ function getRedirect(url) {
         });
     });
 }
-exports.default = getRedirect;
+function sniffHttps(url) {
+    return __awaiter(this, void 0, void 0, function () {
+        var httpsRes, err_2;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 2, , 3]);
+                    return [4 /*yield*/, cancelGet(url, https_1.default)];
+                case 1:
+                    httpsRes = _a.sent();
+                    if (httpsRes.statusCode >= 400) {
+                        throw new Error("Status code >= 400");
+                    }
+                    return [2 /*return*/, {
+                            status: "ok",
+                        }];
+                case 2:
+                    err_2 = _a.sent();
+                    return [2 /*return*/, {
+                            status: "error",
+                        }];
+                case 3: return [2 /*return*/];
+            }
+        });
+    });
+}
+exports.sniffHttps = sniffHttps;
+function sniff(url) {
+    return __awaiter(this, void 0, void 0, function () {
+        var parsed, protocol;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    parsed = url_1.default.parse(url);
+                    protocol = parsed.protocol;
+                    if (!(protocol === "http:")) return [3 /*break*/, 2];
+                    return [4 /*yield*/, sniffHttp(url)];
+                case 1: return [2 /*return*/, _a.sent()];
+                case 2:
+                    if (!(protocol === "https:")) return [3 /*break*/, 4];
+                    return [4 /*yield*/, sniffHttps(url)];
+                case 3: return [2 /*return*/, _a.sent()];
+                case 4: throw new Error("Unsupported protcol");
+            }
+        });
+    });
+}
+exports.sniff = sniff;
 
 
 /***/ }),
 
-/***/ 7208:
+/***/ 7344:
+/***/ (function(__unused_webpack_module, exports) {
+
+"use strict";
+
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.commitFile = void 0;
+function commitFile(lcontext, branch, file) {
+    return __awaiter(this, void 0, void 0, function () {
+        var context, toolkit, message, ref, path, sha;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    context = lcontext.context, toolkit = lcontext.toolkit;
+                    message = file.replacements.join(", ");
+                    ref = "refs/heads/" + branch;
+                    path = file.gitPath;
+                    return [4 /*yield*/, toolkit.repos.getContent(__assign(__assign({}, context.repo), { ref: ref,
+                            path: path }))];
+                case 1:
+                    sha = (_a.sent()).data.sha;
+                    return [4 /*yield*/, toolkit.repos.createOrUpdateFileContents(__assign(__assign({}, context.repo), { path: path,
+                            branch: branch,
+                            sha: sha,
+                            message: message, content: Buffer.from(file.magicString.toString()).toString("base64") }))];
+                case 2:
+                    _a.sent();
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+exports.commitFile = commitFile;
+
+
+/***/ }),
+
+/***/ 3308:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getCache = void 0;
+var fs_1 = __importDefault(__webpack_require__(5747));
+function getCache(ctx, cacheFilePath) {
+    return __awaiter(this, void 0, void 0, function () {
+        var c, flushedEntries, _i, _a, entry;
+        return __generator(this, function (_b) {
+            try {
+                c = JSON.parse(fs_1.default.readFileSync(cacheFilePath, "utf8"));
+                flushedEntries = 0;
+                for (_i = 0, _a = Object.keys(c); _i < _a.length; _i++) {
+                    entry = _a[_i];
+                    if (c[entry] < Date.now() - 100 * 60 * 60 * 24 * 14) {
+                        delete c[entry];
+                        flushedEntries++;
+                    }
+                }
+                if (flushedEntries) {
+                    ctx.messages.push("Flushed " + flushedEntries.toLocaleString());
+                }
+                ctx.cache = c;
+            }
+            catch (e) { }
+            return [2 /*return*/];
+        });
+    });
+}
+exports.getCache = getCache;
+
+
+/***/ }),
+
+/***/ 5340:
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -72478,7 +74769,218 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.shouldScan = exports.replaceFile = exports.findLinks = exports.gatherFiles = void 0;
+exports.queryIA = void 0;
+var http_1 = __importDefault(__webpack_require__(5876));
+// https://github.com/internetarchive/internetarchivebot/blob/master/app/src/Core/APII.php#L2429
+var ENDPOINT = "http://archive.org/wayback/available";
+var HEADERS = {
+    "Wayback-Api-Version": 2,
+};
+function encodeURLs(urls) {
+    return urls
+        .map(function (url, i) {
+        return "url=" + url + "&closest=before&statuscodes=200&statuscodes=203&statuscodes=206&tag=" + i;
+    })
+        .join("\n");
+}
+function queryIA(urls) {
+    return new Promise(function (resolve, reject) {
+        function handleResponse(res) {
+            var body = "";
+            res.setEncoding("utf8");
+            res.on("data", function (chunk) {
+                body += chunk;
+            });
+            res.on("end", function () {
+                try {
+                    resolve(JSON.parse(body));
+                }
+                catch (e) {
+                    reject(body);
+                }
+            });
+        }
+        var req = http_1.default.request(ENDPOINT, {
+            method: "POST",
+            headers: HEADERS,
+        }, handleResponse);
+        req.on("error", function (e) {
+            reject(e);
+        });
+        req.write(encodeURLs(urls));
+        req.end();
+    });
+}
+exports.queryIA = queryIA;
+
+
+/***/ }),
+
+/***/ 3390:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.suggestChanges = exports.getBody = exports.getTitle = exports.getDefaultBranch = void 0;
+var commit_file_1 = __webpack_require__(7344);
+function createBranch(_a, defaultBranch) {
+    var context = _a.context, toolkit = _a.toolkit;
+    return __awaiter(this, void 0, void 0, function () {
+        var branch, ref, sha;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
+                case 0:
+                    branch = "linkrot-" + new Date()
+                        .toLocaleDateString()
+                        .replace(/\//g, "-");
+                    ref = "refs/heads/" + branch;
+                    return [4 /*yield*/, toolkit.git.getRef({
+                            owner: context.repo.owner,
+                            repo: context.repo.repo,
+                            ref: "heads/" + defaultBranch,
+                        })];
+                case 1:
+                    sha = (_b.sent()).data.object.sha;
+                    return [4 /*yield*/, toolkit.git.createRef(__assign(__assign({}, context.repo), { ref: ref,
+                            sha: sha }))];
+                case 2:
+                    _b.sent();
+                    return [2 /*return*/, branch];
+            }
+        });
+    });
+}
+function getDefaultBranch(_a) {
+    var toolkit = _a.toolkit, context = _a.context;
+    return __awaiter(this, void 0, void 0, function () {
+        var default_branch;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
+                case 0: return [4 /*yield*/, toolkit.repos.get({
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                    })];
+                case 1:
+                    default_branch = (_b.sent()).data.default_branch;
+                    return [2 /*return*/, default_branch];
+            }
+        });
+    });
+}
+exports.getDefaultBranch = getDefaultBranch;
+function getTitle(ctx) {
+    return "\uD83D\uDD17 Linkrot updates with " + ctx.stats.upgradedSSL + " SSL Upgrades";
+}
+exports.getTitle = getTitle;
+function getBody(ctx) {
+    return "#### Stats\n\n- " + ctx.stats.urlsDetected.toLocaleString() + " URLs detected\n- " + ctx.stats.cacheSkipped.toLocaleString() + " URLs skipped because of the cache\n- " + ctx.stats.protocolSkipped.toLocaleString() + " URLs skipped because of the protocol\n- " + ctx.stats.relativeSkipped.toLocaleString() + " URLs skipped because of the relative\n- " + ctx.stats.urlsScanned.toLocaleString() + " URLs scanned\n";
+}
+exports.getBody = getBody;
+function suggestChanges(ctx, updatedFiles) {
+    return __awaiter(this, void 0, void 0, function () {
+        var context, toolkit, base, branch, _i, updatedFiles_1, file, number;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    context = ctx.context, toolkit = ctx.toolkit;
+                    if (!updatedFiles.length) {
+                        ctx.message("No changes detected!");
+                        ctx.message(getBody(ctx));
+                        return [2 /*return*/];
+                    }
+                    ctx.message("Suggesting changes");
+                    return [4 /*yield*/, getDefaultBranch(ctx)];
+                case 1:
+                    base = _a.sent();
+                    return [4 /*yield*/, createBranch(ctx, base)];
+                case 2:
+                    branch = _a.sent();
+                    _i = 0, updatedFiles_1 = updatedFiles;
+                    _a.label = 3;
+                case 3:
+                    if (!(_i < updatedFiles_1.length)) return [3 /*break*/, 6];
+                    file = updatedFiles_1[_i];
+                    return [4 /*yield*/, commit_file_1.commitFile(ctx, branch, file)];
+                case 4:
+                    _a.sent();
+                    _a.label = 5;
+                case 5:
+                    _i++;
+                    return [3 /*break*/, 3];
+                case 6: return [4 /*yield*/, toolkit.pulls.create(__assign(__assign({}, context.repo), { title: getTitle(ctx), body: getBody(ctx), head: branch, base: base }))];
+                case 7:
+                    number = (_a.sent()).data.number;
+                    return [4 /*yield*/, toolkit.issues.addLabels(__assign(__assign({}, context.repo), { issue_number: number, labels: ["linkrot"] }))];
+                case 8:
+                    _a.sent();
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+exports.suggestChanges = suggestChanges;
+
+
+/***/ }),
+
+/***/ 5245:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.updateFiles = exports.replaceLinks = exports.toLFile = exports.skipGroups = exports.shouldScan = exports.gatherFiles = exports.groupFiles = void 0;
 var url_1 = __importDefault(__webpack_require__(8835));
 var fs_1 = __importDefault(__webpack_require__(5747));
 var path_1 = __importDefault(__webpack_require__(5622));
@@ -72487,59 +74989,154 @@ var remark_1 = __importDefault(__webpack_require__(7112));
 var unist_util_select_1 = __webpack_require__(7879);
 var remark_frontmatter_1 = __importDefault(__webpack_require__(437));
 var is_absolute_url_1 = __importDefault(__webpack_require__(5410));
-function getRemark() {
-    return remark_1.default().use(remark_frontmatter_1.default, ["yaml"]);
+var glob_1 = __importDefault(__webpack_require__(6691));
+var remark = remark_1.default().use(remark_frontmatter_1.default, ["yaml", "toml"]);
+function groupFiles(ctx, files) {
+    var groups = new Map();
+    for (var _i = 0, files_1 = files; _i < files_1.length; _i++) {
+        var file = files_1[_i];
+        var links = unist_util_select_1.selectAll("link", file.ast);
+        for (var _a = 0, links_1 = links; _a < links_1.length; _a++) {
+            var link = links_1[_a];
+            var url = link.url;
+            if (!groups.get(url)) {
+                groups.set(url, {
+                    url: url,
+                    files: [],
+                });
+            }
+            groups.get(url).files.push(file);
+        }
+    }
+    var urlGroups = Array.from(groups.values());
+    ctx.message(urlGroups.length.toLocaleString() + " unique URLs detected");
+    return urlGroups;
 }
-function gatherFiles() {
-    var BASE = path_1.default.join(process.env.GITHUB_WORKSPACE || __dirname, "_posts");
-    return fs_1.default.readdirSync(BASE)
-        .filter(function (f) { return f.endsWith(".md"); })
-        .map(findLinks);
+exports.groupFiles = groupFiles;
+function gatherFiles(ctx) {
+    var cwd = ctx.cwd;
+    var files = glob_1.default
+        .sync("_posts/*.md", {
+        cwd: cwd,
+        absolute: true,
+    })
+        .map(function (filename) {
+        return toLFile(filename, path_1.default.relative(cwd, filename));
+    });
+    ctx.message(files.length.toLocaleString() + " files detected");
+    return files;
 }
 exports.gatherFiles = gatherFiles;
-function findLinks(basename) {
-    var BASE = path_1.default.join(process.env.GITHUB_WORKSPACE || __dirname, "_posts");
-    var filename = path_1.default.join(BASE, basename);
-    var text = fs_1.default.readFileSync(filename, "utf8");
-    var remark = getRemark();
-    var ast = remark.parse(text);
-    var links = unist_util_select_1.selectAll("link", ast);
-    var externalLinks = links.filter(function (link) {
-        var url = link.url;
-        return is_absolute_url_1.default(url) && shouldScan(url);
+function shouldScan(url) {
+    var parts = url_1.default.parse(url);
+    return parts.protocol === "http:" || parts.protocol === "https:";
+}
+exports.shouldScan = shouldScan;
+function skipGroups(ctx, groups) {
+    ctx.stats.urlsDetected = groups.length;
+    var filtered = groups.filter(function (group) {
+        var url = group.url;
+        if (!is_absolute_url_1.default(url)) {
+            ctx.stats.relativeSkipped++;
+            return false;
+        }
+        if (!shouldScan(url)) {
+            ctx.stats.protocolSkipped++;
+            return false;
+        }
+        if (ctx.cache[url]) {
+            ctx.stats.cacheSkipped++;
+            return false;
+        }
+        return true;
     });
+    var limited = filtered.slice(0, ctx.limit);
+    ctx.stats.urlsScanned = limited.length;
+    return limited;
+}
+exports.skipGroups = skipGroups;
+function toLFile(filename, gitPath) {
+    var text = fs_1.default.readFileSync(filename, "utf8");
+    var ast = remark.parse(text);
     return {
         filename: filename,
-        gitPath: path_1.default.join("_posts", basename),
+        gitPath: gitPath,
         ast: ast,
-        text: text,
-        externalLinks: externalLinks,
+        magicString: new magic_string_1.default(text),
         replacements: [],
     };
 }
-exports.findLinks = findLinks;
-function replaceFile(file, a, b) {
-    var text = file.text;
-    var s = new magic_string_1.default(text);
-    var remark = getRemark();
-    var ast = remark.parse(text);
+exports.toLFile = toLFile;
+function replaceLinks(file, a, b) {
+    var ast = file.ast, magicString = file.magicString;
     var links = unist_util_select_1.selectAll("link", ast);
-    for (var _i = 0, links_1 = links; _i < links_1.length; _i++) {
-        var link = links_1[_i];
+    for (var _i = 0, links_2 = links; _i < links_2.length; _i++) {
+        var link = links_2[_i];
         if (link.url === a) {
             link.url = b;
-            s.overwrite(link.position.start.offset, link.position.end.offset, remark.stringify(link));
+            magicString.overwrite(link.position.start.offset, link.position.end.offset, remark.stringify(link));
         }
     }
-    file.text = s.toString();
     file.replacements.push(a + " \u2192 " + b);
 }
-exports.replaceFile = replaceFile;
-function shouldScan(url) {
-    var parts = url_1.default.parse(url);
-    return parts.protocol === "http:";
+exports.replaceLinks = replaceLinks;
+function updateFiles(ctx, groups) {
+    var _a, _b;
+    var updatedFiles = new Set();
+    for (var _i = 0, groups_1 = groups; _i < groups_1.length; _i++) {
+        var group = groups_1[_i];
+        if (((_a = group.status) === null || _a === void 0 ? void 0 : _a.status) == "upgrade") {
+            for (var _c = 0, _d = group.files; _c < _d.length; _c++) {
+                var file = _d[_c];
+                replaceLinks(file, group.url, group.status.to);
+                updatedFiles.add(file);
+                ctx.stats.upgradedSSL++;
+            }
+        }
+        else if (((_b = group.status) === null || _b === void 0 ? void 0 : _b.status) == "archive") {
+            for (var _e = 0, _f = group.files; _e < _f.length; _e++) {
+                var file = _f[_e];
+                replaceLinks(file, group.url, group.status.to);
+                updatedFiles.add(file);
+                ctx.stats.archived++;
+            }
+        }
+    }
+    return Array.from(updatedFiles);
 }
-exports.shouldScan = shouldScan;
+exports.updateFiles = updateFiles;
+
+
+/***/ }),
+
+/***/ 6582:
+/***/ (function(__unused_webpack_module, exports) {
+
+"use strict";
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.LError = void 0;
+var LError = /** @class */ (function (_super) {
+    __extends(LError, _super);
+    function LError() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    return LError;
+}(Error));
+exports.LError = LError;
 
 
 /***/ }),
@@ -72656,7 +75253,7 @@ module.exports = require("fs");;
 
 /***/ }),
 
-/***/ 8605:
+/***/ 5876:
 /***/ ((module) => {
 
 "use strict";
@@ -72838,6 +75435,6 @@ module.exports = require("zlib");;
 /******/ 	// module exports must be returned from runtime so entry inlining is disabled
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(4034);
+/******/ 	return __webpack_require__(2391);
 /******/ })()
 ;
