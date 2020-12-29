@@ -15,8 +15,7 @@ test("sniff - redirect to https", async (t) => {
 });
 
 test("sniff - error", async (t) => {
-  const res = await sniff("ht:tp://macwright.com");
-  t.equal(res.status, "error");
+  t.rejects(sniff("ht:tp://macwright.com"));
 });
 
 test("checkGroups", async (t) => {

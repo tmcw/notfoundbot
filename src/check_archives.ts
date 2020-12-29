@@ -4,6 +4,7 @@ import { LURLGroup } from "../types";
 export async function checkArchives(groups: LURLGroup[]) {
   let errorGroups = groups.filter((group) => group.status?.status === "error");
   errorGroups = errorGroups.slice(0, 50);
+  if (!errorGroups.length) return;
 
   const archiveStatus = await queryIA(errorGroups.map((group) => group.url));
 

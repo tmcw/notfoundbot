@@ -26,7 +26,11 @@ export function queryIA(urls: string[]): Promise<IAResults> {
         body += chunk;
       });
       res.on("end", () => {
-        resolve(JSON.parse(body));
+        try {
+          resolve(JSON.parse(body));
+        } catch (e) {
+          reject(body);
+        }
       });
     }
 

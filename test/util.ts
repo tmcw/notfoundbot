@@ -5,7 +5,7 @@ import {
   shouldScan,
   gatherFiles,
   toLFile,
-  replaceFile,
+  replaceLinks,
   groupFiles,
   updateFiles,
 } from "../src/util";
@@ -39,8 +39,8 @@ test("updateFiles", async (t) => {
   t.same(updates.length, 0);
 });
 
-test("replaceFile", async (t) => {
-  replaceFile(lFile, "http://google.com", "https://google.com");
+test("replaceLinks", async (t) => {
+  replaceLinks(lFile, "http://google.com", "https://google.com");
   t.same(lFile.replacements, ["http://google.com → https://google.com"]);
 });
 
