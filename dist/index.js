@@ -74466,9 +74466,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.sniff = exports.sniffHttps = exports.checkGroups = void 0;
+exports.sniff = exports.sniffHttps = exports.sniffHttp = exports.checkGroups = void 0;
 var url_1 = __importDefault(__webpack_require__(8835));
 var https_1 = __importDefault(__webpack_require__(7211));
+var http_1 = __importDefault(__webpack_require__(5876));
 var p_all_1 = __importDefault(__webpack_require__(4275));
 var timeout = {
     timeout: 2000,
@@ -74518,7 +74519,7 @@ function predictedHttps(url) {
 }
 function sniffHttp(url) {
     return __awaiter(this, void 0, void 0, function () {
-        var httpsEquivalent, httpsRes, err_1;
+        var httpsEquivalent, httpsRes, e_1, httpRes, err_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -74535,19 +74536,34 @@ function sniffHttp(url) {
                                 to: httpsEquivalent,
                             }];
                     }
-                    return [2 /*return*/, {
-                            status: "ok",
-                        }];
+                    return [3 /*break*/, 4];
                 case 3:
+                    e_1 = _a.sent();
+                    return [3 /*break*/, 4];
+                case 4:
+                    _a.trys.push([4, 6, , 7]);
+                    return [4 /*yield*/, cancelGet(url, http_1.default)];
+                case 5:
+                    httpRes = _a.sent();
+                    if (httpRes.statusCode <= 400) {
+                        return [2 /*return*/, {
+                                status: "ok",
+                            }];
+                    }
+                    return [2 /*return*/, {
+                            status: "error",
+                        }];
+                case 6:
                     err_1 = _a.sent();
                     return [2 /*return*/, {
                             status: "error",
                         }];
-                case 4: return [2 /*return*/];
+                case 7: return [2 /*return*/];
             }
         });
     });
 }
+exports.sniffHttp = sniffHttp;
 function sniffHttps(url) {
     return __awaiter(this, void 0, void 0, function () {
         var httpsRes, err_2;
