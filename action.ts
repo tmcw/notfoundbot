@@ -1,5 +1,5 @@
 import Fs from "fs";
-import { action } from "./";
+import { action } from "./index";
 import { getCache } from "./src/get_cache";
 import { getOctokit, context } from "@actions/github";
 import { restoreCache, saveCache } from "@actions/cache";
@@ -27,10 +27,16 @@ function message(msg: string) {
       upgradedSSL: 0,
       urlsDetected: 0,
       urlsScanned: 0,
+      protocolSkipped: 0,
+      relativeSkipped: 0,
     },
   };
   const cacheFilePath = ".linkrot-cache";
-  await restoreCache([cacheFilePath], "linkrot");
+  try {
+    await restoreCache([cacheFilePath], "linkrot");
+  } catch (e) {
+    ctx.message("ERROR: Failed to restore cache!");
+  }
   await getCache(ctx, cacheFilePath);
   await action(ctx);
   Fs.writeFileSync(cacheFilePath, JSON.stringify(ctx.cache));

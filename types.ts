@@ -44,6 +44,8 @@ export type LContext = {
     upgradedSSL: number;
     urlsScanned: number;
     urlsDetected: number;
+    protocolSkipped: number;
+    relativeSkipped: number;
   };
 };
 

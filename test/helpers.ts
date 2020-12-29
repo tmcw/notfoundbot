@@ -29,6 +29,8 @@ export function testContext(): LContext {
       upgradedSSL: 0,
       urlsScanned: 0,
       urlsDetected: 0,
+      protocolSkipped: 0,
+      relativeSkipped: 0,
     },
   };
 }

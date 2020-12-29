@@ -27,13 +27,14 @@ test("toLFile", async (t) => {
 });
 
 test("groupFiles", async (t) => {
-  const groups = groupFiles([lFile]);
+  const ctx = testContext();
+  const groups = groupFiles(ctx, [lFile]);
   t.same(groups.length, 3);
 });
 
 test("updateFiles", async (t) => {
   const ctx = testContext();
-  const updates = updateFiles(ctx, groupFiles([lFile]));
+  const updates = updateFiles(ctx, groupFiles(ctx, [lFile]));
   t.same(updates.length, 0);
 });
 

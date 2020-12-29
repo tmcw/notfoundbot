@@ -12,7 +12,7 @@ import { LFile, LURLGroup, LContext } from "../types";
 
 const remark = Remark().use(frontmatter, ["yaml", "toml"]);
 
-export function groupFiles(files: LFile[]) {
+export function groupFiles(ctx: LContext, files: LFile[]) {
   const groups = new Map<string, LURLGroup>();
   for (let file of files) {
     const links = selectAll("link", file.ast) as Link[];
@@ -27,12 +27,14 @@ export function groupFiles(files: LFile[]) {
       groups.get(url)!.files.push(file);
     }
   }
-  return Array.from(groups.values());
+  const urlGroups = Array.from(groups.values());
+  ctx.message(`${urlGroups.length.toLocaleString()} unique URLs detected`);
+  return urlGroups;
 }
 
-export function gatherFiles(context: LContext) {
-  const { cwd } = context;
-  return glob
+export function gatherFiles(ctx: LContext) {
+  const { cwd } = ctx;
+  const files = glob
     .sync("_posts/*.md", {
       cwd,
       absolute: true,
@@ -40,6 +42,8 @@ export function gatherFiles(context: LContext) {
     .map((filename) => {
       return toLFile(filename, Path.relative(cwd, filename));
     });
+  ctx.message(`${files.length.toLocaleString()} files detected`);
+  return files;
 }
 
 export function shouldScan(url: string) {
@@ -51,8 +55,14 @@ export function skipGroups(ctx: LContext, groups: LURLGroup[]) {
   ctx.stats.urlsDetected = groups.length;
   const filtered = groups.filter((group) => {
     const { url } = group;
-    if (!isAbsoluteUrl(url)) return false;
-    if (!shouldScan(url)) return false;
+    if (!isAbsoluteUrl(url)) {
+      ctx.stats.relativeSkipped++;
+      return false;
+    }
+    if (!shouldScan(url)) {
+      ctx.stats.protocolSkipped++;
+      return false;
+    }
     if (ctx.cache[url]) {
       ctx.stats.cacheSkipped++;
       return false;

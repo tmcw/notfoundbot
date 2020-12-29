@@ -7,9 +7,12 @@
     "release": "standard-version",
     "build": "ncc build action.ts --license licenses.txt",
     "test": "tsc && tap test",
-    "start": "./dist/action.js"
+    "start": "./dist/index.js"
   },
-  "dependencies": {
+  "bin": {
+    "linkrot": "./dist/index.js"
+  },
+  "devDependencies": {
     "@actions/cache": "^1.0.5",
     "@actions/github": "^4.0.0",
     "@types/glob": "^7.1.3",

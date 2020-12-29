@@ -21,7 +21,7 @@ test("sniff - error", async (t) => {
 
 test("checkGroups", async (t) => {
   const ctx = testContext();
-  const groups = groupFiles([lFile]);
+  const groups = groupFiles(ctx, [lFile]);
   await checkGroups(ctx, groups);
   t.same(Array.from(groups.values())[0].status?.status, "ok");
 });

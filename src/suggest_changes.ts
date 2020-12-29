@@ -48,6 +48,8 @@ export function getBody(ctx: LContext) {
 
 - ${ctx.stats.urlsDetected.toLocaleString()} URLs detected
 - ${ctx.stats.cacheSkipped.toLocaleString()} URLs skipped because of the cache
+- ${ctx.stats.protocolSkipped.toLocaleString()} URLs skipped because of the protocol
+- ${ctx.stats.relativeSkipped.toLocaleString()} URLs skipped because of the relative
 - ${ctx.stats.urlsScanned.toLocaleString()} URLs scanned
 `;
 }
@@ -55,6 +57,13 @@ export function getBody(ctx: LContext) {
 export async function suggestChanges(ctx: LContext, updatedFiles: LFile[]) {
   const { context, toolkit } = ctx;
 
+  if (!updatedFiles.length) {
+    ctx.message(`No changes detected!`);
+    ctx.message(getBody(ctx));
+    return;
+  }
+
+  ctx.message(`Suggesting changes`);
   const base = await getDefaultBranch(ctx);
   const branch = await createBranch(ctx, base);
 

@@ -15,6 +15,8 @@ test("getBody", async (t) => {
 
 - 0 URLs detected
 - 0 URLs skipped because of the cache
+- 0 URLs skipped because of the protocol
+- 0 URLs skipped because of the relative
 - 0 URLs scanned
 `
   );
