@@ -7,61 +7,102 @@ import { selectAll } from "unist-util-select";
 import type { Link } from "mdast";
 import frontmatter from "remark-frontmatter";
 import isAbsoluteUrl from "is-absolute-url";
-import { FileChanges } from "../types";
+import glob from "glob";
+import { LFile, LURLGroup, LContext } from "../types";
 
-function getRemark() {
-  return Remark().use(frontmatter, ["yaml"]);
+const remark = Remark().use(frontmatter, ["yaml", "toml"]);
+
+export function groupFiles(files: LFile[]) {
+  const groups = new Map<string, LURLGroup>();
+  for (let file of files) {
+    const links = selectAll("link", file.ast) as Link[];
+    for (let link of links) {
+      const { url } = link;
+      if (!groups.get(url)) {
+        groups.set(url, {
+          url,
+          files: [],
+        });
+      }
+      groups.get(url)!.files.push(file);
+    }
+  }
+  return Array.from(groups.values());
 }
 
-export function gatherFiles() {
-  const BASE = Path.join(process.env.GITHUB_WORKSPACE || __dirname, "_posts");
-  return Fs.readdirSync(BASE)
-    .filter((f) => f.endsWith(".md"))
-    .map(findLinks);
+export function gatherFiles(context: LContext) {
+  const { cwd } = context;
+  return glob
+    .sync("_posts/*.md", {
+      cwd,
+      absolute: true,
+    })
+    .map((filename) => {
+      return toLFile(filename, Path.relative(cwd, filename));
+    });
 }
 
-export function findLinks(basename: string): FileChanges {
-  const BASE = Path.join(process.env.GITHUB_WORKSPACE || __dirname, "_posts");
-  const filename = Path.join(BASE, basename);
-  const text = Fs.readFileSync(filename, "utf8");
-  const remark = getRemark();
-  const ast = remark.parse(text);
-  const links = selectAll("link", ast) as Link[];
-  const externalLinks = links.filter((link) => {
-    const url = link.url as string;
-    return isAbsoluteUrl(url) && shouldScan(url);
+export function shouldScan(url: string) {
+  const parts = Url.parse(url);
+  return parts.protocol === "http:";
+}
+
+export function skipGroups(ctx: LContext, groups: LURLGroup[]) {
+  ctx.stats.urlsDetected = groups.length;
+  const filtered = groups.filter((group) => {
+    const { url } = group;
+    if (!isAbsoluteUrl(url)) return false;
+    if (!shouldScan(url)) return false;
+    if (ctx.cache[url]) {
+      ctx.stats.cacheSkipped++;
+      return false;
+    }
+    return true;
   });
+  const limited = filtered.slice(0, ctx.limit);
+  ctx.stats.urlsScanned = limited.length;
+  return limited;
+}
+
+export function toLFile(filename: string, gitPath: string): LFile {
+  const text = Fs.readFileSync(filename, "utf8");
+  const ast = remark.parse(text);
+
   return {
     filename,
-    gitPath: Path.join("_posts", basename),
+    gitPath,
     ast,
-    text,
-    externalLinks,
+    magicString: new MagicString(text),
     replacements: [],
   };
 }
 
-export function replaceFile(file: FileChanges, a: string, b: string) {
-  let text = file.text;
-  const s = new MagicString(text);
-  const remark = getRemark();
-  const ast = remark.parse(text);
+export function replaceFile(file: LFile, a: string, b: string) {
+  const { ast, magicString } = file;
   const links = selectAll("link", ast) as Link[];
   for (let link of links) {
     if (link.url === a) {
       link.url = b;
-      s.overwrite(
+      magicString.overwrite(
         link.position!.start.offset!,
         link.position!.end.offset!,
         remark.stringify(link)
       );
     }
   }
-  file.text = s.toString();
   file.replacements.push(`${a} → ${b}`);
 }
 
-export function shouldScan(url: string) {
-  const parts = Url.parse(url);
-  return parts.protocol === "http:";
+export function updateFiles(ctx: LContext, groups: LURLGroup[]): LFile[] {
+  let updatedFiles: Set<LFile> = new Set();
+  for (let group of groups) {
+    if (group.status?.status == "upgrade") {
+      for (let file of group.files) {
+        replaceFile(file, group.url, group.status.to);
+        updatedFiles.add(file);
+        ctx.stats.upgradedSSL++;
+      }
+    }
+  }
+  return Array.from(updatedFiles);
 }

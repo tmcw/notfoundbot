@@ -1,6 +1,8 @@
 import Url from "url";
 import Https from "https";
 import Http from "http";
+import pAll from "p-all";
+import { LStatus, LContext, LURLGroup } from "../types";
 
 const timeout = {
   timeout: 2000,
@@ -20,17 +22,19 @@ function cancelGet(
   });
 }
 
-type Result =
-  | {
-      status: "upgrade";
-      to: string;
-    }
-  | {
-      status: "error";
-    }
-  | { status: "ok" };
+export async function checkGroups(ctx: LContext, groups: LURLGroup[]) {
+  return await pAll(
+    groups.map((group) => {
+      return async () => {
+        group.status = await sniff(group.url);
+        ctx.cache[group.url] = Date.now();
+      };
+    }),
+    { concurrency: 10 }
+  );
+}
 
-export default async function getRedirect(url: string): Promise<Result> {
+export async function sniff(url: string): Promise<LStatus> {
   const httpsEquivalent = Url.format({
     ...Url.parse(url),
     protocol: "https:",

@@ -1,62 +1,75 @@
-import {FileChanges, LContext} from "../types";
-import {createRedirectCommits} from "./create_commits"
+import { LFile, LContext } from "../types";
+import { commitFile } from "./commit_file";
 
-export async function suggestChanges(lcontext: LContext, replacements: FileChanges[], body: string) {
-
-  const {context, toolkit} = lcontext;
-
-
+async function createBranch(
+  { context, toolkit }: LContext,
+  defaultBranch: string
+) {
   const branch = `linkrot-${new Date()
     .toLocaleDateString()
     .replace(/\//g, "-")}`;
-
-  const {
-    data: {default_branch},
-  } = await toolkit.repos.get({
-    owner: context.repo.owner,
-    repo: context.repo.repo,
-  });
+  const ref = `refs/heads/${branch}`;
 
   const {
     data: {
-      object: {sha},
+      object: { sha },
     },
   } = await toolkit.git.getRef({
     owner: context.repo.owner,
     repo: context.repo.repo,
-    ref: `heads/${default_branch}`,
+    ref: `heads/${defaultBranch}`,
   });
 
-  try {
-    await toolkit.repos.getBranch({
-      ...context.repo,
-      branch,
-    });
-  } catch (error) {
-    if (error.name === "HttpError" && error.status === 404) {
-      const branchRef = `refs/heads/${branch}`;
+  await toolkit.git.createRef({
+    ...context.repo,
+    ref,
+    sha,
+  });
 
-      await toolkit.git.createRef({
-        ...context.repo,
-        ref: branchRef,
-        sha,
-      });
-    } else {
-      throw Error(error);
-    }
+  return branch;
+}
+
+export async function getDefaultBranch({ toolkit, context }: LContext) {
+  const {
+    data: { default_branch },
+  } = await toolkit.repos.get({
+    owner: context.repo.owner,
+    repo: context.repo.repo,
+  });
+  return default_branch;
+}
+
+export function getTitle(ctx: LContext) {
+  return `🔗 Linkrot updates with ${ctx.stats.upgradedSSL} SSL Upgrades`;
+}
+
+export function getBody(ctx: LContext) {
+  return `#### Stats
+
+- ${ctx.stats.urlsDetected.toLocaleString()} URLs detected
+- ${ctx.stats.cacheSkipped.toLocaleString()} URLs skipped because of the cache
+- ${ctx.stats.urlsScanned.toLocaleString()} URLs scanned
+`;
+}
+
+export async function suggestChanges(ctx: LContext, updatedFiles: LFile[]) {
+  const { context, toolkit } = ctx;
+
+  const base = await getDefaultBranch(ctx);
+  const branch = await createBranch(ctx, base);
+
+  for (let file of updatedFiles) {
+    await commitFile(ctx, branch, file);
   }
 
-  await createRedirectCommits(lcontext, branch, replacements);
-  const title = `🔗 Linkrot: updating ${replacements.length} links`;
-
   const {
-    data: {number},
+    data: { number },
   } = await toolkit.pulls.create({
     ...context.repo,
-    title,
-    body,
+    title: getTitle(ctx),
+    body: getBody(ctx),
     head: branch,
-    base: default_branch,
+    base,
   });
 
   await toolkit.issues.addLabels({

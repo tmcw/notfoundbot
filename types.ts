@@ -1,15 +1,30 @@
-import type {Link} from "mdast";
-import type {Node} from "unist";
-import type {context} from "@actions/github";
-import {getOctokit} from "@actions/github";
+import type { Node } from "unist";
+import type { context } from "@actions/github";
+import MagicString from "magic-string";
+import { getOctokit } from "@actions/github";
 
-export type FileChanges = {
+export type LFile = {
   filename: string;
   gitPath: string;
   ast: Node;
-  text: string;
-  externalLinks: Link[];
+  magicString: MagicString;
   replacements: string[];
+};
+
+export type LStatus =
+  | {
+      status: "upgrade";
+      to: string;
+    }
+  | {
+      status: "error";
+    }
+  | { status: "ok" };
+
+export type LURLGroup = {
+  url: string;
+  files: LFile[];
+  status?: LStatus;
 };
 
 export type Cache = {
@@ -17,10 +32,19 @@ export type Cache = {
 };
 
 export type LContext = {
-  context: typeof context,
-  toolkit: ReturnType<typeof getOctokit>,
-  cacheUtils: {
-    restoreCache: any,
-    saveCache: any,
-  }
-}
+  cwd: string;
+  context: typeof context;
+  toolkit: ReturnType<typeof getOctokit>;
+  cache: Cache;
+  message: (message: string) => void;
+  messages: string[];
+  limit: number;
+  stats: {
+    cacheSkipped: number;
+    upgradedSSL: number;
+    urlsScanned: number;
+    urlsDetected: number;
+  };
+};
+
+export class LError extends Error {}
