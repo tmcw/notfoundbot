@@ -7,7 +7,7 @@ import { selectAll } from "unist-util-select";
 import type { Link } from "mdast";
 import frontmatter from "remark-frontmatter";
 import isAbsoluteUrl from "is-absolute-url";
-import { FileChanges } from "./types";
+import { FileChanges } from "../types";
 
 function getRemark() {
   return Remark().use(frontmatter, ["yaml"]);

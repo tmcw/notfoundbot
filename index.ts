@@ -2,16 +2,13 @@
 
 import fs from "fs";
 import pAll from "p-all";
-import { getOctokit, context } from "@actions/github";
-import { saveCache, restoreCache } from "@actions/cache";
-import sniff from "./sniff";
-import { FileChanges, Cache } from "./types";
-import { replaceFile, gatherFiles } from "./util";
+import sniff from "./src/sniff";
+import {FileChanges, LContext} from "./types";
+import {replaceFile, gatherFiles} from "./src/util";
+import {getCache} from "./src/get_cache";
+import {suggestChanges} from "./src/suggest_changes";
+import {checkForExisting} from "./src/check_existing";
 
-const dry = process.env.DRY_RUN;
-const toolkit = getOctokit(process.env.GITHUB_TOKEN!);
-const CACHE_FILE = ".linkrot-cache";
-const DEVELOPMENT = process.platform === "darwin";
 
 function replace(
   a: string,
@@ -26,150 +23,22 @@ function replace(
   return results;
 }
 
-/**
- * If an existing PR has the linkrot tag,
- * print and return true to exit.
- */
-async function checkForExisting() {
-  const { data: existingLinkrotIssues } = await toolkit.issues.listForRepo({
-    ...context.repo,
-    labels: "linkrot",
-  });
-  const existingPr = existingLinkrotIssues.find((issue) => issue.pull_request);
-  if (existingPr) {
-    console.log("Skipping linkrot because a pull request already exists");
-    console.log(existingPr.pull_request.html_url);
-    process.exit();
-  }
-}
+export async function action(ctx: LContext) {
+  const CACHE_FILE = ".linkrot-cache";
 
-async function suggestChanges(replacements: FileChanges[], body: string) {
-  const branch = `linkrot-${new Date()
-    .toLocaleDateString()
-    .replace(/\//g, "-")}`;
+  const {cacheUtils} = ctx;
 
-  const {
-    data: { default_branch },
-  } = await toolkit.repos.get({
-    owner: context.repo.owner,
-    repo: context.repo.repo,
-  });
 
-  const {
-    data: {
-      object: { sha },
-    },
-  } = await toolkit.git.getRef({
-    owner: context.repo.owner,
-    repo: context.repo.repo,
-    ref: `heads/${default_branch}`,
-  });
+  const existingMessage = await checkForExisting(ctx);
 
-  try {
-    await toolkit.repos.getBranch({
-      ...context.repo,
-      branch,
-    });
-  } catch (error) {
-    if (error.name === "HttpError" && error.status === 404) {
-      const branchRef = `refs/heads/${branch}`;
-      if (dry) {
-        console.log(`DRY: creating ref: ${branchRef}`);
-      } else {
-        await toolkit.git.createRef({
-          ...context.repo,
-          ref: branchRef,
-          sha,
-        });
-      }
-    } else {
-      throw Error(error);
-    }
+  if (existingMessage) {
+    console.log(existingMessage);
+    return;
   }
 
-  await createRedirectCommits(branch, replacements);
-  const title = `🔗 Linkrot: updating ${replacements.length} links`;
+  await cacheUtils.restoreCache([CACHE_FILE], "linkrot");
 
-  if (dry) {
-    console.log(`DRY: creating pull: ${title}`);
-  } else {
-    const {
-      data: { number },
-    } = await toolkit.pulls.create({
-      ...context.repo,
-      title,
-      body,
-      head: branch,
-      base: default_branch,
-    });
-
-    await toolkit.issues.addLabels({
-      ...context.repo,
-      issue_number: number,
-      labels: ["linkrot"],
-    });
-  }
-}
-
-async function createRedirectCommits(
-  branch: string,
-  replacements: FileChanges[]
-) {
-  for (let file of replacements) {
-    const message = file.replacements.join(", ");
-    const ref = `refs/heads/${branch}`;
-    const path = file.gitPath;
-
-    if (dry) {
-      return console.log(
-        `DRY: updating ${file.filename} with message: ${message}`
-      );
-    }
-
-    const existing = await toolkit.repos.getContent({
-      ...context.repo,
-      ref,
-      path,
-    });
-
-    await toolkit.repos.createOrUpdateFileContents({
-      ...context.repo,
-      path,
-      branch,
-      sha: existing.data.sha,
-      message,
-      content: Buffer.from(file.text).toString("base64"),
-    });
-  }
-}
-
-function getCache(): Cache {
-  try {
-    const c = JSON.parse(fs.readFileSync(CACHE_FILE, "utf8"));
-    let flushedEntries = 0;
-    for (let entry of c) {
-      if (c[entry] < Date.now() - 100 * 60 * 60 * 24 * 14) {
-        delete c[entry];
-        flushedEntries++;
-      }
-    }
-    if (flushedEntries) {
-      console.log(`Flushed ${flushedEntries.toLocaleString()}`);
-    }
-    return c;
-  } catch (e) {
-    return {};
-  }
-}
-
-(async function () {
-  await checkForExisting();
-
-  if (!DEVELOPMENT) {
-    await restoreCache([CACHE_FILE], "linkrot");
-  }
-
-  const cache = getCache();
+  const cache = getCache(CACHE_FILE);
   const files = gatherFiles();
   const urls = new Set<string>();
   const urlReferences = new Map<string, FileChanges[]>();
@@ -213,17 +82,15 @@ function getCache(): Cache {
         }
       };
     }),
-    { concurrency: 10 }
+    {concurrency: 10}
   );
 
   fs.writeFileSync(CACHE_FILE, JSON.stringify(cache));
 
-  if (!DEVELOPMENT) {
-    try {
-      await saveCache([CACHE_FILE], "linkrot");
-    } catch (e) {
-      console.error("ERROR: Failed to save cache!");
-    }
+  try {
+    await cacheUtils.saveCache([CACHE_FILE], "linkrot");
+  } catch (e) {
+    console.error("ERROR: Failed to save cache!");
   }
 
   if (replacements.size == 0) {
@@ -232,7 +99,7 @@ function getCache(): Cache {
     console.log(`Creating PR with ${replacements.size} changes`);
   }
 
-  await suggestChanges(
+  await suggestChanges(ctx,
     Array.from(replacements),
     `- ${urls.size.toLocaleString()} URLs detected
 - ${subset.length.toLocaleString()} checked in this run
@@ -240,4 +107,4 @@ function getCache(): Cache {
 - ${cacheSkipped.toLocaleString()} skipped because of the cache
 - ${upgrades.toLocaleString()} upgraded`
   );
-})();
+}
