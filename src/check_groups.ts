@@ -45,7 +45,7 @@ function predictedHttps(url: string) {
   });
 }
 
-async function sniffHttp(url: string): Promise<LStatus> {
+export async function sniffHttp(url: string): Promise<LStatus> {
   const httpsEquivalent = predictedHttps(url);
   try {
     const httpsRes = await cancelGet(httpsEquivalent, Https);
@@ -56,9 +56,17 @@ async function sniffHttp(url: string): Promise<LStatus> {
         to: httpsEquivalent,
       };
     }
+  } catch (e) {}
 
+  try {
+    const httpRes = await cancelGet(url, Http);
+    if (httpRes.statusCode! <= 400) {
+      return {
+        status: "ok",
+      };
+    }
     return {
-      status: "ok",
+      status: "error",
     };
   } catch (err) {
     return {
