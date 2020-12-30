@@ -74063,6 +74063,7 @@ const get_cache_1 = __webpack_require__(3308);
 const github_1 = __webpack_require__(1089);
 const cache_1 = __webpack_require__(1135);
 const toolkit = github_1.getOctokit(process.env.GITHUB_TOKEN);
+const cacheKey = "linkrot-v2-";
 const messages = [];
 function message(msg) {
     messages.push(msg);
@@ -74089,7 +74090,7 @@ function message(msg) {
     };
     const cacheFilePath = ".linkrot-cache";
     try {
-        await cache_1.restoreCache([cacheFilePath], "linkrot");
+        await cache_1.restoreCache([cacheFilePath], cacheKey);
     }
     catch (e) {
         ctx.message("ERROR: Failed to restore cache!");
@@ -74098,7 +74099,7 @@ function message(msg) {
     await index_1.action(ctx);
     fs_1.default.writeFileSync(cacheFilePath, JSON.stringify(ctx.cache));
     try {
-        await cache_1.saveCache([cacheFilePath], "linkrot");
+        await cache_1.saveCache([cacheFilePath], cacheKey);
     }
     catch (e) {
         ctx.message("ERROR: Failed to save cache!");
