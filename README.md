@@ -19,7 +19,7 @@ will be linked to archives from around that era.
 
 ## Example YAML
 
-```
+```yaml
 name: notfoundbot
 on:
   schedule:
