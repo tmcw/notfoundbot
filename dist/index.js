@@ -73809,7 +73809,7 @@ const get_cache_1 = __webpack_require__(3308);
 const github_1 = __webpack_require__(1089);
 const cache_1 = __webpack_require__(1135);
 const toolkit = github_1.getOctokit(process.env.GITHUB_TOKEN);
-const cacheKey = "linkrot-v2-";
+const cacheKey = `linkrot-v2-${Date.now()}`;
 const messages = [];
 function message(msg) {
     messages.push(msg);
@@ -73836,7 +73836,7 @@ function message(msg) {
     };
     const cacheFilePath = ".linkrot-cache";
     try {
-        await cache_1.restoreCache([cacheFilePath], cacheKey);
+        await cache_1.restoreCache([cacheFilePath], cacheKey, ["linkrot-v2-"]);
     }
     catch (e) {
         ctx.message("ERROR: Failed to restore cache!");
@@ -73958,7 +73958,7 @@ const p_all_1 = __importDefault(__webpack_require__(4275));
 const getOptions = {
     timeout: 2000,
     headers: {
-        "User-Agent": "LinkrotBot",
+        "User-Agent": "curl/7.43.0",
     },
 };
 // In an ideal world, we would use HEAD requests, but
@@ -74013,7 +74013,7 @@ async function sniffHttps(url) {
     try {
         const httpsRes = await cancelGet(url, https_1.default);
         if (httpsRes.statusCode >= 400) {
-            throw new Error("Status code >= 400");
+            throw new Error(`Status code >= 400`);
         }
         return {
             status: "ok",

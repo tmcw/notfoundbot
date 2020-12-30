@@ -7,7 +7,7 @@ import { LStatus, LContext, LURLGroup } from "../types";
 const getOptions = {
   timeout: 2000,
   headers: {
-    "User-Agent": "LinkrotBot",
+    "User-Agent": "curl/7.43.0",
   },
 };
 
@@ -71,7 +71,7 @@ async function sniffHttps(url: string): Promise<LStatus> {
     const httpsRes = await cancelGet(url, Https);
 
     if (httpsRes.statusCode! >= 400) {
-      throw new Error("Status code >= 400");
+      throw new Error(`Status code >= 400`);
     }
 
     return {
