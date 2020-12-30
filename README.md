@@ -17,6 +17,10 @@ By using post dates derived from filenames, Linkrot searches for Wayback Machine
 of linked resources that are contemporary to the post itself: broken links in a 2011 blog post
 will be linked to archives from around that era.
 
+## Features
+
+- Post date detection: supports filename-based dates, YAML & TOML frontmatter
+
 ## Workflow
 
 - If there is an existing PR tagged `linkrot`, exit
