@@ -74143,13 +74143,14 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.checkArchives = void 0;
 const query_ia_1 = __webpack_require__(4354);
 async function checkArchives(groups) {
-    let errorGroups = groups.filter((group) => group.status?.status === "error");
+    var _a, _b;
+    let errorGroups = groups.filter((group) => { var _a; return ((_a = group.status) === null || _a === void 0 ? void 0 : _a.status) === "error"; });
     errorGroups = errorGroups.slice(0, 50);
     if (!errorGroups.length)
         return;
     const archiveStatus = await query_ia_1.queryIA(errorGroups);
     for (let result of archiveStatus.results) {
-        if (result.archived_snapshots?.closest?.available) {
+        if ((_b = (_a = result.archived_snapshots) === null || _a === void 0 ? void 0 : _a.closest) === null || _b === void 0 ? void 0 : _b.available) {
             errorGroups.find((group) => group.url == result.url).status = {
                 status: "archive",
                 to: result.archived_snapshots.closest.url,
@@ -74655,9 +74656,10 @@ function replaceLinks(file, a, b) {
 }
 exports.replaceLinks = replaceLinks;
 function updateFiles(ctx, groups) {
+    var _a;
     let updatedFiles = new Set();
     for (let group of groups) {
-        switch (group.status?.status) {
+        switch ((_a = group.status) === null || _a === void 0 ? void 0 : _a.status) {
             case "upgrade": {
                 for (let file of group.files) {
                     replaceLinks(file, group.url, group.status.to);
