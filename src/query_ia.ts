@@ -1,6 +1,5 @@
 import Https from "https";
 import Http from "http";
-import Path from "path";
 import Querystring from "querystring";
 import { IAResults, LURLGroup } from "../types";
 
@@ -11,17 +10,9 @@ const HEADERS = {
   "Wayback-Api-Version": 2,
 };
 
-export function dateFromFilename(filename: string) {
-  const match = filename.match(/^(\d{4})-(\d{2})-(\d{2})/);
-  if (match) {
-    // Month here is 'monthIndex', a weird API, zero-indexed. Be careful.
-    return new Date(+match[1], parseInt(match[2], 10) - 1, +match[3]);
-  }
-}
-
 function dateForGroup(group: LURLGroup) {
   const dates = Array.from(group.files)
-    .map((file) => dateFromFilename(Path.basename(file.filename)))
+    .map((file) => file.date)
     .filter(Boolean) as Date[];
   dates.sort((a, b) => +b - +a);
   if (dates.length) return dates[0];

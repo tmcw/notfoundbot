@@ -7,6 +7,7 @@ export type LFile = {
   filename: string;
   gitPath: string;
   ast: Node;
+  date: Date | undefined;
   magicString: MagicString;
   replacements: string[];
 };

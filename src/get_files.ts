@@ -1,16 +1,11 @@
-import Fs from "fs";
-import MagicString from "magic-string";
 import Path from "path";
 import Url from "url";
 import glob from "glob";
-import Remark from "remark";
 import isAbsoluteUrl from "is-absolute-url";
-import frontmatter from "remark-frontmatter";
 import { selectAll } from "unist-util-select";
+import { toLFile } from "./to_lfile";
 import type { Link } from "mdast";
 import type { LFile, LURLGroup, LContext } from "../types";
-
-const remark = Remark().use(frontmatter, ["yaml", "toml"]);
 
 function gatherFiles(ctx: LContext) {
   const { cwd } = ctx;
@@ -71,19 +66,6 @@ function skipGroups(ctx: LContext, groups: LURLGroup[]) {
   const limited = filtered.slice(0, ctx.limit);
   ctx.stats.urlsScanned = limited.length;
   return limited;
-}
-
-export function toLFile(filename: string, gitPath: string): LFile {
-  const text = Fs.readFileSync(filename, "utf8");
-  const ast = remark.parse(text);
-
-  return {
-    filename,
-    gitPath,
-    ast,
-    magicString: new MagicString(text),
-    replacements: [],
-  };
 }
 
 export function getFiles(ctx: LContext) {
