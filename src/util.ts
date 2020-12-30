@@ -15,21 +15,18 @@ const remark = Remark().use(frontmatter, ["yaml", "toml"]);
 export function groupFiles(ctx: LContext, files: LFile[]) {
   const groups = new Map<string, LURLGroup>();
   for (let file of files) {
-    const links = selectAll("link", file.ast) as Link[];
-    for (let link of links) {
+    for (let link of selectAll("link", file.ast) as Link[]) {
       const { url } = link;
-      if (!groups.get(url)) {
-        groups.set(url, {
-          url,
-          files: [],
-        });
-      }
-      groups.get(url)!.files.push(file);
+      const group = groups.get(url) || {
+        url,
+        files: new Set(),
+      };
+      group.files.add(file);
+      groups.set(url, group);
     }
   }
-  const urlGroups = Array.from(groups.values());
-  ctx.message(`${urlGroups.length.toLocaleString()} unique URLs detected`);
-  return urlGroups;
+  ctx.message(`${groups.size.toLocaleString()} unique URLs detected`);
+  return Array.from(groups.values());
 }
 
 export function gatherFiles(ctx: LContext) {
@@ -51,24 +48,26 @@ export function shouldScan(url: string) {
   return parts.protocol === "http:" || parts.protocol === "https:";
 }
 
+function filterGroup(ctx: LContext, group: LURLGroup) {
+  const { url } = group;
+  if (!isAbsoluteUrl(url)) {
+    ctx.stats.relativeSkipped++;
+    return false;
+  }
+  if (!shouldScan(url)) {
+    ctx.stats.protocolSkipped++;
+    return false;
+  }
+  if (ctx.cache[url]) {
+    ctx.stats.cacheSkipped++;
+    return false;
+  }
+  return true;
+}
+
 export function skipGroups(ctx: LContext, groups: LURLGroup[]) {
   ctx.stats.urlsDetected = groups.length;
-  const filtered = groups.filter((group) => {
-    const { url } = group;
-    if (!isAbsoluteUrl(url)) {
-      ctx.stats.relativeSkipped++;
-      return false;
-    }
-    if (!shouldScan(url)) {
-      ctx.stats.protocolSkipped++;
-      return false;
-    }
-    if (ctx.cache[url]) {
-      ctx.stats.cacheSkipped++;
-      return false;
-    }
-    return true;
-  });
+  const filtered = groups.filter((group) => filterGroup(ctx, group));
   const limited = filtered.slice(0, ctx.limit);
   ctx.stats.urlsScanned = limited.length;
   return limited;
@@ -106,17 +105,20 @@ export function replaceLinks(file: LFile, a: string, b: string) {
 export function updateFiles(ctx: LContext, groups: LURLGroup[]): LFile[] {
   let updatedFiles: Set<LFile> = new Set();
   for (let group of groups) {
-    if (group.status?.status == "upgrade") {
-      for (let file of group.files) {
-        replaceLinks(file, group.url, group.status.to);
-        updatedFiles.add(file);
-        ctx.stats.upgradedSSL++;
+    switch (group.status?.status) {
+      case "upgrade": {
+        for (let file of group.files) {
+          replaceLinks(file, group.url, group.status.to);
+          updatedFiles.add(file);
+          ctx.stats.upgradedSSL++;
+        }
       }
-    } else if (group.status?.status == "archive") {
-      for (let file of group.files) {
-        replaceLinks(file, group.url, group.status.to);
-        updatedFiles.add(file);
-        ctx.stats.archived++;
+      case "archive": {
+        for (let file of group.files) {
+          replaceLinks(file, group.url, group.status.to);
+          updatedFiles.add(file);
+          ctx.stats.archived++;
+        }
       }
     }
   }
