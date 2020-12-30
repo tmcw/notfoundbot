@@ -5,7 +5,7 @@ async function createBranch(
   { context, toolkit }: LContext,
   defaultBranch: string
 ) {
-  const branch = `linkrot-${new Date()
+  const branch = `notfoundbot-${new Date()
     .toLocaleDateString()
     .replace(/\//g, "-")}`;
   const ref = `refs/heads/${branch}`;
@@ -100,6 +100,6 @@ export async function suggestChanges(ctx: LContext, updatedFiles: LFile[]) {
   await toolkit.issues.addLabels({
     ...context.repo,
     issue_number: number,
-    labels: ["linkrot"],
+    labels: ["notfoundbot"],
   });
 }

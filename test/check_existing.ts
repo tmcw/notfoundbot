@@ -6,7 +6,7 @@ import { testContext } from "./helpers";
 test("checkForExisting", async (t) => {
   const ctx = testContext();
   Nock("https://api.github.com")
-    .get("/repos/foo/bar/issues?labels=linkrot")
+    .get("/repos/foo/bar/issues?labels=notfoundbot")
     .reply(200, []);
   t.equal(await checkForExisting(ctx), undefined);
 });
@@ -14,7 +14,7 @@ test("checkForExisting", async (t) => {
 test("checkForExisting - with existing", async (t) => {
   const ctx = testContext();
   Nock("https://api.github.com")
-    .get("/repos/foo/bar/issues?labels=linkrot")
+    .get("/repos/foo/bar/issues?labels=notfoundbot")
     .reply(200, [
       {
         pull_request: {
@@ -24,7 +24,7 @@ test("checkForExisting - with existing", async (t) => {
     ]);
   await t.rejects(checkForExisting(ctx));
   t.same(ctx.messages, [
-    `Skipping linkrot because a pull request already exists
+    `Skipping notfoundbot because a pull request already exists
 http://foo.com`,
   ]);
 });

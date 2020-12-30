@@ -12,7 +12,7 @@ test("getCache", async (t) => {
 
 test("getCache with an entry", async (t) => {
   const ctx = testContext();
-  const cachePath = Path.join(ctx.cwd, ".linkrot");
+  const cachePath = Path.join(ctx.cwd, ".notfoundbot");
   const cacheData = {
     "http://google.com": Date.now(),
   };
@@ -23,7 +23,7 @@ test("getCache with an entry", async (t) => {
 
 test("getCache with an expired entry", async (t) => {
   const ctx = testContext();
-  const cachePath = Path.join(ctx.cwd, ".linkrot");
+  const cachePath = Path.join(ctx.cwd, ".notfoundbot");
   const cacheData = {
     "http://expired.com": Date.now() - 10e10,
   };

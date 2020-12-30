@@ -80144,7 +80144,7 @@ const get_cache_1 = __webpack_require__(3308);
 const github_1 = __webpack_require__(1089);
 const cache_1 = __webpack_require__(1135);
 const toolkit = github_1.getOctokit(process.env.GITHUB_TOKEN);
-const cacheKey = `linkrot-v2-${Date.now()}`;
+const cacheKey = `notfoundbot-v2-${Date.now()}`;
 const messages = [];
 function message(msg) {
     messages.push(msg);
@@ -80169,9 +80169,9 @@ function message(msg) {
             archived: 0,
         },
     };
-    const cacheFilePath = ".linkrot-cache";
+    const cacheFilePath = ".notfoundbot-cache";
     try {
-        await cache_1.restoreCache([cacheFilePath], cacheKey, ["linkrot-v2-"]);
+        await cache_1.restoreCache([cacheFilePath], cacheKey, ["notfoundbot-v2-"]);
     }
     catch (e) {
         ctx.message("ERROR: Failed to restore cache!");
@@ -80255,18 +80255,18 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.checkForExisting = void 0;
 const types_1 = __webpack_require__(4440);
 /**
- * If an existing PR has the linkrot tag,
+ * If an existing PR has the notfoundbot tag,
  * print and return true to exit.
  */
 async function checkForExisting(ctx) {
     const { toolkit, context } = ctx;
     const { data: existingLinkrotIssues } = await toolkit.issues.listForRepo({
         ...context.repo,
-        labels: "linkrot",
+        labels: "notfoundbot",
     });
     const existingPr = existingLinkrotIssues.find((issue) => issue.pull_request);
     if (existingPr) {
-        ctx.message(`Skipping linkrot because a pull request already exists
+        ctx.message(`Skipping notfoundbot because a pull request already exists
 ${existingPr.pull_request.html_url}`);
         throw new types_1.LError();
     }
@@ -80620,7 +80620,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.suggestChanges = exports.getBody = exports.getTitle = exports.getDefaultBranch = void 0;
 const commit_file_1 = __webpack_require__(7344);
 async function createBranch({ context, toolkit }, defaultBranch) {
-    const branch = `linkrot-${new Date()
+    const branch = `notfoundbot-${new Date()
         .toLocaleDateString()
         .replace(/\//g, "-")}`;
     const ref = `refs/heads/${branch}`;
@@ -80689,7 +80689,7 @@ async function suggestChanges(ctx, updatedFiles) {
     await toolkit.issues.addLabels({
         ...context.repo,
         issue_number: number,
-        labels: ["linkrot"],
+        labels: ["notfoundbot"],
     });
 }
 exports.suggestChanges = suggestChanges;

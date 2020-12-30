@@ -1,19 +1,19 @@
-# Linkrot
+# notfoundbot
 
-[![Maintainability](https://api.codeclimate.com/v1/badges/60d76b0ce5d82d6fedbf/maintainability)](https://codeclimate.com/github/tmcw/linkrot/maintainability)
+[![Maintainability](https://api.codeclimate.com/v1/badges/1870414e70039aad07f3/maintainability)](https://codeclimate.com/github/tmcw/notfoundbot/maintainability)
 
-Linkrot is a GitHub Action that helps you automatically maintain the correctness of your
+notfoundbot is a GitHub Action that helps you automatically maintain the correctness of your
 website's outgoing links. It finds links that need fixing and opens pull requests
 that fix them.
 
 This action is intended for websites and blogs powered by static site generators.
 
-Linkrot does the following fixes:
+notfoundbot does the following fixes:
 
 - Upgrades outgoing HTTP links to HTTPS
 - Replaces broken outgoing links with links to the [Wayback Machine](https://web.archive.org/)
 
-By using post dates derived from filenames, Linkrot searches for Wayback Machine archives
+By using post dates derived from filenames, notfoundbot searches for Wayback Machine archives
 of linked resources that are contemporary to the post itself: broken links in a 2011 blog post
 will be linked to archives from around that era.
 
@@ -23,7 +23,7 @@ will be linked to archives from around that era.
 
 ## Workflow
 
-- If there is an existing PR tagged `linkrot`, exit
+- If there is an existing PR tagged `notfoundbot`, exit
 - Gather post files and parse them, and then for each unique outlink URL
     - If the URL is not http or https, ignore it
     - If the URL is relative, ignore it

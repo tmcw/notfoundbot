@@ -10,7 +10,7 @@
     "start": "./dist/index.js"
   },
   "bin": {
-    "linkrot": "./dist/index.js"
+    "notfoundbot": "./dist/index.js"
   },
   "devDependencies": {
     "@actions/cache": "^1.0.5",
