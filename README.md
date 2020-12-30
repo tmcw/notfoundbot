@@ -1,5 +1,7 @@
 # Linkrot
 
+[![Maintainability](https://api.codeclimate.com/v1/badges/60d76b0ce5d82d6fedbf/maintainability)](https://codeclimate.com/github/tmcw/linkrot/maintainability)
+
 Linkrot is a GitHub Action that helps you automatically maintain the correctness of your
 website's outgoing links. It finds links that need fixing and opens pull requests
 that fix them.
