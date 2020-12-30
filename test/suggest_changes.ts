@@ -4,19 +4,24 @@ import { testContext } from "./helpers";
 
 test("getTitle", async (t) => {
   const ctx = testContext();
-  t.equal(getTitle(ctx), `🔗 Linkrot updates with 0 SSL Upgrades`);
+  t.equal(getTitle(ctx), `🔗 Linkrot: 0 fixes`);
 });
 
 test("getBody", async (t) => {
   const ctx = testContext();
   t.equal(
     getBody(ctx),
-    `#### Stats
+    `# Changes
 
-- 0 URLs detected
-- 0 URLs skipped because of the cache
-- 0 URLs skipped because of the protocol
-- 0 URLs skipped because of the relative
+- 0 links upgraded from HTTP to HTTPS
+- 0 dead links relinked to the Internet Archive
+
+---
+
+- 0 URLs total
+- Skipped 0 cached
+- Skipped 0 mailto or data links
+- Skipped 0 relative links
 - 0 URLs scanned
 `
   );

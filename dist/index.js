@@ -74102,6 +74102,7 @@ function message(msg) {
     }
     catch (e) {
         ctx.message("ERROR: Failed to save cache!");
+        throw e;
     }
 })();
 
@@ -74584,17 +74585,24 @@ async function getDefaultBranch({ toolkit, context }) {
 }
 exports.getDefaultBranch = getDefaultBranch;
 function getTitle(ctx) {
-    return `🔗 Linkrot updates with ${ctx.stats.upgradedSSL} SSL Upgrades`;
+    const { upgradedSSL, archived } = ctx.stats;
+    return `🔗 Linkrot: ${(upgradedSSL + archived).toLocaleString()} fixes`;
 }
 exports.getTitle = getTitle;
 function getBody(ctx) {
-    return `#### Stats
+    const { upgradedSSL, archived, urlsDetected, cacheSkipped, protocolSkipped, relativeSkipped, urlsScanned, } = ctx.stats;
+    return `# Changes
 
-- ${ctx.stats.urlsDetected.toLocaleString()} URLs detected
-- ${ctx.stats.cacheSkipped.toLocaleString()} URLs skipped because of the cache
-- ${ctx.stats.protocolSkipped.toLocaleString()} URLs skipped because of the protocol
-- ${ctx.stats.relativeSkipped.toLocaleString()} URLs skipped because of the relative
-- ${ctx.stats.urlsScanned.toLocaleString()} URLs scanned
+- ${upgradedSSL.toLocaleString()} links upgraded from HTTP to HTTPS
+- ${archived.toLocaleString()} dead links relinked to the Internet Archive
+
+---
+
+- ${urlsDetected.toLocaleString()} URLs total
+- Skipped ${cacheSkipped.toLocaleString()} cached
+- Skipped ${protocolSkipped.toLocaleString()} mailto or data links
+- Skipped ${relativeSkipped.toLocaleString()} relative links
+- ${urlsScanned.toLocaleString()} URLs scanned
 `;
 }
 exports.getBody = getBody;

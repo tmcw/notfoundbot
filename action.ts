@@ -45,5 +45,6 @@ function message(msg: string) {
     await saveCache([cacheFilePath], "linkrot");
   } catch (e) {
     ctx.message("ERROR: Failed to save cache!");
+    throw e;
   }
 })();
