@@ -74209,8 +74209,11 @@ const url_1 = __importDefault(__webpack_require__(8835));
 const https_1 = __importDefault(__webpack_require__(7211));
 const http_1 = __importDefault(__webpack_require__(5876));
 const p_all_1 = __importDefault(__webpack_require__(4275));
-const timeout = {
+const getOptions = {
     timeout: 2000,
+    headers: {
+        "User-Agent": "LinkrotBot",
+    },
 };
 // In an ideal world, we would use HEAD requests, but
 // many sites don't handle them well or at all, so instead
@@ -74218,7 +74221,7 @@ const timeout = {
 // and only harvesting the status code.
 function cancelGet(url, lib) {
     return new Promise((resolve, reject) => {
-        const req = lib.get(url, timeout, (res) => {
+        const req = lib.get(url, getOptions, (res) => {
             resolve(res);
             req.destroy();
         });

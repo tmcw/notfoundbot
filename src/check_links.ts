@@ -4,8 +4,11 @@ import Http from "http";
 import pAll from "p-all";
 import { LStatus, LContext, LURLGroup } from "../types";
 
-const timeout = {
+const getOptions = {
   timeout: 2000,
+  headers: {
+    "User-Agent": "LinkrotBot",
+  },
 };
 
 // In an ideal world, we would use HEAD requests, but
@@ -17,7 +20,7 @@ function cancelGet(
   lib: typeof Http | typeof Https
 ): Promise<Http.IncomingMessage> {
   return new Promise((resolve, reject) => {
-    const req = lib.get(url, timeout, (res) => {
+    const req = lib.get(url, getOptions, (res) => {
       resolve(res);
       req.destroy();
     });
