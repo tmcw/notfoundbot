@@ -6,7 +6,7 @@ export async function checkArchives(groups: LURLGroup[]) {
   errorGroups = errorGroups.slice(0, 50);
   if (!errorGroups.length) return;
 
-  const archiveStatus = await queryIA(errorGroups.map((group) => group.url));
+  const archiveStatus = await queryIA(errorGroups);
 
   for (let result of archiveStatus.results) {
     if (result.archived_snapshots?.closest?.available) {
