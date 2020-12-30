@@ -17,6 +17,31 @@ By using post dates derived from filenames, notfoundbot searches for Wayback Mac
 of linked resources that are contemporary to the post itself: broken links in a 2011 blog post
 will be linked to archives from around that era.
 
+## Example YAML
+
+```
+name: notfoundbot
+on:
+  schedule:
+    - cron: "0 5 * * *"
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Fix links
+        uses: tmcw/notfoundbot@v2.0.0-beta.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+```
+
+Notes:
+
+- I might forget to update the version on `notfoundbot` here - make sure that it's
+  the latest!
+- Check out [crontab.guru](https://crontab.guru/#5_*_*_*_*) to customize the
+  schedule line, which can run the task more or less often if you want.
+
 ## Features
 
 - Post date detection: supports filename-based dates, YAML & TOML frontmatter
