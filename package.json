@@ -1,6 +1,6 @@
 {
-  "name": "@tmcw/linkrot",
-  "version": "2.0.0-alpha.1",
+  "name": "@tmcw/notfoundbot",
+  "version": "2.0.0-beta",
   "main": "dist/index.js",
   "license": "MIT",
   "scripts": {
