@@ -3,6 +3,16 @@ import { getOctokit, context } from "@actions/github";
 import Fs from "fs";
 import Path from "path";
 import { LContext } from "../types";
+import { getFiles } from "../src/get_files";
+
+export function getTestFiles(ctx: LContext) {
+  Fs.copyFileSync(
+    Path.join(__dirname, "./fixtures/example.md"),
+    Path.join(ctx.cwd, "_posts/2020-01-01-example.md")
+  );
+
+  return getFiles(ctx);
+}
 
 export function testContext(): LContext {
   const tmp = Tempy.directory();

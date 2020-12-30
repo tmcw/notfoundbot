@@ -1,8 +1,6 @@
 import { test } from "tap";
-import { queryIA, dateFromFilename, formatDate } from "../src/ia_client";
-import { toLFile, groupFiles } from "../src/util";
-import { testContext } from "./helpers";
-import Path from "path";
+import { queryIA, dateFromFilename, formatDate } from "../src/query_ia";
+import { testContext, getTestFiles } from "./helpers";
 
 test("dateFromFilename", async (t) => {
   t.same(formatDate(dateFromFilename("2000-01-01-foo")), "20000101000000");
@@ -15,11 +13,6 @@ test("formatDate", async (t) => {
 test("queryIA with no groups", async (t) => {
   const ctx = testContext();
 
-  const lFile = toLFile(
-    Path.join(__dirname, "./fixtures/example.md"),
-    "fixtures/example.md"
-  );
-
-  const groups = groupFiles(ctx, [lFile]);
+  const groups = getTestFiles(ctx);
   t.same((await queryIA(groups)).results.length, 3);
 });

@@ -1,20 +1,12 @@
 import { test } from "tap";
 import { checkArchives } from "../src/check_archives";
-import { toLFile, groupFiles } from "../src/util";
-import { testContext } from "./helpers";
+import { testContext, getTestFiles } from "./helpers";
 import type { IAResults } from "../types";
-import Path from "path";
 import Nock from "nock";
 
 test("checkArchives - found", async (t) => {
   const ctx = testContext();
-
-  const lFile = toLFile(
-    Path.join(__dirname, "./fixtures/example.md"),
-    "fixtures/example.md"
-  );
-
-  const groups = groupFiles(ctx, [lFile]);
+  const groups = getTestFiles(ctx);
 
   groups[0].status = {
     status: "error",
@@ -47,13 +39,7 @@ test("checkArchives - found", async (t) => {
 
 test("checkArchives - not found", async (t) => {
   const ctx = testContext();
-
-  const lFile = toLFile(
-    Path.join(__dirname, "./fixtures/example.md"),
-    "fixtures/example.md"
-  );
-
-  const groups = groupFiles(ctx, [lFile]);
+  const groups = getTestFiles(ctx);
 
   groups[0].status = {
     status: "error",
