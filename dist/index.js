@@ -74116,16 +74116,15 @@ function message(msg) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.action = void 0;
 const util_1 = __webpack_require__(5245);
-const check_groups_1 = __webpack_require__(4229);
+const get_files_1 = __webpack_require__(4706);
+const check_existing_1 = __webpack_require__(6154);
+const check_links_1 = __webpack_require__(9207);
 const check_archives_1 = __webpack_require__(4703);
 const suggest_changes_1 = __webpack_require__(3390);
-const check_existing_1 = __webpack_require__(6154);
 async function action(ctx) {
     await check_existing_1.checkForExisting(ctx);
-    const files = util_1.gatherFiles(ctx);
-    const rawGroups = util_1.groupFiles(ctx, files);
-    const urlGroups = util_1.skipGroups(ctx, rawGroups);
-    await check_groups_1.checkGroups(ctx, urlGroups);
+    const urlGroups = get_files_1.getFiles(ctx);
+    await check_links_1.checkLinks(ctx, urlGroups);
     await check_archives_1.checkArchives(urlGroups);
     const updatedFiles = util_1.updateFiles(ctx, urlGroups);
     await suggest_changes_1.suggestChanges(ctx, updatedFiles);
@@ -74142,13 +74141,13 @@ exports.action = action;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.checkArchives = void 0;
-const ia_client_1 = __webpack_require__(5340);
+const query_ia_1 = __webpack_require__(4354);
 async function checkArchives(groups) {
     let errorGroups = groups.filter((group) => group.status?.status === "error");
     errorGroups = errorGroups.slice(0, 50);
     if (!errorGroups.length)
         return;
-    const archiveStatus = await ia_client_1.queryIA(errorGroups);
+    const archiveStatus = await query_ia_1.queryIA(errorGroups);
     for (let result of archiveStatus.results) {
         if (result.archived_snapshots?.closest?.available) {
             errorGroups.find((group) => group.url == result.url).status = {
@@ -74193,7 +74192,7 @@ exports.checkForExisting = checkForExisting;
 
 /***/ }),
 
-/***/ 4229:
+/***/ 9207:
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -74202,7 +74201,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.sniff = exports.sniffHttps = exports.sniffHttp = exports.checkGroups = void 0;
+exports.sniff = exports.checkLinks = void 0;
 const url_1 = __importDefault(__webpack_require__(8835));
 const https_1 = __importDefault(__webpack_require__(7211));
 const http_1 = __importDefault(__webpack_require__(5876));
@@ -74223,15 +74222,6 @@ function cancelGet(url, lib) {
         req.on("error", reject);
     });
 }
-async function checkGroups(ctx, groups) {
-    return await p_all_1.default(groups.map((group) => {
-        return async () => {
-            group.status = await sniff(group.url);
-            ctx.cache[group.url] = Date.now();
-        };
-    }), { concurrency: 10 });
-}
-exports.checkGroups = checkGroups;
 function predictedHttps(url) {
     return url_1.default.format({
         ...url_1.default.parse(url),
@@ -74267,7 +74257,6 @@ async function sniffHttp(url) {
         };
     }
 }
-exports.sniffHttp = sniffHttp;
 async function sniffHttps(url) {
     try {
         const httpsRes = await cancelGet(url, https_1.default);
@@ -74284,7 +74273,15 @@ async function sniffHttps(url) {
         };
     }
 }
-exports.sniffHttps = sniffHttps;
+async function checkLinks(ctx, groups) {
+    return await p_all_1.default(groups.map((group) => {
+        return async () => {
+            group.status = await sniff(group.url);
+            ctx.cache[group.url] = Date.now();
+        };
+    }), { concurrency: 10 });
+}
+exports.checkLinks = checkLinks;
 async function sniff(url) {
     const parsed = url_1.default.parse(url);
     const { protocol } = parsed;
@@ -74365,7 +74362,103 @@ exports.getCache = getCache;
 
 /***/ }),
 
-/***/ 5340:
+/***/ 4706:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getFiles = exports.toLFile = void 0;
+const fs_1 = __importDefault(__webpack_require__(5747));
+const magic_string_1 = __importDefault(__webpack_require__(3330));
+const path_1 = __importDefault(__webpack_require__(5622));
+const url_1 = __importDefault(__webpack_require__(8835));
+const glob_1 = __importDefault(__webpack_require__(6691));
+const remark_1 = __importDefault(__webpack_require__(7112));
+const is_absolute_url_1 = __importDefault(__webpack_require__(5410));
+const remark_frontmatter_1 = __importDefault(__webpack_require__(437));
+const unist_util_select_1 = __webpack_require__(7879);
+const remark = remark_1.default().use(remark_frontmatter_1.default, ["yaml", "toml"]);
+function gatherFiles(ctx) {
+    const { cwd } = ctx;
+    const files = glob_1.default
+        .sync("_posts/*.md", {
+        cwd,
+        absolute: true,
+    })
+        .map((filename) => {
+        return toLFile(filename, path_1.default.relative(cwd, filename));
+    });
+    ctx.message(`${files.length.toLocaleString()} files detected`);
+    return files;
+}
+function groupFiles(ctx, files) {
+    const groups = new Map();
+    for (let file of files) {
+        for (let link of unist_util_select_1.selectAll("link", file.ast)) {
+            const { url } = link;
+            const group = groups.get(url) || {
+                url,
+                files: new Set(),
+            };
+            group.files.add(file);
+            groups.set(url, group);
+        }
+    }
+    ctx.message(`${groups.size.toLocaleString()} unique URLs detected`);
+    return Array.from(groups.values());
+}
+function shouldScan(url) {
+    const parts = url_1.default.parse(url);
+    return parts.protocol === "http:" || parts.protocol === "https:";
+}
+function filterGroup(ctx, group) {
+    const { url } = group;
+    if (!is_absolute_url_1.default(url)) {
+        ctx.stats.relativeSkipped++;
+        return false;
+    }
+    if (!shouldScan(url)) {
+        ctx.stats.protocolSkipped++;
+        return false;
+    }
+    if (ctx.cache[url]) {
+        ctx.stats.cacheSkipped++;
+        return false;
+    }
+    return true;
+}
+function skipGroups(ctx, groups) {
+    ctx.stats.urlsDetected = groups.length;
+    const filtered = groups.filter((group) => filterGroup(ctx, group));
+    const limited = filtered.slice(0, ctx.limit);
+    ctx.stats.urlsScanned = limited.length;
+    return limited;
+}
+function toLFile(filename, gitPath) {
+    const text = fs_1.default.readFileSync(filename, "utf8");
+    const ast = remark.parse(text);
+    return {
+        filename,
+        gitPath,
+        ast,
+        magicString: new magic_string_1.default(text),
+        replacements: [],
+    };
+}
+exports.toLFile = toLFile;
+function getFiles(ctx) {
+    return skipGroups(ctx, groupFiles(ctx, gatherFiles(ctx)));
+}
+exports.getFiles = getFiles;
+
+
+/***/ }),
+
+/***/ 4354:
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -74544,89 +74637,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.updateFiles = exports.replaceLinks = exports.toLFile = exports.skipGroups = exports.shouldScan = exports.gatherFiles = exports.groupFiles = void 0;
-const url_1 = __importDefault(__webpack_require__(8835));
-const fs_1 = __importDefault(__webpack_require__(5747));
-const path_1 = __importDefault(__webpack_require__(5622));
-const magic_string_1 = __importDefault(__webpack_require__(3330));
+exports.updateFiles = exports.replaceLinks = void 0;
 const remark_1 = __importDefault(__webpack_require__(7112));
 const unist_util_select_1 = __webpack_require__(7879);
 const remark_frontmatter_1 = __importDefault(__webpack_require__(437));
-const is_absolute_url_1 = __importDefault(__webpack_require__(5410));
-const glob_1 = __importDefault(__webpack_require__(6691));
 const remark = remark_1.default().use(remark_frontmatter_1.default, ["yaml", "toml"]);
-function groupFiles(ctx, files) {
-    const groups = new Map();
-    for (let file of files) {
-        for (let link of unist_util_select_1.selectAll("link", file.ast)) {
-            const { url } = link;
-            const group = groups.get(url) || {
-                url,
-                files: new Set(),
-            };
-            group.files.add(file);
-            groups.set(url, group);
-        }
-    }
-    ctx.message(`${groups.size.toLocaleString()} unique URLs detected`);
-    return Array.from(groups.values());
-}
-exports.groupFiles = groupFiles;
-function gatherFiles(ctx) {
-    const { cwd } = ctx;
-    const files = glob_1.default
-        .sync("_posts/*.md", {
-        cwd,
-        absolute: true,
-    })
-        .map((filename) => {
-        return toLFile(filename, path_1.default.relative(cwd, filename));
-    });
-    ctx.message(`${files.length.toLocaleString()} files detected`);
-    return files;
-}
-exports.gatherFiles = gatherFiles;
-function shouldScan(url) {
-    const parts = url_1.default.parse(url);
-    return parts.protocol === "http:" || parts.protocol === "https:";
-}
-exports.shouldScan = shouldScan;
-function filterGroup(ctx, group) {
-    const { url } = group;
-    if (!is_absolute_url_1.default(url)) {
-        ctx.stats.relativeSkipped++;
-        return false;
-    }
-    if (!shouldScan(url)) {
-        ctx.stats.protocolSkipped++;
-        return false;
-    }
-    if (ctx.cache[url]) {
-        ctx.stats.cacheSkipped++;
-        return false;
-    }
-    return true;
-}
-function skipGroups(ctx, groups) {
-    ctx.stats.urlsDetected = groups.length;
-    const filtered = groups.filter((group) => filterGroup(ctx, group));
-    const limited = filtered.slice(0, ctx.limit);
-    ctx.stats.urlsScanned = limited.length;
-    return limited;
-}
-exports.skipGroups = skipGroups;
-function toLFile(filename, gitPath) {
-    const text = fs_1.default.readFileSync(filename, "utf8");
-    const ast = remark.parse(text);
-    return {
-        filename,
-        gitPath,
-        ast,
-        magicString: new magic_string_1.default(text),
-        replacements: [],
-    };
-}
-exports.toLFile = toLFile;
 function replaceLinks(file, a, b) {
     const { ast, magicString } = file;
     const links = unist_util_select_1.selectAll("link", ast);
