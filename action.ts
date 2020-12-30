@@ -5,6 +5,7 @@ import { getOctokit, context } from "@actions/github";
 import { restoreCache, saveCache } from "@actions/cache";
 
 const toolkit = getOctokit(process.env.GITHUB_TOKEN!);
+const cacheKey = "linkrot-v2-";
 
 const messages: string[] = [];
 
@@ -34,7 +35,7 @@ function message(msg: string) {
   };
   const cacheFilePath = ".linkrot-cache";
   try {
-    await restoreCache([cacheFilePath], "linkrot");
+    await restoreCache([cacheFilePath], cacheKey);
   } catch (e) {
     ctx.message("ERROR: Failed to restore cache!");
   }
@@ -42,7 +43,7 @@ function message(msg: string) {
   await action(ctx);
   Fs.writeFileSync(cacheFilePath, JSON.stringify(ctx.cache));
   try {
-    await saveCache([cacheFilePath], "linkrot");
+    await saveCache([cacheFilePath], cacheKey);
   } catch (e) {
     ctx.message("ERROR: Failed to save cache!");
     throw e;
