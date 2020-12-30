@@ -20,7 +20,7 @@ export function dateFromFilename(filename: string) {
 }
 
 function dateForGroup(group: LURLGroup) {
-  const dates = group.files
+  const dates = Array.from(group.files)
     .map((file) => dateFromFilename(Path.basename(file.filename)))
     .filter(Boolean) as Date[];
   dates.sort((a, b) => +b - +a);
@@ -37,7 +37,7 @@ export function formatDate(date: Date | undefined) {
 }
 
 function encodeURLs(groups: LURLGroup[]) {
-  return groups
+  return Array.from(groups)
     .map((group, i) => {
       const firstDate = dateForGroup(group);
       return Querystring.stringify({

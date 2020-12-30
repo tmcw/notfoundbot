@@ -27,7 +27,7 @@ export type LStatus =
 
 export type LURLGroup = {
   url: string;
-  files: LFile[];
+  files: Set<LFile>;
   status?: LStatus;
 };
 

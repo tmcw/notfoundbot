@@ -15,16 +15,14 @@ const remark = Remark().use(frontmatter, ["yaml", "toml"]);
 export function groupFiles(ctx: LContext, files: LFile[]) {
   const groups = new Map<string, LURLGroup>();
   for (let file of files) {
-    const links = selectAll("link", file.ast) as Link[];
-    for (let link of links) {
+    for (let link of selectAll("link", file.ast) as Link[]) {
       const { url } = link;
-      if (!groups.get(url)) {
-        groups.set(url, {
-          url,
-          files: [],
-        });
-      }
-      groups.get(url)!.files.push(file);
+      const group = groups.get(url) || {
+        url,
+        files: new Set(),
+      };
+      group.files.add(file);
+      groups.set(url, group);
     }
   }
   ctx.message(`${groups.size.toLocaleString()} unique URLs detected`);
