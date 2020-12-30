@@ -26,18 +26,6 @@ function cancelGet(
   });
 }
 
-export async function checkGroups(ctx: LContext, groups: LURLGroup[]) {
-  return await pAll(
-    groups.map((group) => {
-      return async () => {
-        group.status = await sniff(group.url);
-        ctx.cache[group.url] = Date.now();
-      };
-    }),
-    { concurrency: 10 }
-  );
-}
-
 function predictedHttps(url: string) {
   return Url.format({
     ...Url.parse(url),
@@ -45,7 +33,7 @@ function predictedHttps(url: string) {
   });
 }
 
-export async function sniffHttp(url: string): Promise<LStatus> {
+async function sniffHttp(url: string): Promise<LStatus> {
   const httpsEquivalent = predictedHttps(url);
   try {
     const httpsRes = await cancelGet(httpsEquivalent, Https);
@@ -75,7 +63,7 @@ export async function sniffHttp(url: string): Promise<LStatus> {
   }
 }
 
-export async function sniffHttps(url: string): Promise<LStatus> {
+async function sniffHttps(url: string): Promise<LStatus> {
   try {
     const httpsRes = await cancelGet(url, Https);
 
@@ -91,6 +79,18 @@ export async function sniffHttps(url: string): Promise<LStatus> {
       status: "error",
     };
   }
+}
+
+export async function checkLinks(ctx: LContext, groups: LURLGroup[]) {
+  return await pAll(
+    groups.map((group) => {
+      return async () => {
+        group.status = await sniff(group.url);
+        ctx.cache[group.url] = Date.now();
+      };
+    }),
+    { concurrency: 10 }
+  );
 }
 
 export async function sniff(url: string): Promise<LStatus> {

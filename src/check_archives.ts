@@ -1,4 +1,4 @@
-import { queryIA } from "./ia_client";
+import { queryIA } from "./query_ia";
 import { LURLGroup } from "../types";
 
 export async function checkArchives(groups: LURLGroup[]) {
