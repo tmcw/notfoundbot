@@ -1,3 +1,4 @@
+import Https from "https";
 import Http from "http";
 import Path from "path";
 import Querystring from "querystring";
@@ -5,7 +6,7 @@ import { IAResults, LURLGroup } from "../types";
 
 // https://github.com/internetarchive/internetarchivebot/blob/master/app/src/Core/APII.php#L2429
 
-const ENDPOINT = `http://archive.org/wayback/available`;
+const ENDPOINT = `https://archive.org/wayback/available`;
 const HEADERS = {
   "Wayback-Api-Version": 2,
 };
@@ -67,7 +68,7 @@ export function queryIA(groups: LURLGroup[]): Promise<IAResults> {
       });
     }
 
-    const req = Http.request(
+    const req = Https.request(
       ENDPOINT,
       {
         method: "POST",
