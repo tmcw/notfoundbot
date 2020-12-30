@@ -74301,7 +74301,7 @@ function checkArchives(groups) {
                     errorGroups = errorGroups.slice(0, 50);
                     if (!errorGroups.length)
                         return [2 /*return*/];
-                    return [4 /*yield*/, ia_client_1.queryIA(errorGroups.map(function (group) { return group.url; }))];
+                    return [4 /*yield*/, ia_client_1.queryIA(errorGroups)];
                 case 1:
                     archiveStatus = _d.sent();
                     _loop_1 = function (result) {
@@ -74785,21 +74785,56 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.queryIA = void 0;
-var http_1 = __importDefault(__webpack_require__(5876));
+exports.queryIA = exports.formatDate = exports.dateFromFilename = void 0;
+var https_1 = __importDefault(__webpack_require__(7211));
+var path_1 = __importDefault(__webpack_require__(5622));
+var querystring_1 = __importDefault(__webpack_require__(1191));
 // https://github.com/internetarchive/internetarchivebot/blob/master/app/src/Core/APII.php#L2429
-var ENDPOINT = "http://archive.org/wayback/available";
+var ENDPOINT = "https://archive.org/wayback/available";
 var HEADERS = {
     "Wayback-Api-Version": 2,
 };
-function encodeURLs(urls) {
-    return urls
-        .map(function (url, i) {
-        return "url=" + url + "&closest=before&statuscodes=200&statuscodes=203&statuscodes=206&tag=" + i;
+function dateFromFilename(filename) {
+    var match = filename.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (match) {
+        // Month here is 'monthIndex', a weird API, zero-indexed. Be careful.
+        return new Date(+match[1], parseInt(match[2], 10) - 1, +match[3]);
+    }
+}
+exports.dateFromFilename = dateFromFilename;
+function dateForGroup(group) {
+    var dates = group.files
+        .map(function (file) { return dateFromFilename(path_1.default.basename(file.filename)); })
+        .filter(Boolean);
+    dates.sort(function (a, b) { return +b - +a; });
+    if (dates.length)
+        return dates[0];
+}
+function formatDate(date) {
+    if (!date)
+        return;
+    // date( 'YmdHis', $time )
+    var y = date.getFullYear();
+    var m = (date.getMonth() + 1).toString().padStart(2, "0");
+    var d = date.getDate().toString().padStart(2, "0");
+    return "" + y + m + d + "000000";
+}
+exports.formatDate = formatDate;
+function encodeURLs(groups) {
+    return groups
+        .map(function (group, i) {
+        var firstDate = dateForGroup(group);
+        return querystring_1.default.stringify({
+            url: group.url,
+            timestamp: formatDate(firstDate),
+            closest: "before",
+            statuscodes: [200, 203, 206],
+            tag: i,
+        });
     })
         .join("\n");
 }
-function queryIA(urls) {
+function queryIA(groups) {
     return new Promise(function (resolve, reject) {
         function handleResponse(res) {
             var body = "";
@@ -74816,14 +74851,14 @@ function queryIA(urls) {
                 }
             });
         }
-        var req = http_1.default.request(ENDPOINT, {
+        var req = https_1.default.request(ENDPOINT, {
             method: "POST",
             headers: HEADERS,
         }, handleResponse);
         req.on("error", function (e) {
             reject(e);
         });
-        req.write(encodeURLs(urls));
+        req.write(encodeURLs(groups));
         req.end();
     });
 }
@@ -75314,6 +75349,14 @@ module.exports = require("path");;
 
 "use strict";
 module.exports = require("punycode");;
+
+/***/ }),
+
+/***/ 1191:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("querystring");;
 
 /***/ }),
 
