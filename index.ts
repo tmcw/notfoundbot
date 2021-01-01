@@ -14,4 +14,5 @@ export async function action(ctx: LContext) {
   await checkArchives(urlGroups);
   const updatedFiles = updateFiles(ctx, urlGroups);
   await suggestChanges(ctx, updatedFiles);
+  return updatedFiles;
 }

@@ -44,6 +44,7 @@ export type LContext = {
   message: (message: string) => void;
   messages: string[];
   limit: number;
+  branchName: string;
   stats: {
     cacheSkipped: number;
     upgradedSSL: number;
