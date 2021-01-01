@@ -80159,6 +80159,9 @@ function message(msg) {
         message,
         messages,
         limit: 100,
+        branchName: `notfoundbot-${new Date()
+            .toLocaleDateString()
+            .replace(/\//g, "-")}`,
         stats: {
             cacheSkipped: 0,
             upgradedSSL: 0,
@@ -80211,6 +80214,7 @@ async function action(ctx) {
     await check_archives_1.checkArchives(urlGroups);
     const updatedFiles = util_1.updateFiles(ctx, urlGroups);
     await suggest_changes_1.suggestChanges(ctx, updatedFiles);
+    return updatedFiles;
 }
 exports.action = action;
 
@@ -80619,11 +80623,8 @@ exports.queryIA = queryIA;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.suggestChanges = exports.getBody = exports.getTitle = exports.getDefaultBranch = void 0;
 const commit_file_1 = __webpack_require__(7344);
-async function createBranch({ context, toolkit }, defaultBranch) {
-    const branch = `notfoundbot-${new Date()
-        .toLocaleDateString()
-        .replace(/\//g, "-")}`;
-    const ref = `refs/heads/${branch}`;
+async function createBranch({ branchName, context, toolkit }, defaultBranch) {
+    const ref = `refs/heads/${branchName}`;
     const { data: { object: { sha }, }, } = await toolkit.git.getRef({
         owner: context.repo.owner,
         repo: context.repo.repo,
@@ -80634,7 +80635,7 @@ async function createBranch({ context, toolkit }, defaultBranch) {
         ref,
         sha,
     });
-    return branch;
+    return branchName;
 }
 async function getDefaultBranch({ toolkit, context }) {
     const { data: { default_branch }, } = await toolkit.repos.get({
@@ -80666,6 +80667,17 @@ function getBody(ctx) {
 `;
 }
 exports.getBody = getBody;
+async function createPR(ctx, base) {
+    const { context, toolkit } = ctx;
+    const { data: { number }, } = await toolkit.pulls.create({
+        ...context.repo,
+        title: getTitle(ctx),
+        body: getBody(ctx),
+        head: ctx.branchName,
+        base,
+    });
+    return number;
+}
 async function suggestChanges(ctx, updatedFiles) {
     const { context, toolkit } = ctx;
     if (!updatedFiles.length) {
@@ -80675,17 +80687,11 @@ async function suggestChanges(ctx, updatedFiles) {
     }
     ctx.message(`Suggesting changes`);
     const base = await getDefaultBranch(ctx);
-    const branch = await createBranch(ctx, base);
+    await createBranch(ctx, base);
     for (let file of updatedFiles) {
-        await commit_file_1.commitFile(ctx, branch, file);
+        await commit_file_1.commitFile(ctx, ctx.branchName, file);
     }
-    const { data: { number }, } = await toolkit.pulls.create({
-        ...context.repo,
-        title: getTitle(ctx),
-        body: getBody(ctx),
-        head: branch,
-        base,
-    });
+    const number = await createPR(ctx, base);
     await toolkit.issues.addLabels({
         ...context.repo,
         issue_number: number,
@@ -80720,8 +80726,11 @@ function frontmatterDate(ast) {
     const node = unist_util_select_1.select("yaml,toml", ast);
     if (!node)
         return;
+    // Jekyll allows duplicate keys in YAML, but js-yaml will,
+    // by default, throw if it encounters one. The json: true
+    // option changes its behavior to take the last key value.
     const parsed = (node.type === "yaml"
-        ? js_yaml_1.default.safeLoad(node.value)
+        ? js_yaml_1.default.safeLoad(node.value, { json: true })
         : toml_1.default.parse(node.value));
     if (!(typeof parsed.date === "string"))
         return;
@@ -80788,18 +80797,12 @@ function updateFiles(ctx, groups) {
     let updatedFiles = new Set();
     for (let group of groups) {
         switch ((_a = group.status) === null || _a === void 0 ? void 0 : _a.status) {
-            case "upgrade": {
-                for (let file of group.files) {
-                    replaceLinks(file, group.url, group.status.to);
-                    updatedFiles.add(file);
-                    ctx.stats.upgradedSSL++;
-                }
-            }
+            case "upgrade":
             case "archive": {
                 for (let file of group.files) {
                     replaceLinks(file, group.url, group.status.to);
                     updatedFiles.add(file);
-                    ctx.stats.archived++;
+                    ctx.stats[group.status.status == "upgrade" ? "upgradedSSL" : "archived"]++;
                 }
             }
         }
