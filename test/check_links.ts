@@ -29,8 +29,8 @@ test("sniff - not found", async (t) => {
 });
 
 test("sniff - redirect to https", async (t) => {
+  Nock("https://macwright.com").persist().get("/").reply(200, []);
   t.equal((await sniff("http://macwright.com")).status, "upgrade");
-  t.equal((await sniff("http://jamesbridle.com")).status, "upgrade");
 });
 
 test("sniff - error", async (t) => {
@@ -38,6 +38,9 @@ test("sniff - error", async (t) => {
 });
 
 test("checkLinks", async (t) => {
+  Nock("http://google.com").persist().get("/").reply(200, []);
+  Nock("https://yahoo.com").persist().get("/").reply(200, []);
+  Nock("http://foo.com").persist().get("/").reply(200, []);
   const ctx = testContext();
   const groups = getTestFiles(ctx);
   await checkLinks(ctx, groups);

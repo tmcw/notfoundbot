@@ -13,8 +13,3 @@ test("updateFiles", async (t) => {
   const updates = updateFiles(ctx, getTestFiles(ctx));
   t.same(updates.length, 0);
 });
-
-// test("replaceLinks", async (t) => {
-//   replaceLinks(lFile, "http://google.com", "https://google.com");
-//   t.same(lFile.replacements, ["http://google.com → https://google.com"]);
-// });

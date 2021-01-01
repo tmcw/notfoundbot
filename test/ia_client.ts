@@ -1,3 +1,4 @@
+import Nock from "nock";
 import { test } from "tap";
 import { queryIA, formatDate } from "../src/query_ia";
 import { testContext, getTestFiles } from "./helpers";
@@ -8,6 +9,10 @@ test("formatDate", async (t) => {
 
 test("queryIA with no groups", async (t) => {
   const ctx = testContext();
+
+  Nock("https://archive.org")
+    .post("/wayback/available")
+    .reply(200, { results: [1, 2, 3] });
 
   const groups = getTestFiles(ctx);
   t.same((await queryIA(groups)).results.length, 3);
