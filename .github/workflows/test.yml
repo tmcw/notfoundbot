@@ -13,6 +13,25 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
+    - name: Install dependencies
+      run: |
+        curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter && \
+        chmod +x ./cc-test-reporter && \
+        ./cc-test-reporter upload-coverage
+    - name: Set ENV for codeclimate (pull_request)
+      working-directory: web
+      run: |
+        git fetch --no-tags --prune --depth=1 origin +refs/heads/$GITHUB_HEAD_REF:refs/remotes/origin/$GITHUB_HEAD_REF && \
+        echo "GIT_BRANCH=${GITHUB_REF/refs\/heads\//}" >> $GITHUB_ENV && \
+        echo "GIT_COMMIT_SHA=$(git rev-parse origin/$GITHUB_HEAD_REF)" >> $GITHUB_ENV
+      if: github.event_name == 'pull_request'
+
+    - name: Set ENV for codeclimate (push)
+      working-directory: web
+      run: |
+        echo "GIT_BRANCH=${GITHUB_REF/refs\/heads\//}" >> $GITHUB_ENV && \
+        echo "GIT_COMMIT_SHA=${GITHUB_SHA}" >> $GITHUB_ENV
+      if: github.event_name == 'push'
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v1
       with:
@@ -21,3 +40,9 @@ jobs:
       run: |
         yarn install
         yarn test
+    - name: Upload coverage
+      working-directory: web
+      run: |
+        ./cc-test-reporter after-build
+      env:
+        CC_TEST_REPORTER_ID: bbebaee1e22b81303ec79d7e1f6a7b726d77aa168f815f18366b9a23e76bedaf
