@@ -67,6 +67,20 @@ export function getBody(ctx: LContext) {
 `;
 }
 
+async function createPR(ctx: LContext, base: string) {
+  const { context, toolkit } = ctx;
+  const {
+    data: { number },
+  } = await toolkit.pulls.create({
+    ...context.repo,
+    title: getTitle(ctx),
+    body: getBody(ctx),
+    head: ctx.branchName,
+    base,
+  });
+  return number;
+}
+
 export async function suggestChanges(ctx: LContext, updatedFiles: LFile[]) {
   const { context, toolkit } = ctx;
 
@@ -84,15 +98,7 @@ export async function suggestChanges(ctx: LContext, updatedFiles: LFile[]) {
     await commitFile(ctx, ctx.branchName, file);
   }
 
-  const {
-    data: { number },
-  } = await toolkit.pulls.create({
-    ...context.repo,
-    title: getTitle(ctx),
-    body: getBody(ctx),
-    head: ctx.branchName,
-    base,
-  });
+  const number = await createPR(ctx, base);
 
   await toolkit.issues.addLabels({
     ...context.repo,

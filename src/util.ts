@@ -26,18 +26,14 @@ export function updateFiles(ctx: LContext, groups: LURLGroup[]): LFile[] {
   let updatedFiles: Set<LFile> = new Set();
   for (let group of groups) {
     switch (group.status?.status) {
-      case "upgrade": {
-        for (let file of group.files) {
-          replaceLinks(file, group.url, group.status.to);
-          updatedFiles.add(file);
-          ctx.stats.upgradedSSL++;
-        }
-      }
+      case "upgrade":
       case "archive": {
         for (let file of group.files) {
           replaceLinks(file, group.url, group.status.to);
           updatedFiles.add(file);
-          ctx.stats.archived++;
+          ctx.stats[
+            group.status.status == "upgrade" ? "upgradedSSL" : "archived"
+          ]++;
         }
       }
     }
