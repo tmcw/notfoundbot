@@ -1,5 +1,7 @@
 ---
 title: Test
+x: 2
+x: 3
 ---
 
 - [link](http://google.com/)
