@@ -15,8 +15,11 @@ const remark = Remark().use(frontmatter, ["yaml", "toml"]);
 export function frontmatterDate(ast: Node) {
   const node = select("yaml,toml", ast) as YamlNode | TomlNode;
   if (!node) return;
+  // Jekyll allows duplicate keys in YAML, but js-yaml will,
+  // by default, throw if it encounters one. The json: true
+  // option changes its behavior to take the last key value.
   const parsed = (node.type === "yaml"
-    ? yaml.safeLoad(node.value)
+    ? yaml.safeLoad(node.value, { json: true })
     : TOML.parse(node.value)) as any;
   if (!(typeof parsed.date === "string")) return;
   const date = new Date(parsed.date);
