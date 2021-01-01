@@ -1,6 +1,6 @@
 # notfoundbot
 
-[![Maintainability](https://api.codeclimate.com/v1/badges/1870414e70039aad07f3/maintainability)](https://codeclimate.com/github/tmcw/notfoundbot/maintainability)
+[![Maintainability](https://api.codeclimate.com/v1/badges/1870414e70039aad07f3/maintainability)](https://codeclimate.com/github/tmcw/notfoundbot/maintainability) [![Test Coverage](https://api.codeclimate.com/v1/badges/1870414e70039aad07f3/test_coverage)](https://codeclimate.com/github/tmcw/notfoundbot/test_coverage)
 
 notfoundbot is a GitHub Action that helps you automatically maintain the correctness of your
 website's outgoing links. It finds links that need fixing and opens pull requests
