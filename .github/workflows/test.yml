@@ -19,7 +19,6 @@ jobs:
         chmod +x ./cc-test-reporter && \
         ./cc-test-reporter before-build
     - name: Set ENV for codeclimate (pull_request)
-      working-directory: web
       run: |
         git fetch --no-tags --prune --depth=1 origin +refs/heads/$GITHUB_HEAD_REF:refs/remotes/origin/$GITHUB_HEAD_REF && \
         echo "GIT_BRANCH=${GITHUB_REF/refs\/heads\//}" >> $GITHUB_ENV && \
@@ -27,7 +26,6 @@ jobs:
       if: github.event_name == 'pull_request'
 
     - name: Set ENV for codeclimate (push)
-      working-directory: web
       run: |
         echo "GIT_BRANCH=${GITHUB_REF/refs\/heads\//}" >> $GITHUB_ENV && \
         echo "GIT_COMMIT_SHA=${GITHUB_SHA}" >> $GITHUB_ENV
@@ -41,7 +39,6 @@ jobs:
         yarn install
         yarn test
     - name: Upload coverage
-      working-directory: web
       run: |
         mkdir -p coverage
         ./node_modules/.bin/tap --coverage-report=text-lcov > coverage.lcov
