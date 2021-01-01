@@ -2,13 +2,10 @@ import { LFile, LContext } from "../types";
 import { commitFile } from "./commit_file";
 
 async function createBranch(
-  { context, toolkit }: LContext,
+  { branchName, context, toolkit }: LContext,
   defaultBranch: string
 ) {
-  const branch = `notfoundbot-${new Date()
-    .toLocaleDateString()
-    .replace(/\//g, "-")}`;
-  const ref = `refs/heads/${branch}`;
+  const ref = `refs/heads/${branchName}`;
 
   const {
     data: {
@@ -26,7 +23,7 @@ async function createBranch(
     sha,
   });
 
-  return branch;
+  return branchName;
 }
 
 export async function getDefaultBranch({ toolkit, context }: LContext) {
@@ -81,10 +78,10 @@ export async function suggestChanges(ctx: LContext, updatedFiles: LFile[]) {
 
   ctx.message(`Suggesting changes`);
   const base = await getDefaultBranch(ctx);
-  const branch = await createBranch(ctx, base);
+  await createBranch(ctx, base);
 
   for (let file of updatedFiles) {
-    await commitFile(ctx, branch, file);
+    await commitFile(ctx, ctx.branchName, file);
   }
 
   const {
@@ -93,7 +90,7 @@ export async function suggestChanges(ctx: LContext, updatedFiles: LFile[]) {
     ...context.repo,
     title: getTitle(ctx),
     body: getBody(ctx),
-    head: branch,
+    head: ctx.branchName,
     base,
   });
 

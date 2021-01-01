@@ -23,6 +23,9 @@ function message(msg: string) {
     message,
     messages,
     limit: 100,
+    branchName: `notfoundbot-${new Date()
+      .toLocaleDateString()
+      .replace(/\//g, "-")}`,
     stats: {
       cacheSkipped: 0,
       upgradedSSL: 0,

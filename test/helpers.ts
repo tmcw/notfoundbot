@@ -34,6 +34,7 @@ export function testContext(): LContext {
     message,
     messages,
     cache: {},
+    branchName: "test-branch",
     stats: {
       cacheSkipped: 0,
       upgradedSSL: 0,

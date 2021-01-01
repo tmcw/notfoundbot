@@ -29,7 +29,7 @@ test("action", async (t) => {
   Nock("https://api.github.com")
     .persist()
     .get(
-      "/repos/foo/bar/contents/_posts%2F2020-01-01-example.md?ref=refs%2Fheads%2Fnotfoundbot-12-31-2020"
+      "/repos/foo/bar/contents/_posts%2F2020-01-01-example.md?ref=refs%2Fheads%2Ftest-branch"
     )
     .reply(200, { sha: "abcd" });
 
