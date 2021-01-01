@@ -41,7 +41,7 @@ jobs:
     - name: Upload coverage
       run: |
         mkdir -p coverage
-        ./node_modules/.bin/tap --coverage-report=text-lcov > coverage.lcov
-        ./cc-test-reporter after-build -t lcov ./coverage.lcov
+        ./node_modules/.bin/tap --coverage-report=text-lcov > coverage/lcov.info
+        ./cc-test-reporter after-build -t lcov
       env:
         CC_TEST_REPORTER_ID: bbebaee1e22b81303ec79d7e1f6a7b726d77aa168f815f18366b9a23e76bedaf
