@@ -13,3 +13,23 @@ test("updateFiles", async (t) => {
   const updates = updateFiles(ctx, getTestFiles(ctx));
   t.same(updates.length, 0);
 });
+
+test("replaceLinks", async (t) => {
+  const ctx = testContext();
+  const groups = getTestFiles(ctx);
+  const file = Array.from(groups[0].files)[0];
+  replaceLinks(file, "http://google.com/", "http://test.com/");
+  t.same(
+    file.magicString.toString(),
+    `---
+title: Test
+x: 2
+x: 3
+---
+
+- [link](http://test.com/)
+- [other link](http://foo.com/)
+- [https link](https://yahoo.com/)
+`
+  );
+});
