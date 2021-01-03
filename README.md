@@ -45,6 +45,8 @@ Notes:
 ## Features
 
 - Post date detection: supports filename-based dates, YAML & TOML frontmatter
+- notfoundbot uses [magic-string](https://github.com/rich-harris/magic-string) to
+  selectively update links without affecting surrounding markup
 
 ## Workflow
 
