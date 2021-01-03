@@ -19,7 +19,7 @@ test("checkArchives - found", async (t) => {
         tag: "0",
         archived_snapshots: {
           closest: {
-            url: "https://archived.com/google",
+            url: "http://archive.org/http://google.com/",
             status: "ok",
             timestamp: "1",
             available: true,
@@ -33,7 +33,7 @@ test("checkArchives - found", async (t) => {
   await checkArchives(groups);
   t.same(groups[0].status, {
     status: "archive",
-    to: "https://archived.com/google",
+    to: "https://archive.org/http://google.com/",
   });
 });
 
