@@ -11904,7 +11904,7 @@ const Store = __webpack_require__(2411)/* .Store */ .y;
 const MemoryCookieStore = __webpack_require__(3313)/* .MemoryCookieStore */ .m;
 const pathMatch = __webpack_require__(9567)/* .pathMatch */ .U;
 const VERSION = __webpack_require__(4046);
-const { fromCallback } = __webpack_require__(8645);
+const { fromCallback } = __webpack_require__(1047);
 
 // From RFC6265 S4.1.1
 // note that it excludes \x3B ";"
@@ -13575,7 +13575,7 @@ exports.PrefixSecurityEnum = PrefixSecurityEnum;
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-const { fromCallback } = __webpack_require__(8645);
+const { fromCallback } = __webpack_require__(1047);
 const Store = __webpack_require__(2411)/* .Store */ .y;
 const permuteDomain = __webpack_require__(24).permuteDomain;
 const pathMatch = __webpack_require__(9567)/* .pathMatch */ .U;
@@ -14280,6 +14280,39 @@ function __classPrivateFieldSet(receiver, privateMap, value) {
     }
     privateMap.set(receiver, value);
     return value;
+}
+
+
+/***/ }),
+
+/***/ 1047:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+
+exports.fromCallback = function (fn) {
+  return Object.defineProperty(function () {
+    if (typeof arguments[arguments.length - 1] === 'function') fn.apply(this, arguments)
+    else {
+      return new Promise((resolve, reject) => {
+        arguments[arguments.length] = (err, res) => {
+          if (err) return reject(err)
+          resolve(res)
+        }
+        arguments.length++
+        fn.apply(this, arguments)
+      })
+    }
+  }, 'name', { value: fn.name })
+}
+
+exports.fromPromise = function (fn) {
+  return Object.defineProperty(function () {
+    const cb = arguments[arguments.length - 1]
+    if (typeof cb !== 'function') return fn.apply(this, arguments)
+    else fn.apply(this, arguments).then(r => cb(null, r), cb)
+  }, 'name', { value: fn.name })
 }
 
 
@@ -52767,24 +52800,6 @@ module.exports = function isBuffer (obj) {
 
 /***/ }),
 
-/***/ 8486:
-/***/ ((module) => {
-
-"use strict";
-
-
-module.exports = value => {
-	if (Object.prototype.toString.call(value) !== '[object Object]') {
-		return false;
-	}
-
-	const prototype = Object.getPrototypeOf(value);
-	return prototype === null || prototype === Object.prototype;
-};
-
-
-/***/ }),
-
 /***/ 4202:
 /***/ ((__unused_webpack_module, exports) => {
 
@@ -73042,7 +73057,7 @@ exports.debug = debug; // for test
 var bail = __webpack_require__(8852)
 var buffer = __webpack_require__(1039)
 var extend = __webpack_require__(3321)
-var plain = __webpack_require__(8486)
+var plain = __webpack_require__(5223)
 var trough = __webpack_require__(4609)
 var vfile = __webpack_require__(2569)
 
@@ -73510,6 +73525,24 @@ function assertDone(name, asyncName, complete) {
     )
   }
 }
+
+
+/***/ }),
+
+/***/ 5223:
+/***/ ((module) => {
+
+"use strict";
+
+
+module.exports = value => {
+	if (Object.prototype.toString.call(value) !== '[object Object]') {
+		return false;
+	}
+
+	const prototype = Object.getPrototypeOf(value);
+	return prototype === null || prototype === Object.prototype;
+};
 
 
 /***/ }),
@@ -74461,39 +74494,6 @@ function getUserAgent() {
 
 exports.getUserAgent = getUserAgent;
 //# sourceMappingURL=index.js.map
-
-
-/***/ }),
-
-/***/ 8645:
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-
-exports.fromCallback = function (fn) {
-  return Object.defineProperty(function () {
-    if (typeof arguments[arguments.length - 1] === 'function') fn.apply(this, arguments)
-    else {
-      return new Promise((resolve, reject) => {
-        arguments[arguments.length] = (err, res) => {
-          if (err) return reject(err)
-          resolve(res)
-        }
-        arguments.length++
-        fn.apply(this, arguments)
-      })
-    }
-  }, 'name', { value: fn.name })
-}
-
-exports.fromPromise = function (fn) {
-  return Object.defineProperty(function () {
-    const cb = arguments[arguments.length - 1]
-    if (typeof cb !== 'function') return fn.apply(this, arguments)
-    else fn.apply(this, arguments).then(r => cb(null, r), cb)
-  }, 'name', { value: fn.name })
-}
 
 
 /***/ }),
@@ -80240,7 +80240,7 @@ async function checkArchives(groups) {
         if ((_b = (_a = result.archived_snapshots) === null || _a === void 0 ? void 0 : _a.closest) === null || _b === void 0 ? void 0 : _b.available) {
             errorGroups.find((group) => group.url == result.url).status = {
                 status: "archive",
-                to: result.archived_snapshots.closest.url,
+                to: result.archived_snapshots.closest.url.replace(/^http:/, "https:"),
             };
         }
     }
@@ -80780,15 +80780,21 @@ const remark_1 = __importDefault(__webpack_require__(7112));
 const unist_util_select_1 = __webpack_require__(7879);
 const remark_frontmatter_1 = __importDefault(__webpack_require__(437));
 const remark = remark_1.default().use(remark_frontmatter_1.default, ["yaml", "toml"]);
+function stringify(link) {
+    return remark.stringify(link).replace(/\n$/, "");
+}
+function replaceLink(link, magicString, to) {
+    link.url = to;
+    magicString.overwrite(link.position.start.offset, link.position.end.offset, stringify(link));
+}
 function replaceLinks(file, a, b) {
     const { ast, magicString } = file;
     const links = unist_util_select_1.selectAll("link", ast);
-    for (let link of links) {
-        if (link.url === a) {
-            link.url = b;
-            magicString.overwrite(link.position.start.offset, link.position.end.offset, remark.stringify(link));
-        }
-    }
+    links
+        .filter((link) => link.url === a)
+        .forEach((link) => {
+        replaceLink(link, magicString, b);
+    });
     file.replacements.push(`${a} → ${b}`);
 }
 exports.replaceLinks = replaceLinks;
