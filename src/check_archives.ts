@@ -12,7 +12,7 @@ export async function checkArchives(groups: LURLGroup[]) {
     if (result.archived_snapshots?.closest?.available) {
       errorGroups.find((group) => group.url == result.url)!.status = {
         status: "archive",
-        to: result.archived_snapshots!.closest.url,
+        to: result.archived_snapshots!.closest.url.replace(/^http:/, "https:"),
       };
     }
   }
