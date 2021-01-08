@@ -7,6 +7,7 @@
     "release": "standard-version",
     "build": "ncc build action.ts --license licenses.txt",
     "test": "tsc && tap test",
+    "cli": "ts-node ./cli.ts",
     "start": "./dist/index.js"
   },
   "bin": {
@@ -36,6 +37,7 @@
     "@iarna/toml": "^2.2.5",
     "@types/js-yaml": "^3.12.5",
     "js-yaml": "^3.14.1",
+    "node_extra_ca_certs_mozilla_bundle": "^1.0.4",
     "standard-version": "^9.1.0"
   }
 }

@@ -2,7 +2,12 @@ import Url from "url";
 import Https from "https";
 import Http from "http";
 import pAll from "p-all";
+import Fs from "fs";
 import { LStatus, LContext, LURLGroup } from "../types";
+
+Https.globalAgent.options.ca = Fs.readFileSync(
+  "node_modules/node_extra_ca_certs_mozilla_bundle/ca_bundle/ca_intermediate_root_bundle.pem"
+);
 
 const getOptions = {
   timeout: 2000,
