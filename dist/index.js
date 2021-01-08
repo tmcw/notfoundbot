@@ -11904,7 +11904,7 @@ const Store = __webpack_require__(2411)/* .Store */ .y;
 const MemoryCookieStore = __webpack_require__(3313)/* .MemoryCookieStore */ .m;
 const pathMatch = __webpack_require__(9567)/* .pathMatch */ .U;
 const VERSION = __webpack_require__(4046);
-const { fromCallback } = __webpack_require__(1047);
+const { fromCallback } = __webpack_require__(8645);
 
 // From RFC6265 S4.1.1
 // note that it excludes \x3B ";"
@@ -13575,7 +13575,7 @@ exports.PrefixSecurityEnum = PrefixSecurityEnum;
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-const { fromCallback } = __webpack_require__(1047);
+const { fromCallback } = __webpack_require__(8645);
 const Store = __webpack_require__(2411)/* .Store */ .y;
 const permuteDomain = __webpack_require__(24).permuteDomain;
 const pathMatch = __webpack_require__(9567)/* .pathMatch */ .U;
@@ -14280,39 +14280,6 @@ function __classPrivateFieldSet(receiver, privateMap, value) {
     }
     privateMap.set(receiver, value);
     return value;
-}
-
-
-/***/ }),
-
-/***/ 1047:
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-
-exports.fromCallback = function (fn) {
-  return Object.defineProperty(function () {
-    if (typeof arguments[arguments.length - 1] === 'function') fn.apply(this, arguments)
-    else {
-      return new Promise((resolve, reject) => {
-        arguments[arguments.length] = (err, res) => {
-          if (err) return reject(err)
-          resolve(res)
-        }
-        arguments.length++
-        fn.apply(this, arguments)
-      })
-    }
-  }, 'name', { value: fn.name })
-}
-
-exports.fromPromise = function (fn) {
-  return Object.defineProperty(function () {
-    const cb = arguments[arguments.length - 1]
-    if (typeof cb !== 'function') return fn.apply(this, arguments)
-    else fn.apply(this, arguments).then(r => cb(null, r), cb)
-  }, 'name', { value: fn.name })
 }
 
 
@@ -74498,6 +74465,39 @@ exports.getUserAgent = getUserAgent;
 
 /***/ }),
 
+/***/ 8645:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+
+exports.fromCallback = function (fn) {
+  return Object.defineProperty(function () {
+    if (typeof arguments[arguments.length - 1] === 'function') fn.apply(this, arguments)
+    else {
+      return new Promise((resolve, reject) => {
+        arguments[arguments.length] = (err, res) => {
+          if (err) return reject(err)
+          resolve(res)
+        }
+        arguments.length++
+        fn.apply(this, arguments)
+      })
+    }
+  }, 'name', { value: fn.name })
+}
+
+exports.fromPromise = function (fn) {
+  return Object.defineProperty(function () {
+    const cb = arguments[arguments.length - 1]
+    if (typeof cb !== 'function') return fn.apply(this, arguments)
+    else fn.apply(this, arguments).then(r => cb(null, r), cb)
+  }, 'name', { value: fn.name })
+}
+
+
+/***/ }),
+
 /***/ 8716:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
@@ -80359,6 +80359,11 @@ async function sniffHttps(url) {
         };
     }
     catch (err) {
+        if ((err === null || err === void 0 ? void 0 : err.code) === "UNABLE_TO_VERIFY_LEAF_SIGNATURE") {
+            return {
+                status: "ok",
+            };
+        }
         return {
             status: "error",
         };
