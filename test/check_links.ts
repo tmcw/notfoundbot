@@ -23,6 +23,13 @@ test("sniff - ok", async (t) => {
   t.equal((await sniff("https://a.com/")).status, "ok");
 });
 
+test("sniff - leaf cert failed ignored and ok", async (t) => {
+  Nock("https://a.com")
+    .get("/")
+    .replyWithError({ code: "UNABLE_TO_VERIFY_LEAF_SIGNATURE" });
+  t.equal((await sniff("https://a.com/")).status, "ok");
+});
+
 test("sniff - not found", async (t) => {
   Nock("https://a.com").get("/").reply(400, "ok");
   t.equal((await sniff("https://a.com/")).status, "error");

@@ -78,6 +78,11 @@ async function sniffHttps(url: string): Promise<LStatus> {
       status: "ok",
     };
   } catch (err) {
+    if (err?.code === "UNABLE_TO_VERIFY_LEAF_SIGNATURE") {
+      return {
+        status: "ok",
+      };
+    }
     return {
       status: "error",
     };
