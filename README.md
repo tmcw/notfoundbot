@@ -30,7 +30,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Fix links
-        uses: tmcw/notfoundbot@v2.0.1
+        uses: tmcw/notfoundbot@v2.0.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
