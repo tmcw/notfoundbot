@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.0.3](https://github.com/tmcw/linkrot/compare/v2.0.2...v2.0.3) (2021-01-08)
+
+
+### Bug Fixes
+
+* Allow websites to have untrusted SSL certificates for now ([#54](https://github.com/tmcw/linkrot/issues/54)) ([c0a302f](https://github.com/tmcw/linkrot/commit/c0a302f31a6638651a681dfb1a1f2422dea9df96))
+
 ### [2.0.2](https://github.com/tmcw/linkrot/compare/v2.0.1...v2.0.2) (2021-01-03)
 
 
