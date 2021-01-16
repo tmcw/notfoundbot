@@ -80374,6 +80374,7 @@ async function checkLinks(ctx, groups) {
         return async () => {
             group.status = await sniff(group.url);
             ctx.cache[group.url] = Date.now();
+            ctx.message(`Added ${group.url} to cache, now ${Object.keys(ctx.cache).length} items in cache`);
         };
     }), { concurrency: 10 });
 }
