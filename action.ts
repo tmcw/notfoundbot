@@ -44,6 +44,7 @@ function message(msg: string) {
   }
   await getCache(ctx, cacheFilePath);
   await action(ctx);
+  ctx.message(`Saving cache with ${Object.keys(ctx.cache).length} items`);
   Fs.writeFileSync(cacheFilePath, JSON.stringify(ctx.cache));
   try {
     await saveCache([cacheFilePath], cacheKey);

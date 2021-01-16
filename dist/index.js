@@ -80181,6 +80181,7 @@ function message(msg) {
     }
     await get_cache_1.getCache(ctx, cacheFilePath);
     await index_1.action(ctx);
+    ctx.message(`Saving cache with ${Object.keys(ctx.cache).length} items`);
     fs_1.default.writeFileSync(cacheFilePath, JSON.stringify(ctx.cache));
     try {
         await cache_1.saveCache([cacheFilePath], cacheKey);
@@ -80440,6 +80441,7 @@ const fs_1 = __importDefault(__webpack_require__(5747));
 async function getCache(ctx, cacheFilePath) {
     try {
         const c = JSON.parse(fs_1.default.readFileSync(cacheFilePath, "utf8"));
+        ctx.message(`Loaded cache with ${Object.keys(c).length} items`);
         let flushedEntries = 0;
         for (let entry of Object.keys(c)) {
             if (c[entry] < Date.now() - 100 * 60 * 60 * 24 * 14) {
@@ -80450,6 +80452,7 @@ async function getCache(ctx, cacheFilePath) {
         if (flushedEntries) {
             ctx.messages.push(`Flushed ${flushedEntries.toLocaleString()}`);
         }
+        ctx.message(`Winnowed cache with ${Object.keys(c).length} items`);
         ctx.cache = c;
     }
     catch (e) { }
