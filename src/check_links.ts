@@ -4,10 +4,13 @@ import Http from "http";
 import pAll from "p-all";
 import { LStatus, LContext, LURLGroup } from "../types";
 
+const ua =
+  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.16; rv:84.0) Gecko/20100101 Firefox/84.0";
+
 const getOptions = {
   timeout: 2000,
   headers: {
-    "User-Agent": "curl/7.43.0",
+    "User-Agent": ua,
   },
 };
 

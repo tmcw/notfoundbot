@@ -80295,10 +80295,11 @@ const url_1 = __importDefault(__webpack_require__(8835));
 const https_1 = __importDefault(__webpack_require__(7211));
 const http_1 = __importDefault(__webpack_require__(8605));
 const p_all_1 = __importDefault(__webpack_require__(4275));
+const ua = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.16; rv:84.0) Gecko/20100101 Firefox/84.0";
 const getOptions = {
     timeout: 2000,
     headers: {
-        "User-Agent": "curl/7.43.0",
+        "User-Agent": ua,
     },
 };
 // In an ideal world, we would use HEAD requests, but
