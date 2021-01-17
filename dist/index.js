@@ -80510,6 +80510,12 @@ function groupFiles(ctx, files) {
 }
 function shouldScan(url) {
     const parts = url_1.default.parse(url);
+    // Treat links to archive.org as permanent. The archive might lose something,
+    // but for this tool it is the last resort, so there's no possible action
+    // in that case.
+    if (parts.host === "web.archive.org") {
+        return false;
+    }
     return parts.protocol === "http:" || parts.protocol === "https:";
 }
 function filterGroup(ctx, group) {
