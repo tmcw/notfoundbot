@@ -35,6 +35,25 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
 
+Some websites will return different information for notfoundbot than for a typical user. When false positives become a repetitive issue an exceptions list can be used. The exception list is a space separated list of hosts that will always return an ok status.
+
+```yaml
+name: notfoundbot
+on:
+  schedule:
+    - cron: "0 5 * * *"
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Fix links
+        uses: tmcw/notfoundbot@v2.0.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          EXCEPTIONS: www.host.com thisisok.org
+```
+
 Notes:
 
 - I might forget to update the version on `notfoundbot` here - make sure that it's

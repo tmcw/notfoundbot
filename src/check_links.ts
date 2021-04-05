@@ -93,10 +93,12 @@ async function sniffHttps(url: string): Promise<LStatus> {
 }
 
 export async function checkLinks(ctx: LContext, groups: LURLGroup[]) {
+  const exceptions = process.env.EXCEPTIONS?.split(' ') ?? [];
+
   return await pAll(
     groups.map((group) => {
       return async () => {
-        group.status = await sniff(group.url);
+        group.status = await sniff(group.url, exceptions);
         ctx.cache[group.url] = Date.now();
         ctx.message(
           `Added ${group.url} to cache, now ${
@@ -109,10 +111,16 @@ export async function checkLinks(ctx: LContext, groups: LURLGroup[]) {
   );
 }
 
-export async function sniff(url: string): Promise<LStatus> {
+export async function sniff(url: string, exceptions: string[]): Promise<LStatus> {
   const parsed = Url.parse(url);
 
-  const { protocol } = parsed;
+  const { protocol, host } = parsed;
+
+  if (host && exceptions.includes(host)) {
+    return {
+      status: "ok",
+    };
+  }
 
   if (protocol === "http:") {
     return await sniffHttp(url);
