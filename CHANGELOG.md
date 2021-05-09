@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.1.0](https://github.com/tmcw/linkrot/compare/v2.0.3...v2.1.0) (2021-05-09)
+
+
+### Features
+
+* create exceptions list ([#56](https://github.com/tmcw/linkrot/issues/56)) ([a2d812f](https://github.com/tmcw/linkrot/commit/a2d812fc2442ee9cd7f7f093717ec366da6318e8)), closes [#52](https://github.com/tmcw/linkrot/issues/52)
+
 ### [2.0.3](https://github.com/tmcw/linkrot/compare/v2.0.2...v2.0.3) (2021-01-08)
 
 
