@@ -54,6 +54,17 @@ jobs:
           EXCEPTIONS: www.host.com thisisok.org
 ```
 
+By default notfoundbot will check `.md` files in the `_posts` directory. You can change this directory:
+
+```yaml
+      - name: Fix links
+        uses: tmcw/notfoundbot@v2.0.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          content-folder: custom-content
+```
+
 Notes:
 
 - I might forget to update the version on `notfoundbot` here - make sure that it's

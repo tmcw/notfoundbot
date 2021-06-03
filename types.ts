@@ -37,6 +37,7 @@ export type Cache = {
 };
 
 export type LContext = {
+  contentDir: string;
   cwd: string;
   context: typeof context;
   toolkit: ReturnType<typeof getOctokit>;

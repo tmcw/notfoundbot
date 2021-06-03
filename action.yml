@@ -9,3 +9,8 @@ branding:
 runs:
   using: 'node12'
   main: 'dist/index.js'
+
+inputs:
+  content-folder:
+    description: 'Directory with markdown files to fix'
+    default: '_posts'

@@ -8,6 +8,12 @@ test("groupFiles", async (t) => {
   t.same(groups.length, 3);
 });
 
+test("custom directory", async (t) => {
+  const ctx = testContext("custom-content-folder");
+  const groups = getTestFiles(ctx);
+  t.same(groups.length, 3);
+});
+
 test("updateFiles", async (t) => {
   const ctx = testContext();
   const updates = updateFiles(ctx, getTestFiles(ctx));
