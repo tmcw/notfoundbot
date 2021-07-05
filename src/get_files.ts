@@ -10,7 +10,7 @@ import type { LFile, LURLGroup, LContext } from "../types";
 function gatherFiles(ctx: LContext) {
   const { cwd } = ctx;
   const files = glob
-    .sync("_posts/*.md", {
+    .sync(`${ctx.contentDir}/*.md`, {
       cwd,
       absolute: true,
     })

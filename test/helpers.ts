@@ -8,15 +8,15 @@ import { getFiles } from "../src/get_files";
 export function getTestFiles(ctx: LContext) {
   Fs.copyFileSync(
     Path.join(__dirname, "./fixtures/example.md"),
-    Path.join(ctx.cwd, "_posts/2020-01-01-example.md")
+    Path.join(ctx.cwd, `${ctx.contentDir}/2020-01-01-example.md`)
   );
 
   return getFiles(ctx);
 }
 
-export function testContext(): LContext {
+export function testContext(contentDir = "_posts"): LContext {
   const tmp = Tempy.directory();
-  Fs.mkdirSync(Path.join(tmp, "_posts"));
+  Fs.mkdirSync(Path.join(tmp, contentDir));
   process.env["GITHUB_REPOSITORY"] = "foo/bar";
   process.env["GITHUB_EVENT_PATH"] = Path.join(__dirname, "payload.json");
   process.env["GITHUB_TOKEN"] = "0000000000000000000000000000000000000000";
@@ -27,6 +27,7 @@ export function testContext(): LContext {
     messages.push(str);
   }
   return {
+    contentDir,
     cwd: tmp,
     limit: 100,
     toolkit,
