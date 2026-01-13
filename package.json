@@ -17,6 +17,7 @@
   "devDependencies": {
     "@actions/cache": "^5.0.2",
     "@actions/github": "^7.0.0",
+    "@changesets/cli": "^2.29.8",
     "@types/js-yaml": "^4.0.9",
     "@types/mdast": "^4.0.4",
     "@types/node": "^25.0.7",
@@ -38,12 +39,12 @@
     "tsx": "^4.19.2",
     "typescript": "^5.6.3",
     "unified": "^11.0.5",
-    "unist-util-select": "^5.1.0"
+    "unist-util-select": "^5.1.0",
+    "@types/unist": "^3.0.3"
   },
   "dependencies": {
     "@actions/core": "^2.0.2",
     "@iarna/toml": "^2.2.5",
-    "js-yaml": "^4.1.0",
-    "standard-version": "^9.5.0"
+    "js-yaml": "^4.1.0"
   }
 }
