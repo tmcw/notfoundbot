@@ -1,5 +1,5 @@
-import { LFile, LContext } from "../types";
-import { commitFile } from "./commit_file";
+import { LFile, LContext } from "../types.js";
+import { commitFile } from "./commit_file.js";
 
 async function createBranch(
   { branchName, context, toolkit }: LContext,
@@ -11,13 +11,13 @@ async function createBranch(
     data: {
       object: { sha },
     },
-  } = await toolkit.git.getRef({
+  } = await toolkit.rest.git.getRef({
     owner: context.repo.owner,
     repo: context.repo.repo,
     ref: `heads/${defaultBranch}`,
   });
 
-  await toolkit.git.createRef({
+  await toolkit.rest.git.createRef({
     ...context.repo,
     ref,
     sha,
@@ -29,7 +29,7 @@ async function createBranch(
 export async function getDefaultBranch({ toolkit, context }: LContext) {
   const {
     data: { default_branch },
-  } = await toolkit.repos.get({
+  } = await toolkit.rest.repos.get({
     owner: context.repo.owner,
     repo: context.repo.repo,
   });
@@ -71,7 +71,7 @@ async function createPR(ctx: LContext, base: string) {
   const { context, toolkit } = ctx;
   const {
     data: { number },
-  } = await toolkit.pulls.create({
+  } = await toolkit.rest.pulls.create({
     ...context.repo,
     title: getTitle(ctx),
     body: getBody(ctx),
@@ -100,7 +100,7 @@ export async function suggestChanges(ctx: LContext, updatedFiles: LFile[]) {
 
   const number = await createPR(ctx, base);
 
-  await toolkit.issues.addLabels({
+  await toolkit.rest.issues.addLabels({
     ...context.repo,
     issue_number: number,
     labels: ["notfoundbot"],

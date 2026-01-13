@@ -1,14 +1,14 @@
-import Remark from "remark";
+import { fromMarkdown } from "mdast-util-from-markdown";
+import { toMarkdown } from "mdast-util-to-markdown";
+import { frontmatter } from "micromark-extension-frontmatter";
+import { frontmatterFromMarkdown, frontmatterToMarkdown } from "mdast-util-frontmatter";
 import { selectAll } from "unist-util-select";
 import type { Link } from "mdast";
 import MagicString from "magic-string";
-import frontmatter from "remark-frontmatter";
-import { LFile, LURLGroup, LContext } from "../types";
-
-const remark = Remark().use(frontmatter, ["yaml", "toml"]);
+import { LFile, LURLGroup, LContext } from "../types.js";
 
 function stringify(link: Link) {
-  return remark.stringify(link).replace(/\n$/, "");
+  return toMarkdown(link).replace(/\n$/, "");
 }
 
 function replaceLink(link: Link, magicString: MagicString, to: string) {

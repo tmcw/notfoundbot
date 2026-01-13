@@ -1,8 +1,8 @@
-import Url from "url";
-import Https from "https";
-import Http from "http";
+import Url from "node:url";
+import Https from "node:https";
+import Http from "node:http";
 import pAll from "p-all";
-import { LStatus, LContext, LURLGroup } from "../types";
+import { LStatus, LContext, LURLGroup } from "../types.js";
 
 const ua =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.16; rv:84.0) Gecko/20100101 Firefox/84.0";
@@ -81,7 +81,8 @@ async function sniffHttps(url: string): Promise<LStatus> {
       status: "ok",
     };
   } catch (err) {
-    if (err?.code === "UNABLE_TO_VERIFY_LEAF_SIGNATURE") {
+    const errorCode = (err as NodeJS.ErrnoException)?.code;
+    if (errorCode === "UNABLE_TO_VERIFY_LEAF_SIGNATURE") {
       return {
         status: "ok",
       };

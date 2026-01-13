@@ -1,22 +1,20 @@
-import Path from "path";
-import Url from "url";
-import glob from "glob";
+import Path from "node:path";
+import Url from "node:url";
+import { globSync } from "glob";
 import isAbsoluteUrl from "is-absolute-url";
 import { selectAll } from "unist-util-select";
-import { toLFile } from "./to_lfile";
+import { toLFile } from "./to_lfile.js";
 import type { Link } from "mdast";
-import type { LFile, LURLGroup, LContext } from "../types";
+import type { LFile, LURLGroup, LContext } from "../types.js";
 
 function gatherFiles(ctx: LContext) {
   const { cwd } = ctx;
-  const files = glob
-    .sync(`${ctx.contentDir}/*.@(md|markdown|mkdown|mkdn|mkd)`, {
-      cwd,
-      absolute: true,
-    })
-    .map((filename) => {
-      return toLFile(filename, Path.relative(cwd, filename));
-    });
+  const files = globSync(`${ctx.contentDir}/*.@(md|markdown|mkdown|mkdn|mkd)`, {
+    cwd,
+    absolute: true,
+  }).map((filename) => {
+    return toLFile(filename, Path.relative(cwd, filename));
+  });
   ctx.message(`${files.length.toLocaleString()} files detected`);
   return files;
 }

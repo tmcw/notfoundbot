@@ -1,11 +1,11 @@
-import { LContext } from "./types";
+import { LContext } from "./types.js";
 
-import { updateFiles } from "./src/util";
-import { getFiles } from "./src/get_files";
-import { checkForExisting } from "./src/check_existing";
-import { checkLinks } from "./src/check_links";
-import { checkArchives } from "./src/check_archives";
-import { suggestChanges } from "./src/suggest_changes";
+import { updateFiles } from "./src/util.js";
+import { getFiles } from "./src/get_files.js";
+import { checkForExisting } from "./src/check_existing.js";
+import { checkLinks } from "./src/check_links.js";
+import { checkArchives } from "./src/check_archives.js";
+import { suggestChanges } from "./src/suggest_changes.js";
 
 export async function action(ctx: LContext) {
   await checkForExisting(ctx);

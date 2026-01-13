@@ -1,10 +1,12 @@
 import { test } from "tap";
-import { checkArchives } from "../src/check_archives";
-import { testContext, getTestFiles } from "./helpers";
-import type { IAResults } from "../types";
-import Nock from "nock";
+import nock from "nock";
+import { checkArchives } from "../src/check_archives.js";
+import { testContext, getTestFiles } from "./helpers.js";
+import type { IAResults } from "../types.js";
 
 test("checkArchives - found", async (t) => {
+  t.teardown(() => nock.cleanAll());
+
   const ctx = testContext();
   const groups = getTestFiles(ctx);
 
@@ -29,7 +31,7 @@ test("checkArchives - found", async (t) => {
     ],
   };
 
-  Nock("https://archive.org").post("/wayback/available").reply(200, fakeResult);
+  nock("https://archive.org").post("/wayback/available").reply(200, fakeResult);
   await checkArchives(groups);
   t.same(groups[0].status, {
     status: "archive",
@@ -38,6 +40,8 @@ test("checkArchives - found", async (t) => {
 });
 
 test("checkArchives - not found", async (t) => {
+  t.teardown(() => nock.cleanAll());
+
   const ctx = testContext();
   const groups = getTestFiles(ctx);
 
@@ -62,7 +66,7 @@ test("checkArchives - not found", async (t) => {
     ],
   };
 
-  Nock("https://archive.org").post("/wayback/available").reply(200, fakeResult);
+  nock("https://archive.org").post("/wayback/available").reply(200, fakeResult);
   await checkArchives(groups);
   t.same(groups[0].status, {
     status: "error",
