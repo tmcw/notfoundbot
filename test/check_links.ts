@@ -28,12 +28,10 @@ test("sniff - ok https", async (t) => {
   t.equal((await sniff("https://a.com/", [])).status, "ok");
 });
 
-test("sniff - leaf cert failed ignored and ok", async (t) => {
+test("sniff - network error returns error status", async (t) => {
   t.teardown(() => nock.cleanAll());
-  nock("https://a.com")
-    .get("/")
-    .replyWithError({ code: "UNABLE_TO_VERIFY_LEAF_SIGNATURE" });
-  t.equal((await sniff("https://a.com/", [])).status, "ok");
+  nock("https://a.com").get("/").replyWithError("connection refused");
+  t.equal((await sniff("https://a.com/", [])).status, "error");
 });
 
 test("sniff - https not found", async (t) => {
