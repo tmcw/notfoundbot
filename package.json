@@ -15,15 +15,14 @@
     "notfoundbot": "./dist/index.js"
   },
   "devDependencies": {
-    "@actions/cache": "^4.0.0",
+    "@actions/cache": "^5.0.2",
     "@actions/github": "5.1.1",
-    "@types/glob": "^8.1.0",
     "@types/js-yaml": "^4.0.9",
     "@types/mdast": "^4.0.4",
-    "@types/node": "^22.10.0",
+    "@types/node": "^25.0.7",
     "@vercel/ncc": "^0.38.3",
-    "glob": "^11.0.0",
-    "is-absolute-url": "^4.0.1",
+    "glob": "^13.0.0",
+    "is-absolute-url": "^5.0.0",
     "magic-string": "^0.30.12",
     "mdast-util-from-markdown": "^2.0.2",
     "mdast-util-frontmatter": "^2.0.1",
@@ -41,7 +40,7 @@
     "unist-util-select": "^5.1.0"
   },
   "dependencies": {
-    "@actions/core": "^1.11.1",
+    "@actions/core": "^2.0.2",
     "@iarna/toml": "^2.2.5",
     "js-yaml": "^4.1.0",
     "standard-version": "^9.5.0"
