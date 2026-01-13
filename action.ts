@@ -1,10 +1,10 @@
-import Fs from "fs";
-import { action } from "./index";
-import { getCache } from "./src/get_cache";
+import Fs from "node:fs";
+import { action } from "./index.js";
+import { getCache } from "./src/get_cache.js";
 import { getOctokit, context } from "@actions/github";
 import { restoreCache, saveCache } from "@actions/cache";
 import { getInput } from "@actions/core";
-import { LContext } from "./types";
+import { LContext } from "./types.js";
 
 const toolkit = getOctokit(process.env.GITHUB_TOKEN!);
 const cacheKey = `notfoundbot-v2-${Date.now()}`;
@@ -19,7 +19,7 @@ function message(msg: string) {
 (async function () {
   const ctx: LContext = {
     contentDir: getInput("content-folder"),
-    cwd: process.env.GITHUB_WORKSPACE || __dirname,
+    cwd: process.env.GITHUB_WORKSPACE || import.meta.dirname || process.cwd(),
     toolkit,
     context,
     cache: {},
@@ -52,7 +52,7 @@ function message(msg: string) {
   try {
     await saveCache([cacheFilePath], cacheKey);
   } catch (e) {
-    ctx.message("ERROR: Failed to save cache!");
-    throw e;
+    // Fail gracefully - cache errors shouldn't fail the action
+    ctx.message(`WARNING: Failed to save cache: ${e instanceof Error ? e.message : String(e)}`);
   }
 })();

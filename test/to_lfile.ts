@@ -1,8 +1,11 @@
-import Fs from "fs";
-import Path from "path";
+import Fs from "node:fs";
+import Path from "node:path";
+import { fileURLToPath } from "node:url";
 import { test } from "tap";
-import { toLFile } from "../src/to_lfile";
-import { testContext } from "./helpers";
+import { toLFile } from "../src/to_lfile.js";
+import { testContext } from "./helpers.js";
+
+const __dirname = Path.dirname(fileURLToPath(import.meta.url));
 
 test("toLFile - jekyll-style date", async (t) => {
   const ctx = testContext();

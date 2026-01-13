@@ -1,7 +1,7 @@
 import { test } from "tap";
-import { checkArchives } from "../src/check_archives";
-import { testContext, getTestFiles } from "./helpers";
-import type { IAResults } from "../types";
+import { checkArchives } from "../src/check_archives.js";
+import { testContext, getTestFiles } from "./helpers.js";
+import type { IAResults } from "../types.js";
 import Nock from "nock";
 
 test("checkArchives - found", async (t) => {

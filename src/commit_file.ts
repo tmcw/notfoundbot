@@ -1,4 +1,4 @@
-import { LFile, LContext } from "../types";
+import { LFile, LContext } from "../types.js";
 
 export async function commitFile(
   lcontext: LContext,
@@ -10,19 +10,20 @@ export async function commitFile(
   const ref = `refs/heads/${branch}`;
   const path = file.gitPath;
 
-  const {
-    data: { sha },
-  } = await toolkit.repos.getContent({
+  const { data } = await toolkit.rest.repos.getContent({
     ...context.repo,
     ref,
     path,
   });
 
-  await toolkit.repos.createOrUpdateFileContents({
+  // getContent returns an array for directories, single object for files
+  const sha = Array.isArray(data) ? undefined : data.sha;
+
+  await toolkit.rest.repos.createOrUpdateFileContents({
     ...context.repo,
     path,
     branch,
-    sha,
+    sha: sha as string,
     message,
     content: Buffer.from(file.magicString.toString()).toString("base64"),
   });

@@ -1,7 +1,7 @@
 import Nock from "nock";
 import { test } from "tap";
-import { queryIA, formatDate } from "../src/query_ia";
-import { testContext, getTestFiles } from "./helpers";
+import { queryIA, formatDate } from "../src/query_ia.js";
+import { testContext, getTestFiles } from "./helpers.js";
 
 test("formatDate", async (t) => {
   t.same(formatDate(new Date(2000, 0, 2)), "20000102000000");

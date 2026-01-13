@@ -1,5 +1,5 @@
-import Fs from "fs";
-import { LContext } from "../types";
+import Fs from "node:fs";
+import { LContext } from "../types.js";
 
 export async function getCache(ctx: LContext, cacheFilePath: string) {
   try {

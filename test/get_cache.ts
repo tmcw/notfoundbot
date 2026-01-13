@@ -1,8 +1,8 @@
 import { test } from "tap";
-import Fs from "fs";
-import Path from "path";
-import { getCache } from "../src/get_cache";
-import { testContext } from "./helpers";
+import Fs from "node:fs";
+import Path from "node:path";
+import { getCache } from "../src/get_cache.js";
+import { testContext } from "./helpers.js";
 
 test("getCache", async (t) => {
   const ctx = testContext();

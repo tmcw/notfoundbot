@@ -1,6 +1,6 @@
 import { test } from "tap";
-import { getBody, getTitle } from "../src/suggest_changes";
-import { testContext } from "./helpers";
+import { getBody, getTitle } from "../src/suggest_changes.js";
+import { testContext } from "./helpers.js";
 
 test("getTitle", async (t) => {
   const ctx = testContext();

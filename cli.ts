@@ -1,6 +1,6 @@
-import { sniff } from "./src/check_links";
+import { sniff } from "./src/check_links.js";
 
-// Usage: ts-node cli.ts <URL>
+// Usage: tsx cli.ts <URL>
 
 (async function () {
   const exceptions = process.env.EXCEPTIONS?.split(' ') ?? []

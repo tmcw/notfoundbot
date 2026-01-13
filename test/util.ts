@@ -1,6 +1,6 @@
 import { test } from "tap";
-import { replaceLinks, updateFiles } from "../src/util";
-import { testContext, getTestFiles } from "./helpers";
+import { replaceLinks, updateFiles } from "../src/util.js";
+import { testContext, getTestFiles } from "./helpers.js";
 
 test("groupFiles", async (t) => {
   const ctx = testContext();

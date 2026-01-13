@@ -1,6 +1,6 @@
 import { test } from "tap";
-import { sniff, checkLinks } from "../src/check_links";
-import { testContext, getTestFiles } from "./helpers";
+import { sniff, checkLinks } from "../src/check_links.js";
+import { testContext, getTestFiles } from "./helpers.js";
 import Nock from "nock";
 
 test("sniff - ok, no upgrade", async (t) => {

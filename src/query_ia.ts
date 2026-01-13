@@ -1,13 +1,13 @@
-import Https from "https";
-import Http from "http";
-import Querystring from "querystring";
-import { IAResults, LURLGroup } from "../types";
+import Https from "node:https";
+import Http from "node:http";
+import Querystring from "node:querystring";
+import { IAResults, LURLGroup } from "../types.js";
 
 // https://github.com/internetarchive/internetarchivebot/blob/master/app/src/Core/APII.php#L2429
 
 const ENDPOINT = `https://archive.org/wayback/available`;
 const HEADERS = {
-  "Wayback-Api-Version": 2,
+  "Wayback-Api-Version": "2",
 };
 
 function dateForGroup(group: LURLGroup) {

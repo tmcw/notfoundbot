@@ -1,5 +1,5 @@
-import { queryIA } from "./query_ia";
-import { LURLGroup } from "../types";
+import { queryIA } from "./query_ia.js";
+import { LURLGroup } from "../types.js";
 
 export async function checkArchives(groups: LURLGroup[]) {
   let errorGroups = groups.filter((group) => group.status?.status === "error");

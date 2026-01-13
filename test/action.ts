@@ -1,9 +1,12 @@
 import Nock from "nock";
-import Fs from "fs";
-import Path from "path";
+import Fs from "node:fs";
+import Path from "node:path";
+import { fileURLToPath } from "node:url";
 import { test } from "tap";
-import { action } from "../index";
-import { testContext } from "./helpers";
+import { action } from "../index.js";
+import { testContext } from "./helpers.js";
+
+const __dirname = Path.dirname(fileURLToPath(import.meta.url));
 
 test("action", async (t) => {
   Nock("https://api.github.com")

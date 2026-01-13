@@ -1,7 +1,7 @@
 import Nock from "nock";
 import { test } from "tap";
-import { checkForExisting } from "../src/check_existing";
-import { testContext } from "./helpers";
+import { checkForExisting } from "../src/check_existing.js";
+import { testContext } from "./helpers.js";
 
 test("checkForExisting", async (t) => {
   const ctx = testContext();

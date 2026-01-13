@@ -1,6 +1,6 @@
 import type { Node } from "unist";
 import type { context } from "@actions/github";
-import MagicString from "magic-string";
+import type MagicString from "magic-string";
 import { getOctokit } from "@actions/github";
 
 export type LFile = {
@@ -77,3 +77,14 @@ type IAResult = {
   tag: string;
   archived_snapshots?: IASnapshot;
 };
+
+// Frontmatter node types (previously from remark-frontmatter)
+export interface YamlNode extends Node {
+  type: "yaml";
+  value: string;
+}
+
+export interface TomlNode extends Node {
+  type: "toml";
+  value: string;
+}
