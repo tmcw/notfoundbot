@@ -6,6 +6,7 @@
   "license": "MIT",
   "scripts": {
     "build": "ncc build action.ts --license licenses.txt",
+    "prepublish": "ncc build action.ts --license licenses.txt",
     "test": "tsc && tap --disable-coverage test",
     "cli": "tsx ./cli.ts",
     "start": "./dist/index.js"
