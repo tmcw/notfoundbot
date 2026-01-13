@@ -36,6 +36,9 @@ importers:
       '@types/node':
         specifier: ^25.0.7
         version: 25.0.8
+      '@types/unist':
+        specifier: ^3.0.3
+        version: 3.0.3
       '@vercel/ncc':
         specifier: ^0.38.3
         version: 0.38.4
