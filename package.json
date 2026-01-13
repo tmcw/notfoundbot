@@ -17,6 +17,7 @@
   "devDependencies": {
     "@actions/cache": "^5.0.2",
     "@actions/github": "^7.0.0",
+    "@changesets/cli": "^2.29.8",
     "@types/js-yaml": "^4.0.9",
     "@types/mdast": "^4.0.4",
     "@types/node": "^25.0.7",
@@ -43,7 +44,6 @@
   "dependencies": {
     "@actions/core": "^2.0.2",
     "@iarna/toml": "^2.2.5",
-    "js-yaml": "^4.1.0",
-    "standard-version": "^9.5.0"
+    "js-yaml": "^4.1.0"
   }
 }
