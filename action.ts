@@ -52,7 +52,6 @@ function message(msg: string) {
   try {
     await saveCache([cacheFilePath], cacheKey);
   } catch (e) {
-    // Fail gracefully - cache errors shouldn't fail the action
     ctx.message(`WARNING: Failed to save cache: ${e instanceof Error ? e.message : String(e)}`);
   }
 })();

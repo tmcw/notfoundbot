@@ -1,4 +1,4 @@
-import Nock from "nock";
+import nock from "nock";
 import Fs from "node:fs";
 import Path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -9,51 +9,43 @@ import { testContext } from "./helpers.js";
 const __dirname = Path.dirname(fileURLToPath(import.meta.url));
 
 test("action", async (t) => {
-  Nock("https://api.github.com")
-    .persist()
+  t.teardown(() => nock.cleanAll());
+
+  nock("https://api.github.com")
     .get("/repos/foo/bar/issues?labels=notfoundbot")
     .reply(200, []);
 
-  Nock("https://api.github.com")
-    .persist()
+  nock("https://api.github.com")
     .get("/repos/foo/bar")
     .reply(200, { default_branch: "main" });
 
-  Nock("https://api.github.com")
-    .persist()
+  nock("https://api.github.com")
     .get("/repos/foo/bar/git/ref/heads%2Fmain")
     .reply(200, { object: { sha: "deadbeef" } });
 
-  Nock("https://api.github.com")
-    .persist()
+  nock("https://api.github.com")
     .post("/repos/foo/bar/git/refs")
     .reply(200, {});
 
-  Nock("https://api.github.com")
-    .persist()
-    .get(
-      "/repos/foo/bar/contents/_posts%2F2020-01-01-example.md?ref=refs%2Fheads%2Ftest-branch"
-    )
+  nock("https://api.github.com")
+    .get("/repos/foo/bar/contents/_posts%2F2020-01-01-example.md?ref=refs%2Fheads%2Ftest-branch")
     .reply(200, { sha: "abcd" });
 
-  Nock("https://api.github.com")
-    .persist()
+  nock("https://api.github.com")
     .put("/repos/foo/bar/contents/_posts%2F2020-01-01-example.md")
     .reply(200, {});
 
-  Nock("https://api.github.com")
-    .persist()
+  nock("https://api.github.com")
     .post("/repos/foo/bar/pulls")
+    .reply(200, { number: 1 });
+
+  nock("https://api.github.com")
+    .post("/repos/foo/bar/issues/1/labels")
     .reply(200, {});
 
-  Nock("https://api.github.com")
-    .persist()
-    .post("/repos/foo/bar/issues//labels")
-    .reply(200, {});
-
-  Nock("https://google.com").persist().get("/").reply(200, []);
-  Nock("https://yahoo.com").persist().get("/").reply(200, []);
-  Nock("https://foo.com").persist().get("/").reply(200, []);
+  nock("https://google.com").get("/").reply(200, []);
+  nock("https://yahoo.com").get("/").reply(200, []);
+  nock("https://foo.com").get("/").reply(200, []);
 
   const ctx = testContext();
 

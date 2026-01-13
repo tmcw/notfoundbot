@@ -81,7 +81,6 @@ async function sniffHttps(url: string): Promise<LStatus> {
       status: "ok",
     };
   } catch (err) {
-    // Handle TLS certificate verification errors gracefully
     const errorCode = (err as NodeJS.ErrnoException)?.code;
     if (errorCode === "UNABLE_TO_VERIFY_LEAF_SIGNATURE") {
       return {
