@@ -16,11 +16,12 @@
   },
   "devDependencies": {
     "@actions/cache": "^5.0.2",
-    "@actions/github": "5.1.1",
+    "@actions/github": "^7.0.0",
     "@types/js-yaml": "^4.0.9",
     "@types/mdast": "^4.0.4",
     "@types/node": "^25.0.7",
     "@vercel/ncc": "^0.38.3",
+    "fetch-mock": "^12.6.0",
     "glob": "^13.0.0",
     "is-absolute-url": "^5.0.0",
     "magic-string": "^0.30.12",
