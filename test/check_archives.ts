@@ -32,7 +32,7 @@ test("checkArchives - found", async (t) => {
   };
 
   nock("https://archive.org").post("/wayback/available").reply(200, fakeResult);
-  await checkArchives(groups);
+  await checkArchives(ctx, groups);
   t.same(groups[0].status, {
     status: "archive",
     to: "https://archive.org/http://google.com/",
@@ -67,8 +67,30 @@ test("checkArchives - not found", async (t) => {
   };
 
   nock("https://archive.org").post("/wayback/available").reply(200, fakeResult);
-  await checkArchives(groups);
+  await checkArchives(ctx, groups);
   t.same(groups[0].status, {
     status: "error",
   });
+});
+
+test("checkArchives - 503 from Wayback Machine is logged, not thrown", async (t) => {
+  t.teardown(() => nock.cleanAll());
+
+  const ctx = testContext();
+  const groups = getTestFiles(ctx);
+
+  groups[0].status = {
+    status: "error",
+  };
+
+  nock("https://archive.org")
+    .post("/wayback/available")
+    .reply(503, "<html><body><h1>503 Service Unavailable</h1></body></html>");
+
+  await checkArchives(ctx, groups);
+  t.same(groups[0].status, { status: "error" }, "status is unchanged");
+  t.ok(
+    ctx.messages.some((m) => m.startsWith("WARNING: Wayback Machine lookup failed")),
+    "warning was logged"
+  );
 });

@@ -2,11 +2,11 @@
   "name": "@tmcw/notfoundbot",
   "version": "3.0.0",
   "type": "module",
+  "private": true,
   "main": "dist/index.js",
   "license": "MIT",
   "scripts": {
     "build": "ncc build action.ts --license licenses.txt",
-    "prepublish": "ncc build action.ts --license licenses.txt",
     "test": "tsc && tap --disable-coverage test",
     "cli": "tsx ./cli.ts",
     "start": "./dist/index.js"
@@ -15,36 +15,41 @@
     "notfoundbot": "./dist/index.js"
   },
   "devDependencies": {
-    "@actions/cache": "^5.0.2",
-    "@actions/github": "^7.0.0",
-    "@changesets/cli": "^2.29.8",
+    "@actions/cache": "^6.0.0",
+    "@actions/github": "^9.1.1",
+    "@changesets/cli": "^2.31.0",
     "@types/js-yaml": "^4.0.9",
     "@types/mdast": "^4.0.4",
-    "@types/node": "^25.0.7",
-    "@vercel/ncc": "^0.38.3",
+    "@types/node": "^25.6.0",
+    "@vercel/ncc": "^0.38.4",
     "fetch-mock": "^12.6.0",
-    "glob": "^13.0.0",
+    "glob": "^13.0.6",
     "is-absolute-url": "^5.0.0",
-    "magic-string": "^0.30.12",
-    "mdast-util-from-markdown": "^2.0.2",
+    "magic-string": "^0.30.21",
+    "mdast-util-from-markdown": "^2.0.3",
     "mdast-util-frontmatter": "^2.0.1",
     "mdast-util-to-markdown": "^2.1.2",
     "micromark-extension-frontmatter": "^2.0.0",
-    "nock": "^14.0.10",
-    "p-all": "^5.0.0",
+    "nock": "^14.0.13",
+    "p-all": "^5.0.1",
     "remark": "^15.0.1",
     "remark-frontmatter": "^5.0.0",
-    "tap": "^21.0.1",
-    "tempy": "^3.1.0",
-    "tsx": "^4.19.2",
-    "typescript": "^5.6.3",
+    "tap": "^21.7.1",
+    "tempy": "^3.2.0",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.3",
     "unified": "^11.0.5",
     "unist-util-select": "^5.1.0",
     "@types/unist": "^3.0.3"
   },
   "dependencies": {
-    "@actions/core": "^2.0.2",
+    "@actions/core": "^3.0.1",
     "@iarna/toml": "^2.2.5",
-    "js-yaml": "^4.1.0"
+    "js-yaml": "^4.1.1"
+  },
+  "pnpm": {
+    "overrides": {
+      "test-exclude": "^8.0.0"
+    }
   }
 }

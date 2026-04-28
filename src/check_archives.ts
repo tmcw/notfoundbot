@@ -1,12 +1,22 @@
 import { queryIA } from "./query_ia.js";
-import { LURLGroup } from "../types.js";
+import { LContext, LURLGroup } from "../types.js";
 
-export async function checkArchives(groups: LURLGroup[]) {
+export async function checkArchives(ctx: LContext, groups: LURLGroup[]) {
   let errorGroups = groups.filter((group) => group.status?.status === "error");
   errorGroups = errorGroups.slice(0, 50);
   if (!errorGroups.length) return;
 
-  const archiveStatus = await queryIA(errorGroups);
+  let archiveStatus;
+  try {
+    archiveStatus = await queryIA(errorGroups);
+  } catch (e) {
+    ctx.message(
+      `WARNING: Wayback Machine lookup failed, skipping archive replacements this run: ${
+        e instanceof Error ? e.message : String(e)
+      }`
+    );
+    return;
+  }
 
   for (let result of archiveStatus.results) {
     if (result.archived_snapshots?.closest?.available) {

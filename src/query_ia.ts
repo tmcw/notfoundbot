@@ -54,7 +54,12 @@ export function queryIA(groups: LURLGroup[]): Promise<IAResults> {
         try {
           resolve(JSON.parse(body));
         } catch (e) {
-          reject(body);
+          const snippet = body.replace(/\s+/g, " ").trim().slice(0, 200);
+          reject(
+            new Error(
+              `Wayback API returned non-JSON response (status ${res.statusCode}): ${snippet}`
+            )
+          );
         }
       });
     }
@@ -67,6 +72,9 @@ export function queryIA(groups: LURLGroup[]): Promise<IAResults> {
       },
       handleResponse
     );
+    req.setTimeout(15_000, () => {
+      req.destroy(new Error("Wayback API request timed out after 15s"));
+    });
     req.on("error", (e) => {
       reject(e);
     });

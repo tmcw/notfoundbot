@@ -11,7 +11,7 @@ export async function action(ctx: LContext) {
   await checkForExisting(ctx);
   const urlGroups = getFiles(ctx);
   await checkLinks(ctx, urlGroups);
-  await checkArchives(urlGroups);
+  await checkArchives(ctx, urlGroups);
   const updatedFiles = updateFiles(ctx, urlGroups);
   await suggestChanges(ctx, updatedFiles);
   return updatedFiles;
