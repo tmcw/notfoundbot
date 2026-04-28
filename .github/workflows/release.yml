@@ -10,7 +10,6 @@ concurrency: ${{ github.workflow }}-${{ github.ref }}
 permissions:
   contents: write
   pull-requests: write
-  id-token: write
 
 jobs:
   release:
@@ -18,14 +17,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: jdx/mise-action@v3
+        with:
+          fetch-depth: 0
+      - uses: jdx/mise-action@v4
       - name: Install dependencies
         run: pnpm install
 
-      - name: Create Release Pull Request or Publish to npm
+      - name: Create Release Pull Request or tag GitHub release
         id: changesets
         uses: changesets/action@v1
         with:
-          publish: pnpm dlx @changesets/cli publish
+          version: pnpm exec changeset version
+          publish: pnpm exec changeset tag
+          createGithubReleases: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
