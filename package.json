@@ -2,6 +2,7 @@
   "name": "@tmcw/notfoundbot",
   "version": "3.0.0",
   "type": "module",
+  "private": true,
   "main": "dist/index.js",
   "license": "MIT",
   "scripts": {
@@ -9,6 +10,9 @@
     "test": "tsc && tap --disable-coverage test",
     "cli": "tsx ./cli.ts",
     "start": "./dist/index.js"
+  },
+  "bin": {
+    "notfoundbot": "./dist/index.js"
   },
   "devDependencies": {
     "@actions/cache": "^6.0.0",
