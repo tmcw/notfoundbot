@@ -46,5 +46,10 @@
     "@actions/core": "^3.0.1",
     "@iarna/toml": "^2.2.5",
     "js-yaml": "^4.1.1"
+  },
+  "pnpm": {
+    "overrides": {
+      "test-exclude": "^8.0.0"
+    }
   }
 }
