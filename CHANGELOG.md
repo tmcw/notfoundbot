@@ -6,8 +6,6 @@
 
 - 7b2ebc4: Update to ESM, upgrade Node
 
-All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
-
 ## [2.1.0](https://github.com/tmcw/linkrot/compare/v2.0.3...v2.1.0) (2021-05-09)
 
 ### Features

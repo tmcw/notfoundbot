@@ -26,9 +26,9 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v6
       - name: Fix links
-        uses: tmcw/notfoundbot@v2.0.2
+        uses: tmcw/notfoundbot@v3.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
@@ -44,9 +44,9 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v6
       - name: Fix links
-        uses: tmcw/notfoundbot@v2.0.2
+        uses: tmcw/notfoundbot@v3.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           EXCEPTIONS: www.host.com thisisok.org
@@ -56,7 +56,7 @@ By default notfoundbot will check `.md` files in the `_posts` directory. You can
 
 ```yaml
       - name: Fix links
-        uses: tmcw/notfoundbot@v2.0.2
+        uses: tmcw/notfoundbot@v3.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -97,3 +97,21 @@ Then, for each link marked as an error:
 - Check the Internet Archive to find contemporary archives of each failed URL
     - If an archive exists, replace the link
     - Otherwise, ignore it.
+
+## Contributing
+
+This repo uses [pnpm](https://pnpm.io/) (managed via [mise](https://mise.jdx.dev/)) and [changesets](https://github.com/changesets/changesets) for versioning.
+
+```sh
+pnpm install
+pnpm test            # tsc + tap
+pnpm build           # rebuild dist/index.js (must be committed alongside source changes)
+```
+
+When you open a PR with a user-visible change, add a changeset describing it:
+
+```sh
+pnpm changeset
+```
+
+This creates a small markdown file in `.changeset/` that drives the next version bump and `CHANGELOG.md` entry. On merge to `main`, a "Version Packages" PR is opened automatically; merging that PR cuts the next `vX.Y.Z` git tag and GitHub release.
